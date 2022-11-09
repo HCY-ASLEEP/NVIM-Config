@@ -90,6 +90,7 @@ cnoreabbrev spt sp<ENTER>:term
 ""buffer vertical split
 cnoreabbrev vb vertical<SPACE>sb
 
+
 "" Show Files searched fuzzily
 function! Redir(cmd)
 	redir => output
@@ -106,6 +107,7 @@ command! -nargs=1 -complete=command  Redir silent call Redir(<q-args>)
 
 nnoremap <Space>f :Redir<SPACE>!find<SPACE>~<SPACE>-name<SPACE>'**'<LEFT><LEFT>
 
+
 "" Go to the file on line
 function! JumpToFile()
     let l:path=getline('.')
@@ -117,6 +119,7 @@ function! JumpToFile()
     endif
 endfunction
 nnoremap <ENTER> :call JumpToFile()<ENTER>:set nocursorline<ENTER>
+
 
 "" 底部状态栏设置
 set statusline=%*\ %.50F\               "显示文件名和文件路径
