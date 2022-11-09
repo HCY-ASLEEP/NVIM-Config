@@ -81,6 +81,7 @@ nnoremap vv <C-v>
 "" paste in command mod
 cnoremap <C-v> <C-r>"
 
+
 echo expand("%:p:h")
 
 cnoreabbrev fd echo expand("%:p:h")
