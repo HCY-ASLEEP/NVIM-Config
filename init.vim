@@ -193,7 +193,6 @@ map <F2> :call ToggleVExplorer()<CR>
 
 
 call plug#begin('/home/asleep/.local/share/nvim/site/autoload')
-""Plug 'itchyny/lightline.vim'
 Plug 'joshdick/onedark.vim'
 Plug 'neoclide/coc.nvim', {'branch': 'release'}
 Plug 'tpope/vim-fugitive'
@@ -210,16 +209,6 @@ colorscheme onedark
 
 auto Filetype markdown cnoreabbrev mt MarkdownPreviewToggle
 auto Filetype markdown let g:mkdp_theme = "light"
-
-
-""let g:lightline = {
-""      \'colorscheme' : 'onedark',
-""      \ 'separator': { 'left': '', 'right': '' },
-""      \ 'subseparator': { 'left': '', 'right': '' },
-""      \ 'component': {
-""            \ 'lineinfo': ' %3l / %L : %-2v',
-""            \ }, 
-""      \ }
 
 
 "-------------------------------------------------------------------------------------------------------------
