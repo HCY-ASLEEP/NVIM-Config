@@ -23,6 +23,7 @@ set autoread
 "" split line
 set fillchars=eob:\ 
 
+"" set double key separation time
 set timeoutlen=200
 
 
@@ -31,14 +32,14 @@ set viewdir=~/.vimviews/
 autocmd BufWinLeave *.* mkview
 autocmd BufWinEnter *.* silent! loadview 
 
-
+"" auto pair
 inoremap { {}<LEFT>
 inoremap ( ()<LEFT>
 inoremap [ []<LEFT>
 inoremap ' ''<LEFT>
 inoremap " ""<LEFT>
 
-" {} and ()completion
+" {} and ()completion when press enter in the middle of them
 function! InsertBrace()
     call feedkeys("\<BS>",'n')
     let l:frontChar = getline('.')[col('.') - 2]
@@ -68,6 +69,7 @@ xnoremap ;; <ESC>
 cnoremap ;; <ESC>
 onoremap ;; <ESC>
 
+
 " exit windows
 tnoremap ;; <C-\><C-n>
 
@@ -81,7 +83,7 @@ nnoremap vv <C-v>
 "" paste in command mod
 cnoremap <C-v> <C-r>"
 
-
+"" show current buffer path
 echo expand("%:p:h")
 
 cnoreabbrev fd echo expand("%:p:h")
@@ -91,8 +93,7 @@ cnoreabbrev spt sp<ENTER>:term
 ""buffer vertical split
 cnoreabbrev vb vertical<SPACE>sb
 
-
-"" Show Files searched fuzzily
+"" redirect the command output to a buffer
 function! Redir(cmd)
 	redir => output
 	execute a:cmd
@@ -106,8 +107,22 @@ function! Redir(cmd)
 endfunction
 command! -nargs=1 -complete=command  Redir silent call Redir(<q-args>)
 
-nnoremap <Space>f :Redir<SPACE>!find<SPACE>~<SPACE>-name<SPACE>'**'<LEFT><LEFT>
+"" set default fuzzy find root folder to "~"
+let g:fuzzyFindFileRootFolder="~"
 
+"" Show Files searched fuzzily
+function! FuzzyFindFile(substr)
+    echo a:substr
+    let l:result=":Redir !find ".g:fuzzyFindRootFolder." -wholename '*".a:substr."*'\<ENTER>"
+    call feedkeys(l:result,'n')
+endfunction
+
+"" change fuzzy find file root folder to path where the buffer current locates
+function! ChangeFuzzyFindFileRootFolder()
+    let g:fuzzyFindRootFolder=expand("%:p:h")
+endfunction
+
+nnoremap ff :call<SPACE>FuzzyFindFile("")<LEFT><LEFT>
 
 "" Go to the file on line
 function! JumpToFile()
@@ -134,8 +149,6 @@ set statusline+=%3p%%                   "显示光标前文本所占总文本的
 "-------------------------------------------------------------------------------------------------------------
 "-----------------------------------------------common-end----------------------------------------------------
 "-------------------------------------------------------------------------------------------------------------
-
-
 
 
 
@@ -202,6 +215,7 @@ Plug 'neoclide/coc.nvim', {'branch': 'release'}
 Plug 'tpope/vim-fugitive'
 Plug 'iamcco/markdown-preview.nvim', { 'do': 'cd app && yarn install' }
 call plug#end()
+
 
 "有些插件需要安装 nerd fonts！
 "nerd fonts 包括了 powerline fonts！
