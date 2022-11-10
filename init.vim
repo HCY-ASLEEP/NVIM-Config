@@ -100,7 +100,6 @@ function! Redir(cmd)
 	redir END
 	let output = split(output, "\n")
 	enew
-	let w:scratch = 1
 	setlocal buftype=nofile bufhidden=wipe nobuflisted noswapfile
 	call setline(1, output)
     call feedkeys(":set cursorline\<CR>")
@@ -112,14 +111,13 @@ let g:fuzzyFindFileRootFolder="~"
 
 "" Show Files searched fuzzily
 function! FuzzyFindFile(substr)
-    echo a:substr
-    let l:result=":Redir !find ".g:fuzzyFindRootFolder." -wholename '*".a:substr."*'\<ENTER>"
-    call feedkeys(l:result,'n')
+    call feedkeys(":Redir !find ".g:fuzzyFindFileRootFolder." -path '*".a:substr."*'\<ENTER>" ,'n')
+    call feedkeys("/".a:substr."\<ENTER>")
 endfunction
 
 "" change fuzzy find file root folder to path where the buffer current locates
 function! ChangeFuzzyFindFileRootFolder()
-    let g:fuzzyFindRootFolder=expand("%:p:h")
+    let g:fuzzyFindFileRootFolder=expand("%:p:h")
 endfunction
 
 nnoremap ff :call<SPACE>FuzzyFindFile("")<LEFT><LEFT>
@@ -134,8 +132,7 @@ function! JumpToFile()
         echo "File loaded error, can not call JumpToFile"
     endif
 endfunction
-nnoremap <ENTER> :call JumpToFile()<ENTER>:set nocursorline<ENTER>
-
+nnoremap <ENTER> :call JumpToFile()<ENTER>:set<SPACE>nocursorline<ENTER>:noh<ENTER>
 
 "" 底部状态栏设置
 set statusline=%*\ %.50F\               "显示文件名和文件路径
