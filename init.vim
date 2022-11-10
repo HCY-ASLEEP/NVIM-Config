@@ -28,6 +28,7 @@ set timeoutlen=200
 
 
 " Vim jump to the last position when reopening a file
+" ! You must mkdir viewdir first !
 set viewdir=~/.vimviews/
 autocmd BufWinLeave *.* mkview
 autocmd BufWinEnter *.* silent! loadview 
@@ -53,8 +54,8 @@ inoremap <expr> <ENTER> InsertBrace()
 
 "" map ;; to esc
 function! ESC_IMAP()
-    let l:frontChar = getline('.')[col('.') - 2]
-    if l:frontChar == ";" 
+    "" If the char in front the cursor is ";"
+    if getline('.')[col('.') - 2]== ";" 
         call feedkeys("\<BS>\<BS>\<ESC>", 'n')
     else
         call feedkeys("\<BS>\;", 'n')
@@ -78,7 +79,6 @@ nnoremap <TAB> <C-w>w
 
 "" visual block short-cut
 nnoremap vv <C-v>
-
 
 "" paste in command mod
 cnoremap <C-v> <C-r>"
