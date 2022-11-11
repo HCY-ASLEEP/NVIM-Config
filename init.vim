@@ -107,20 +107,20 @@ endfunction
 command! -nargs=1 -complete=command  Redir silent call Redir(<q-args>)
 
 "" set default fuzzy find root folder to "~"
-let g:fuzzyFindFileRootFolder="~"
+let g:FFSRoot="~"
 
 "" Show Files searched fuzzily
-function! FuzzyFindFile(substr)
-    call feedkeys(":Redir !find ".g:fuzzyFindFileRootFolder." -path '*".a:substr."*'\<ENTER>" ,'n')
+function! FuzzyFileSearch(substr)
+    call feedkeys(":Redir !find ".g:FFSRoot." -path '*".a:substr."*'\<ENTER>" ,'n')
     call feedkeys("/".a:substr."\<ENTER>")
 endfunction
 
 "" change fuzzy find file root folder to path where the buffer current locates
-function! ChangeFuzzyFindFileRootFolder()
-    let g:fuzzyFindFileRootFolder=expand("%:p:h")
+function! SetFFSRootInsitu()
+    let g:FFSRoot=expand("%:p:h")
 endfunction
 
-nnoremap ff :call<SPACE>FuzzyFindFile("")<LEFT><LEFT>
+nnoremap ff :call<SPACE>FuzzyFileSearch("")<LEFT><LEFT>
 
 "" Go to the file on line
 function! JumpToFile()
