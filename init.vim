@@ -69,7 +69,6 @@ xnoremap ;; <ESC>
 cnoremap ;; <ESC>
 onoremap ;; <ESC>
 
-
 " exit windows
 tnoremap ;; <C-\><C-n>
 
@@ -95,53 +94,6 @@ cnoreabbrev st sp<ENTER>:term
 
 ""buffer vertical split
 cnoreabbrev vb vertical<SPACE>sb
-
-"" redirect the command output to a buffer
-function! Redir(cmd)
-	redir => output
-	execute a:cmd
-	redir END
-	let output = split(output, "\n")
-	enew
-	setlocal buftype=nofile bufhidden=wipe nobuflisted noswapfile
-	call setline(1, output)
-    call feedkeys(":set cursorline\<CR>")
-endfunction
-command! -nargs=1 -complete=command  Redir silent call Redir(<q-args>)
-
-"" set default fuzzy find root folder to "~"
-let g:rootdir="~"
-
-" change fuzzy find file root folder to path where the buffer current locates
-function! SetRoordir(newPath)
-    if a:newPath=="."
-        let g:rootdir=expand("%:p:h")
-    else
-        let g:rootdir=a:newPath
-    endif
-endfunction
-command! -nargs=1 -complete=command  SetRoordir silent call SetRoordir(<q-args>)
-cnoreabbrev sr SetRoordir
-
-"" Show Files searched fuzzily
-function! FuzzyFileSearch(substr)
-    call feedkeys(":Redir !find ".g:rootdir." -path '*".a:substr."*'\<ENTER>" ,'n')
-    call feedkeys("/".a:substr."\<ENTER>")
-endfunction
-
-nnoremap ff :call<SPACE>FuzzyFileSearch("")<LEFT><LEFT>
-
-"" Go to the file on line
-function! JumpToFile()
-    let l:path=getline('.')
-    if filereadable(l:path)
-        echo "SpecificFile exists"
-        exec "edit ".l:path
-    else
-        echo "File loaded error, can not call JumpToFile"
-    endif
-endfunction
-nnoremap <ENTER> :call JumpToFile()<ENTER>:set<SPACE>nocursorline<ENTER>:noh<ENTER>
 
 "" 底部状态栏设置
 set statusline=%*\ %.50F\               "显示文件名和文件路径
@@ -219,6 +171,7 @@ call plug#begin('/home/asleep/.local/share/nvim/site/autoload')
 Plug 'joshdick/onedark.vim'
 Plug 'neoclide/coc.nvim', {'branch': 'release'}
 Plug 'tpope/vim-fugitive'
+Plug 'Yggdroot/LeaderF', { 'do': ':LeaderfInstallCExtension' }
 Plug 'iamcco/markdown-preview.nvim', { 'do': 'cd app && yarn install' }
 call plug#end()
 
@@ -229,6 +182,12 @@ colorscheme onedark
 auto Filetype markdown cnoreabbrev mt MarkdownPreviewToggle
 auto Filetype markdown let g:mkdp_theme = "light"
 
+let g:Lf_WindowPosition = 'popup'
+let g:Lf_ShowDevIcons = 0
+cnoreabbrev ls LeaderfBuffer
+cnoreabbrev fp LeaderfFile
+cnoreabbrev ft LeaderfBufTag
+cnoreabbrev ff LeaderfFunction
 
 "-------------------------------------------------------------------------------------------------------------
 "-----------------------------------------------vim-plug-end--------------------------------------------------
