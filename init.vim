@@ -26,7 +26,6 @@ set fillchars=eob:\
 "" set double key separation time
 set timeoutlen=200
 
-
 " Vim jump to the last position when reopening a file
 " ! You must mkdir viewdir first !
 set viewdir=~/.vimviews/
@@ -76,6 +75,10 @@ tnoremap ;; <C-\><C-n>
 
 " switch windows
 nnoremap <TAB> <C-w>w
+nnoremap <C-h> <C-w>h
+nnoremap <C-j> <C-w>j
+nnoremap <C-k> <C-w>k
+nnoremap <C-l> <C-w>l
 
 "" visual block short-cut
 nnoremap vv <C-v>
@@ -87,8 +90,8 @@ cnoremap <C-v> <C-r>"
 echo expand("%:p:h")
 
 cnoreabbrev fd echo expand("%:p:h")
-cnoreabbrev vst vs<ENTER>:term
-cnoreabbrev spt sp<ENTER>:term
+cnoreabbrev vt vs<ENTER>:term
+cnoreabbrev st sp<ENTER>:term
 
 ""buffer vertical split
 cnoreabbrev vb vertical<SPACE>sb
@@ -107,17 +110,23 @@ endfunction
 command! -nargs=1 -complete=command  Redir silent call Redir(<q-args>)
 
 "" set default fuzzy find root folder to "~"
-let g:FFSRoot="~"
+let g:rootdir="~"
+
+" change fuzzy find file root folder to path where the buffer current locates
+function! SetRoordir(newPath)
+    if a:newPath=="."
+        let g:rootdir=expand("%:p:h")
+    else
+        let g:rootdir=a:newPath
+    endif
+endfunction
+command! -nargs=1 -complete=command  SetRoordir silent call SetRoordir(<q-args>)
+cnoreabbrev sr SetRoordir
 
 "" Show Files searched fuzzily
 function! FuzzyFileSearch(substr)
-    call feedkeys(":Redir !find ".g:FFSRoot." -path '*".a:substr."*'\<ENTER>" ,'n')
+    call feedkeys(":Redir !find ".g:rootdir." -path '*".a:substr."*'\<ENTER>" ,'n')
     call feedkeys("/".a:substr."\<ENTER>")
-endfunction
-
-"" change fuzzy find file root folder to path where the buffer current locates
-function! SetFFSRootInsitu()
-    let g:FFSRoot=expand("%:p:h")
 endfunction
 
 nnoremap ff :call<SPACE>FuzzyFileSearch("")<LEFT><LEFT>
@@ -136,66 +145,67 @@ nnoremap <ENTER> :call JumpToFile()<ENTER>:set<SPACE>nocursorline<ENTER>:noh<ENT
 
 "" 底部状态栏设置
 set statusline=%*\ %.50F\               "显示文件名和文件路径
-set statusline+=%=%y%m%r%h%w\ \ \ %*        "显示文件类型及文件状态
-set statusline+=%{&ff}\[%{&fenc}]\ \ \ %*   "显示文件编码类型
-set statusline+=%l/%L,%c\ \ %*            "显示光标所在行和列
-set statusline+=%3p%%                   "显示光标前文本所占总文本的比例
+set statusline+=%=%l/%L:%c\ %*          "显示光标所在行和列
+set statusline+=%3p%%\ \                "显示光标前文本所占总文本的比例
+set statusline+=%y%m%r%h%w\ \ %*        "显示文件类型及文件状态
+set statusline+=%{&ff}\[%{&fenc}]\ %*   "显示文件编码类型
+set statusline+=\ %{strftime('%H:%M')}  "显示时间 
 
+"" 设置 netrw
+let g:netrw_banner = 0
+let g:netrw_liststyle = 3
+let g:netrw_browse_split = 4
 
+let t:max_win_width=20
+
+function! OpenExplorerOnSize(size)
+    let t:win_width=a:size
+    set splitright
+    exec t:win_width."vsplit"
+    set nosplitright
+    Explore
+    let t:expl_buf_num = bufnr("%")
+endfunction
+
+function! ToggleExplorer()
+    if exists("t:expl_buf_num")
+        let l:expl_win_num = bufwinnr(t:expl_buf_num)
+        let l:cur_win_num = winnr()
+
+        if l:expl_win_num != -1
+            while l:expl_win_num != l:cur_win_num
+                wincmd w
+                let l:cur_win_num = winnr()
+            endwhile
+            
+            if t:win_width!=0
+                let t:win_width=0
+                exec "vertical resize ".t:win_width
+                wincmd w
+            else
+                let t:win_width=t:max_win_width
+                exec "vertical resize ".t:win_width
+            endif
+        else 
+            call OpenExplorerOnSize(t:max_win_width)            
+        endif
+    else
+        call OpenExplorerOnSize(t:max_win_width)
+    endif
+endfunction
+
+nmap ee :call ToggleExplorer()<CR>
+
+function! ExploreVimEnter()
+    call OpenExplorerOnSize(0)
+    wincmd w
+endfunction
+
+autocmd VimEnter * call ExploreVimEnter()
 
 "-------------------------------------------------------------------------------------------------------------
 "-----------------------------------------------common-end----------------------------------------------------
 "-------------------------------------------------------------------------------------------------------------
-
-
-
-
-
-
-"""-------------------------------------------------------------------------------------------------------------
-""----------------------------------------------netrw_start----------------------------------------------------
-""-------------------------------------------------------------------------------------------------------------
-
-let g:netrw_banner = 0
-let g:netrw_liststyle = 3
-let g:netrw_browse_split = 4
-let g:netrw_altv = 1
-let g:netrw_winsize = 20
-
-set autochdir
-
-" Toggle Vexplore with <F2>
-function! ToggleVExplorer()
-    if exists("t:expl_buf_num")
-        let expl_win_num = bufwinnr(t:expl_buf_num)
-        let cur_win_num = winnr()
-
-        if expl_win_num != -1
-            while expl_win_num != cur_win_num
-                exec "wincmd w"
-                let cur_win_num = winnr()
-            endwhile
-
-            close
-        endif
-
-        unlet t:expl_buf_num
-    else
-         Vexplore
-         let t:expl_buf_num = bufnr("%")
-    endif
-endfunction
-
-map <F2> :call ToggleVExplorer()<CR>
-
-
-
-""-------------------------------------------------------------------------------------------------------------
-""-----------------------------------------------netrw-end-----------------------------------------------------
-""-------------------------------------------------------------------------------------------------------------
-
-
-
 
 
 
@@ -205,18 +215,12 @@ map <F2> :call ToggleVExplorer()<CR>
 "-------------------------------------------------------------------------------------------------------------
 
 
-
 call plug#begin('/home/asleep/.local/share/nvim/site/autoload')
 Plug 'joshdick/onedark.vim'
 Plug 'neoclide/coc.nvim', {'branch': 'release'}
 Plug 'tpope/vim-fugitive'
 Plug 'iamcco/markdown-preview.nvim', { 'do': 'cd app && yarn install' }
 call plug#end()
-
-
-"有些插件需要安装 nerd fonts！
-"nerd fonts 包括了 powerline fonts！
-"建议安装 DejaVuSansMonoNerd！
 
 let g:onedark_terminal_italics=1
 autocmd ColorScheme * highlight Normal ctermbg=NONE guibg=NONE 
@@ -281,10 +285,6 @@ nnoremap <silent><nowait> <space>o  :<C-u>CocList outline<cr>
 "-----------------------------------------markdown-dialogue-start---------------------------------------------
 "-------------------------------------------------------------------------------------------------------------
 
-function! EMPTY_LINE()
-  call feedkeys("\<BS>\<ENTER>######\<SPACE>\<ENTER>\<ENTER>", 'n')
-endfunction
-
 function! INSERT_A_PICTURE()
   call feedkeys("\<BS>\<img src\=\"\"\/\>\<LEFT>\<LEFT>\<LEFT>",'n')  
 endfunction
@@ -307,14 +307,20 @@ endfunction
 
 
 
-auto Filetype markdown inoremap <expr> <c-j> LEFT_TEXT_DIALOUGE()
-auto Filetype markdown inoremap <expr> <c-k> RIGHT_TEXT_DIALOUGE()
-auto Filetype markdown inoremap <expr> <c-h> LEFT_PICTURE_DIALOUGE()
-auto Filetype markdown inoremap <expr> <c-l> RIGHT_PICTURE_DIALOUGE()
-auto Filetype markdown inoremap <expr> <c-o> EMPTY_LINE()
+auto Filetype markdown inoremap <expr> <c-left> LEFT_TEXT_DIALOUGE()
+auto Filetype markdown inoremap <expr> <c-right> RIGHT_TEXT_DIALOUGE()
+auto Filetype markdown inoremap <expr> <c-up> LEFT_PICTURE_DIALOUGE()
+auto Filetype markdown inoremap <expr> <c-down> RIGHT_PICTURE_DIALOUGE()
 auto Filetype markdown inoremap <expr> <c-p> INSERT_A_PICTURE()
 
 "-------------------------------------------------------------------------------------------------------------
 "-----------------------------------------markdown-dialogue-end-----------------------------------------------
 "-------------------------------------------------------------------------------------------------------------
+
+
+
+
+
+
+
 
