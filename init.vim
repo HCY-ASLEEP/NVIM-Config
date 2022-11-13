@@ -20,7 +20,7 @@ set nofoldenable
 " 自动同步
 set autoread
 
-"" split line
+" split line
 set fillchars=eob:\ 
 
 "" set double key separation time
