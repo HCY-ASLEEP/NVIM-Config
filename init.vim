@@ -108,7 +108,7 @@ let g:netrw_banner = 0
 let g:netrw_liststyle = 3
 let g:netrw_browse_split = 4
 
-let t:max_win_width=20
+let t:max_win_width=25
 
 function! OpenExplorerOnSize(size)
     let t:win_width=a:size
@@ -146,10 +146,10 @@ function! ToggleExplorer()
     endif
 endfunction
 
-nmap ee :call ToggleExplorer()<CR>
+nnoremap ee :call ToggleExplorer()<CR>
 
 function! ExploreVimEnter()
-    call OpenExplorerOnSize(0)
+    call OpenExplorerOnSize(t:max_win_width)
     wincmd w
 endfunction
 
