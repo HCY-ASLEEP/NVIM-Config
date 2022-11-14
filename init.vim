@@ -122,22 +122,14 @@ endfunction
 function! ToggleExplorer()
     if exists("t:expl_buf_num")
         let l:expl_win_num = bufwinnr(t:expl_buf_num)
-        let l:cur_win_num = winnr()
-
         if l:expl_win_num != -1
-            while l:expl_win_num != l:cur_win_num
-                wincmd w
-                let l:cur_win_num = winnr()
-            endwhile
-            
             if t:win_width!=0
                 let t:win_width=0
-                exec "vertical resize ".t:win_width
-                wincmd w
             else
                 let t:win_width=t:max_win_width
-                exec "vertical resize ".t:win_width
+                exec l:expl_win_num."wincmd w"
             endif
+            exec "vertical ".l:expl_win_num."resize ".t:win_width
         else 
             call OpenExplorerOnSize(t:max_win_width)            
         endif
