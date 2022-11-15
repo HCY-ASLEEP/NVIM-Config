@@ -17,7 +17,7 @@ set clipboard+=unnamedplus
 set foldmethod=syntax
 set nofoldenable
 
-" 自动同步
+" auto sync 
 set autoread
 
 " split line
@@ -40,7 +40,7 @@ inoremap ' ''<LEFT>
 inoremap " ""<LEFT>
 
 " {} and ()completion when press enter in the middle of them
-function! InsertBrace()
+function! InsertCRBrace()
     call feedkeys("\<BS>",'n')
     let l:frontChar = getline('.')[col('.') - 2]
     if l:frontChar == "{" || l:frontChar == "("
@@ -49,7 +49,7 @@ function! InsertBrace()
         call feedkeys("\<CR>", 'n')
     endif
 endfunction
-inoremap <expr> <ENTER> InsertBrace()
+inoremap <expr> <ENTER> InsertCRBrace()
 
 "" map ;; to esc
 function! ESC_IMAP()
@@ -95,22 +95,28 @@ cnoreabbrev st sp<ENTER>:term
 ""buffer vertical split
 cnoreabbrev vb vertical<SPACE>sb
 
-"" 底部状态栏设置
-set statusline=%*\ %.50F\               "显示文件名和文件路径
-set statusline+=%=%l/%L:%c\ %*          "显示光标所在行和列
-set statusline+=%3p%%\ \                "显示光标前文本所占总文本的比例
-set statusline+=%y%m%r%h%w\ \ %*        "显示文件类型及文件状态
-set statusline+=%{&ff}\[%{&fenc}]\ %*   "显示文件编码类型
-set statusline+=\ %{strftime('%H:%M')}  "显示时间 
+"" bottem statusline settings
+set statusline=%*\ %.50F\               " show filename and filepath
+set statusline+=%=%l/%L:%c\ %*          " show the column and raw num where cursor in
+set statusline+=%3p%%\ \                " show proportion of the text in front of the cursor to the total text
+set statusline+=%y%m%r%h%w\ \ %*        " show filetype and filestatus
+set statusline+=%{&ff}\[%{&fenc}]\ %*   " show encoding type of file
+set statusline+=\ %{strftime('%H:%M')}  " show current time
 
 "" 设置 netrw
+"" not show the help banner on top 
 let g:netrw_banner = 0
+"" make explorer show files like a tree
 let g:netrw_liststyle = 3
+"" see help doc to know more about this global var
 let g:netrw_browse_split = 4
 
+"" explorer vertical split max win width
 let t:max_win_width=25
+"" record the win num of workspace except explorer where cursor in
 let t:cur_work_win_num = winnr()
 
+"" open explorer by specific size
 function! OpenExplorerOnSize(size)
     let t:win_width=a:size
     set splitright
@@ -123,10 +129,13 @@ endfunction
 function! ToggleExplorer()
     if exists("t:expl_buf_num")
         let l:expl_win_num = bufwinnr(t:expl_buf_num)
+        "" if expl_win_num exists
         if l:expl_win_num != -1
+            "" if cursor is not in explorer
             if l:expl_win_num != winnr()
                let t:cur_work_win_num = winnr() 
             endif
+            "" if explorer is hidden
             if t:win_width!=0
                 let t:win_width=0
                 exec t:cur_work_win_num."wincmd w"
