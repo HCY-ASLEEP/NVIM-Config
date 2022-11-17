@@ -172,7 +172,6 @@ autocmd VimEnter * call ExploreVimEnter()
 "--------------------------------------------vim-plug-start---------------------------------------------------
 "-------------------------------------------------------------------------------------------------------------
 
-
 call plug#begin('/home/asleep/.local/share/nvim/site/autoload')
 Plug 'joshdick/onedark.vim'
 Plug 'neoclide/coc.nvim', {'branch': 'release'}

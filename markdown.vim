@@ -2,11 +2,6 @@
 "-----------------------------------------markdown-dialogue-start---------------------------------------------
 "-------------------------------------------------------------------------------------------------------------
 
-
-cnoreabbrev mt MarkdownPreviewToggle
-let g:mkdp_theme = "light"
-
-
 function! INSERT_A_PICTURE()
   call feedkeys("\<BS>\<img src\=\"\"\/\>\<LEFT>\<LEFT>\<LEFT>",'n')  
 endfunction
@@ -29,11 +24,17 @@ endfunction
 
 
 
-auto Filetype markdown inoremap <expr> <c-left> LEFT_TEXT_DIALOUGE()
-auto Filetype markdown inoremap <expr> <c-right> RIGHT_TEXT_DIALOUGE()
-auto Filetype markdown inoremap <expr> <c-up> LEFT_PICTURE_DIALOUGE()
-auto Filetype markdown inoremap <expr> <c-down> RIGHT_PICTURE_DIALOUGE()
-auto Filetype markdown inoremap <expr> <c-p> INSERT_A_PICTURE()
+inoremap <expr> <c-left> LEFT_TEXT_DIALOUGE()
+inoremap <expr> <c-right> RIGHT_TEXT_DIALOUGE()
+inoremap <expr> <c-up> LEFT_PICTURE_DIALOUGE()
+inoremap <expr> <c-down> RIGHT_PICTURE_DIALOUGE()
+inoremap <expr> <c-p> INSERT_A_PICTURE()
+
+
+cnoreabbrev mt MarkdownPreviewToggle
+let g:mkdp_theme = "light"
+
+
 
 "-------------------------------------------------------------------------------------------------------------
 "-----------------------------------------markdown-dialogue-end-----------------------------------------------
