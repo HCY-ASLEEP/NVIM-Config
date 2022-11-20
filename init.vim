@@ -38,6 +38,7 @@ inoremap ( ()<LEFT>
 inoremap [ []<LEFT>
 inoremap ' ''<LEFT>
 inoremap " ""<LEFT>
+inoremap ` ``<LEFT>
 
 " {} and ()completion when press enter in the middle of them
 function! InsertCRBrace()
@@ -74,10 +75,10 @@ tnoremap ;; <C-\><C-n>
 
 " switch windows
 nnoremap <TAB> <C-w>w
-nnoremap <C-h> <C-w>h
-nnoremap <C-j> <C-w>j
-nnoremap <C-k> <C-w>k
-nnoremap <C-l> <C-w>l
+function! SwitchWin(winNum)
+    exec a:winNum."wincmd w"
+endfunction
+nnoremap t :call<SPACE>SwitchWin()<LEFT>
 
 "" visual block short-cut
 nnoremap vv <C-v>
@@ -102,6 +103,7 @@ set statusline+=%3p%%\ \                " show proportion of the text in front o
 set statusline+=%y%m%r%h%w\ \ %*        " show filetype and filestatus
 set statusline+=%{&ff}\[%{&fenc}]\ %*   " show encoding type of file
 set statusline+=\ %{strftime('%H:%M')}  " show current time
+set statusline+=\ \ [%{winnr()}]
 
 "" 设置 netrw
 "" not show the help banner on top 
