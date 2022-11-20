@@ -103,7 +103,7 @@ set statusline+=%3p%%\ \                " show proportion of the text in front o
 set statusline+=%y%m%r%h%w\ \ %*        " show filetype and filestatus
 set statusline+=%{&ff}\[%{&fenc}]\ %*   " show encoding type of file
 set statusline+=\ %{strftime('%H:%M')}  " show current time
-set statusline+=\ \ [%{winnr()}]
+set statusline+=\ \ [%{winnr()}]        " show winNum of current
 
 "" 设置 netrw
 "" not show the help banner on top 
