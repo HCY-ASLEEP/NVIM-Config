@@ -177,7 +177,8 @@ Plug 'joshdick/onedark.vim'
 Plug 'neoclide/coc.nvim', {'branch': 'release'}
 Plug 'tpope/vim-fugitive'
 Plug 'Yggdroot/LeaderF', { 'do': ':LeaderfInstallCExtension' }
-Plug 'iamcco/markdown-preview.nvim', { 'do': 'cd app && yarn install' }
+"" load markdown plugin according filetype
+Plug 'iamcco/markdown-preview.nvim', { 'for': ['markdown'], 'do': 'cd app && yarn install' }
 call plug#end()
 
 let g:onedark_terminal_italics=1
@@ -240,4 +241,4 @@ nnoremap <silent><nowait> <space>o  :<C-u>CocList outline<cr>
 
 
 " This is my markdown settings
-auto Filetype markdown source ./markdown.vim
+auto Filetype markdown source /home/asleep/.config/nvim/markdown.vim
