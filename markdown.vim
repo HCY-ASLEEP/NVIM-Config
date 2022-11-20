@@ -24,10 +24,10 @@ endfunction
 
 
 
-inoremap <expr> <c-left> LEFT_TEXT_DIALOUGE()
-inoremap <expr> <c-right> RIGHT_TEXT_DIALOUGE()
-inoremap <expr> <c-up> LEFT_PICTURE_DIALOUGE()
-inoremap <expr> <c-down> RIGHT_PICTURE_DIALOUGE()
+inoremap <expr> <c-j> LEFT_TEXT_DIALOUGE()
+inoremap <expr> <c-k> RIGHT_TEXT_DIALOUGE()
+inoremap <expr> <c-h> LEFT_PICTURE_DIALOUGE()
+inoremap <expr> <c-l> RIGHT_PICTURE_DIALOUGE()
 inoremap <expr> <c-p> INSERT_A_PICTURE()
 
 
