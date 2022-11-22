@@ -161,7 +161,7 @@ function! ToggleExplorer()
     endif
 endfunction
 
-nnoremap ee :call ToggleExplorer()<CR>
+nnoremap <silent>ee :call ToggleExplorer()<CR>
 
 function! ExploreVimEnter()
     call OpenExplorerOnSize(t:max_win_width)
@@ -182,17 +182,12 @@ autocmd VimEnter * call ExploreVimEnter()
 "-------------------------------------------------------------------------------------------------------------
 
 call plug#begin('/home/asleep/.local/share/nvim/site/autoload')
-""Plug 'joshdick/onedark.vim'
 Plug 'neoclide/coc.nvim', {'branch': 'release'}
 Plug 'tpope/vim-fugitive'
 Plug 'Yggdroot/LeaderF', { 'do': ':LeaderfInstallCExtension' }
 "" load markdown plugin according filetype
 Plug 'iamcco/markdown-preview.nvim', { 'for': ['markdown'], 'do': 'cd app && yarn install' }
 call plug#end()
-
-""let g:onedark_terminal_italics=1
-""autocmd ColorScheme * highlight Normal ctermbg=NONE guibg=NONE 
-""colorscheme onedark
 
 let g:Lf_WindowPosition = 'popup'
 let g:Lf_ShowDevIcons = 0
