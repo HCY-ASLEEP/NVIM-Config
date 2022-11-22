@@ -104,6 +104,13 @@ set statusline+=%y%m%r%h%w\ \ %*        " show filetype and filestatus
 set statusline+=%{&ff}\[%{&fenc}]\ %*   " show encoding type of file
 set statusline+=\ %{strftime('%H:%M')}  " show current time
 set statusline+=\ \ [%{winnr()}]        " show winNum of current
+hi VertSplit ctermfg=NONE ctermbg=NONE cterm=NONE
+set fillchars=vert:\ 
+hi Statusline ctermfg=NONE ctermbg=NONE cterm=bold 
+hi StatuslineNC ctermfg=NONE ctermbg=NONE cterm=NONE
+
+
+
 
 "" 设置 netrw
 "" not show the help banner on top 
@@ -175,7 +182,7 @@ autocmd VimEnter * call ExploreVimEnter()
 "-------------------------------------------------------------------------------------------------------------
 
 call plug#begin('/home/asleep/.local/share/nvim/site/autoload')
-Plug 'joshdick/onedark.vim'
+""Plug 'joshdick/onedark.vim'
 Plug 'neoclide/coc.nvim', {'branch': 'release'}
 Plug 'tpope/vim-fugitive'
 Plug 'Yggdroot/LeaderF', { 'do': ':LeaderfInstallCExtension' }
@@ -183,9 +190,9 @@ Plug 'Yggdroot/LeaderF', { 'do': ':LeaderfInstallCExtension' }
 Plug 'iamcco/markdown-preview.nvim', { 'for': ['markdown'], 'do': 'cd app && yarn install' }
 call plug#end()
 
-let g:onedark_terminal_italics=1
-autocmd ColorScheme * highlight Normal ctermbg=NONE guibg=NONE 
-colorscheme onedark
+""let g:onedark_terminal_italics=1
+""autocmd ColorScheme * highlight Normal ctermbg=NONE guibg=NONE 
+""colorscheme onedark
 
 let g:Lf_WindowPosition = 'popup'
 let g:Lf_ShowDevIcons = 0
