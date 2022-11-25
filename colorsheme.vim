@@ -13,7 +13,6 @@ hi QuickFixLine ctermfg=16 ctermbg=226 cterm=NONE
 hi Conceal ctermfg=254 ctermbg=145 cterm=NONE
 hi Cursor ctermfg=16 ctermbg=46 cterm=NONE
 hi Directory ctermfg=172 ctermbg=NONE cterm=NONE
-hi EndOfBuffer ctermfg=160 ctermbg=NONE cterm=bold
 hi ErrorMsg ctermfg=160 ctermbg=231 cterm=reverse
 hi FoldColumn ctermfg=44 ctermbg=NONE cterm=NONE
 hi MatchParen ctermfg=NONE ctermbg=21 cterm=NONE
@@ -64,6 +63,7 @@ hi DiffDelete ctermfg=231 ctermbg=133 cterm=NONE
 hi ModeMsg ctermfg=darkyellow ctermbg=NONE cterm=NONE
 hi Error ctermfg=darkyellow ctermbg=NONE cterm=NONE
 hi LineNr ctermfg=darkgray ctermbg=NONE cterm=NONE
+hi EndOfBuffer ctermfg=darkyellow
 hi Search ctermbg=darkgray
 
 
