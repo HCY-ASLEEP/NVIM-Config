@@ -2,6 +2,8 @@
 " ---------------------------------------------common-start----------------------------------------------------
 " -------------------------------------------------------------------------------------------------------------
 
+source /home/asleep/.config/nvim/colorsheme.vim
+
 set number
 set mouse=c
 
@@ -19,9 +21,6 @@ set nofoldenable
 
 " auto sync 
 set autoread
-
-" split line
-set fillchars=eob:\ 
 
 " set double key separation time
 set timeoutlen=200
@@ -97,28 +96,11 @@ cnoreabbrev st sp<ENTER>:term
 cnoreabbrev vb vertical<SPACE>sb
 
 " lines above are specific settings for colorscheme koehler
-colorscheme koehler
-hi ModeMsg ctermfg=darkyellow ctermbg=NONE cterm=NONE
-hi Error ctermfg=darkyellow ctermbg=NONE cterm=NONE
-hi LineNr ctermfg=darkgray ctermbg=NONE cterm=NONE
-hi Search ctermbg=darkgray 
-
-" common settings for colorscheme
-hi VertSplit ctermfg=NONE ctermbg=NONE cterm=NONE
-hi Statusline ctermfg=NONE ctermbg=NONE cterm=bold 
-hi StatuslineNC ctermfg=NONE ctermbg=NONE cterm=NONE
-
-" let fillchars become space
-set fillchars=vert:\ 
-
-" bottem statusline settings
-set statusline=%*\ %.50F\               " show filename and filepath
-set statusline+=%=%l/%L:%c\ %*          " show the column and raw num where cursor in
-set statusline+=%3p%%\ \                " show proportion of the text in front of the cursor to the total text
-set statusline+=%y%m%r%h%w\ \ %*        " show filetype and filestatus
-set statusline+=%{&ff}\[%{&fenc}]\ %*   " show encoding type of file
-set statusline+=\ %{strftime('%H:%M')}  " show current time
-set statusline+=\ \ [%{winnr()}]        " show winNum of current
+""colorscheme koehler
+""hi ModeMsg ctermfg=darkyellow ctermbg=NONE cterm=NONE
+""hi Error ctermfg=darkyellow ctermbg=NONE cterm=NONE
+""hi LineNr ctermfg=darkgray ctermbg=NONE cterm=NONE
+""hi Search ctermbg=darkgray 
 
 
 " 设置 netrw
