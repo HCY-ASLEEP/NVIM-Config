@@ -103,11 +103,6 @@ let g:netrw_liststyle = 3
 " see help doc to know more about this global var
 let g:netrw_browse_split = 4
 
-" explorer vertical split max win width
-let t:max_win_width=25
-" record the win num of workspace except explorer where cursor in
-let t:cur_work_win_num = winnr()
-
 " open explorer by specific size
 function! OpenExplorerOnSize(size)
     let t:win_width=a:size
@@ -146,13 +141,16 @@ endfunction
 
 nnoremap <silent>ee :call ToggleExplorer()<CR>
 
-function! ExploreVimEnter()
+function! ExploreWhenEnter()
+    " explorer vertical split max win width
+    let t:max_win_width=25
+    " record the win num of workspace except explorer where cursor in
+    let t:cur_work_win_num = winnr()
     call OpenExplorerOnSize(t:max_win_width)
     wincmd w
 endfunction
 
-autocmd VimEnter * call ExploreVimEnter()
-
+autocmd TabEnter,VimEnter * call ExploreWhenEnter()
 "-------------------------------------------------------------------------------------------------------------
 "-----------------------------------------------common-end----------------------------------------------------
 "-------------------------------------------------------------------------------------------------------------
@@ -223,7 +221,7 @@ nnoremap <silent><nowait> <space>o  :<C-u>CocList outline<cr>
 
 " It is neccessory to claim this command when use colorscheme koehler
 " Pum menu selected bg
-hi CocMenuSel ctermbg=237 guibg=#13354A
+hi CocMenuSel ctermbg=242 guibg=#13354A
 
 "-------------------------------------------------------------------------------------------------------------
 "-------------------------------------------------coc-end-----------------------------------------------------
