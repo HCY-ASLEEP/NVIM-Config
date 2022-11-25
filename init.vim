@@ -5,7 +5,7 @@
 set number
 set mouse=c
 
-"" Tab settings
+" Tab settings
 set tabstop=4
 set shiftwidth=4
 set softtabstop=4
@@ -23,7 +23,7 @@ set autoread
 " split line
 set fillchars=eob:\ 
 
-"" set double key separation time
+" set double key separation time
 set timeoutlen=200
 
 " Vim jump to the last position when reopening a file
@@ -32,7 +32,7 @@ set viewdir=~/.vimviews/
 autocmd BufWinLeave *.* mkview
 autocmd BufWinEnter *.* silent! loadview 
 
-"" auto pair
+" auto pair
 inoremap { {}<LEFT>
 inoremap ( ()<LEFT>
 inoremap [ []<LEFT>
@@ -52,9 +52,9 @@ function! InsertCRBrace()
 endfunction
 inoremap <expr> <ENTER> InsertCRBrace()
 
-"" map ;; to esc
+" map ;; to esc
 function! ESC_IMAP()
-    "" If the char in front the cursor is ";"
+    " If the char in front the cursor is ";"
     if getline('.')[col('.') - 2]== ";" 
         call feedkeys("\<BS>\<BS>\<ESC>", 'n')
     else
@@ -80,23 +80,38 @@ function! SwitchWin(winNum)
 endfunction
 nnoremap t :call<SPACE>SwitchWin()<LEFT>
 
-"" visual block short-cut
+" visual block short-cut
 nnoremap vv <C-v>
 
-"" paste in command mod
+" paste in command mod
 cnoremap <C-v> <C-r>"
 
-"" show current buffer path
+" show current buffer path
 echo expand("%:p:h")
 
 cnoreabbrev fd echo expand("%:p:h")
 cnoreabbrev vt vs<ENTER>:term
 cnoreabbrev st sp<ENTER>:term
 
-""buffer vertical split
+"buffer vertical split
 cnoreabbrev vb vertical<SPACE>sb
 
-"" bottem statusline settings
+" lines above are specific settings for colorscheme koehler
+colorscheme koehler
+hi ModeMsg ctermfg=darkyellow ctermbg=NONE cterm=NONE
+hi Error ctermfg=darkyellow ctermbg=NONE cterm=NONE
+hi LineNr ctermfg=darkgray ctermbg=NONE cterm=NONE
+hi Search ctermbg=darkgray 
+
+" common settings for colorscheme
+hi VertSplit ctermfg=NONE ctermbg=NONE cterm=NONE
+hi Statusline ctermfg=NONE ctermbg=NONE cterm=bold 
+hi StatuslineNC ctermfg=NONE ctermbg=NONE cterm=NONE
+
+" let fillchars become space
+set fillchars=vert:\ 
+
+" bottem statusline settings
 set statusline=%*\ %.50F\               " show filename and filepath
 set statusline+=%=%l/%L:%c\ %*          " show the column and raw num where cursor in
 set statusline+=%3p%%\ \                " show proportion of the text in front of the cursor to the total text
@@ -104,28 +119,22 @@ set statusline+=%y%m%r%h%w\ \ %*        " show filetype and filestatus
 set statusline+=%{&ff}\[%{&fenc}]\ %*   " show encoding type of file
 set statusline+=\ %{strftime('%H:%M')}  " show current time
 set statusline+=\ \ [%{winnr()}]        " show winNum of current
-hi VertSplit ctermfg=NONE ctermbg=NONE cterm=NONE
-set fillchars=vert:\ 
-hi Statusline ctermfg=NONE ctermbg=NONE cterm=bold 
-hi StatuslineNC ctermfg=NONE ctermbg=NONE cterm=NONE
 
 
-
-
-"" 设置 netrw
-"" not show the help banner on top 
+" 设置 netrw
+" not show the help banner on top 
 let g:netrw_banner = 0
-"" make explorer show files like a tree
+" make explorer show files like a tree
 let g:netrw_liststyle = 3
-"" see help doc to know more about this global var
+" see help doc to know more about this global var
 let g:netrw_browse_split = 4
 
-"" explorer vertical split max win width
+" explorer vertical split max win width
 let t:max_win_width=25
-"" record the win num of workspace except explorer where cursor in
+" record the win num of workspace except explorer where cursor in
 let t:cur_work_win_num = winnr()
 
-"" open explorer by specific size
+" open explorer by specific size
 function! OpenExplorerOnSize(size)
     let t:win_width=a:size
     set splitright
@@ -138,13 +147,13 @@ endfunction
 function! ToggleExplorer()
     if exists("t:expl_buf_num")
         let l:expl_win_num = bufwinnr(t:expl_buf_num)
-        "" if expl_win_num exists
+        " if expl_win_num exists
         if l:expl_win_num != -1
-            "" if cursor is not in explorer
+            " if cursor is not in explorer
             if l:expl_win_num != winnr()
                let t:cur_work_win_num = winnr() 
             endif
-            "" if explorer is hidden
+            " if explorer is hidden
             if t:win_width!=0
                 let t:win_width=0
                 exec t:cur_work_win_num."wincmd w"
@@ -185,7 +194,7 @@ call plug#begin('/home/asleep/.local/share/nvim/site/autoload')
 Plug 'neoclide/coc.nvim', {'branch': 'release'}
 Plug 'tpope/vim-fugitive'
 Plug 'Yggdroot/LeaderF', { 'do': ':LeaderfInstallCExtension' }
-"" load markdown plugin according filetype
+" load markdown plugin according filetype
 Plug 'iamcco/markdown-preview.nvim', { 'for': ['markdown'], 'do': 'cd app && yarn install' }
 call plug#end()
 
@@ -238,6 +247,9 @@ nnoremap <silent><nowait> <space>e  :<C-u>CocList extensions<cr>
 " Find symbol of current document.
 nnoremap <silent><nowait> <space>o  :<C-u>CocList outline<cr>
 
+" It is neccessory to claim this command when use colorscheme koehler
+" Pum menu selected bg
+hi CocMenuSel ctermbg=237 guibg=#13354A
 
 "-------------------------------------------------------------------------------------------------------------
 "-------------------------------------------------coc-end-----------------------------------------------------
