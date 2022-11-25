@@ -95,15 +95,7 @@ cnoreabbrev st sp<ENTER>:term
 "buffer vertical split
 cnoreabbrev vb vertical<SPACE>sb
 
-" lines above are specific settings for colorscheme koehler
-""colorscheme koehler
-""hi ModeMsg ctermfg=darkyellow ctermbg=NONE cterm=NONE
-""hi Error ctermfg=darkyellow ctermbg=NONE cterm=NONE
-""hi LineNr ctermfg=darkgray ctermbg=NONE cterm=NONE
-""hi Search ctermbg=darkgray 
-
-
-" 设置 netrw
+" netrw settings
 " not show the help banner on top 
 let g:netrw_banner = 0
 " make explorer show files like a tree
