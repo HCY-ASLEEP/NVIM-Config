@@ -297,3 +297,7 @@ set statusline+=%y%m%r%h%w\ \ %*        " show filetype and filestatus
 set statusline+=%{&ff}\[%{&fenc}]\ %*   " show encoding type of file
 set statusline+=\ %{strftime('%H:%M')}  " show current time
 set statusline+=\ \ [%{winnr()}]        " show winNum of current
+
+" coc pum menu selected color
+hi CocMenuSel ctermbg=19
+
