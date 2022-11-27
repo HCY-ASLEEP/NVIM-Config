@@ -216,67 +216,21 @@ nnoremap <silent><nowait> <space>e  :<C-u>CocList extensions<cr>
 " Find symbol of current document.
 nnoremap <silent><nowait> <space>o  :<C-u>CocList outline<cr>
 
+" hi selected item of coc pum menu
+hi CocMenuSel ctermfg=white ctermbg=black cterm=bold
 
-" colorsheme settings ------------------------------------------------------------------------------
 
-" copy of colorscheme koehler
-hi ColorColumn ctermfg=grey ctermbg=darkred cterm=NONE
-hi CursorLineNr ctermfg=darkyellow ctermbg=NONE cterm=underline
-hi CursorColumn ctermfg=NONE ctermbg=NONE cterm=underline
-hi CursorLine ctermfg=NONE ctermbg=NONE cterm=underline
-hi QuickFixLine ctermfg=black ctermbg=darkyellow cterm=NONE
-hi Conceal ctermfg=grey ctermbg=NONE cterm=NONE
-hi Directory ctermfg=darkyellow ctermbg=NONE cterm=NONE
-hi ErrorMsg ctermfg=darkred ctermbg=grey cterm=bold,reverse
-hi FoldColumn ctermfg=darkcyan ctermbg=NONE cterm=NONE
-hi MoreMsg ctermfg=darkgreen ctermbg=NONE cterm=bold
-hi Question ctermfg=darkblue ctermbg=NONE cterm=bold
-hi SignColumn ctermfg=darkcyan ctermbg=NONE cterm=NONE
-hi SpecialKey ctermfg=darkred ctermbg=NONE cterm=NONE
-hi SpellBad ctermfg=darkred ctermbg=darkyellow cterm=reverse
-hi SpellCap ctermfg=darkgreen ctermbg=NONE cterm=reverse
-hi SpellLocal ctermfg=darkcyan ctermbg=NONE cterm=reverse
-hi SpellRare ctermfg=darkmagenta ctermbg=darkyellow cterm=reverse
-hi StatusLine ctermfg=grey ctermbg=darkblue cterm=bold,reverse
-hi StatusLineNC ctermfg=grey ctermbg=darkblue cterm=reverse
-hi Title ctermfg=darkmagenta ctermbg=NONE cterm=bold
-hi VertSplit ctermfg=darkblue ctermbg=grey cterm=NONE
-hi Visual ctermfg=NONE ctermbg=NONE cterm=reverse
-hi VisualNOS ctermfg=NONE ctermbg=black cterm=underline
-hi WarningMsg ctermfg=darkred ctermbg=NONE cterm=NONE
-hi WildMenu ctermfg=black ctermbg=darkyellow cterm=NONE
-hi Constant ctermfg=darkred ctermbg=NONE cterm=NONE
-hi Identifier ctermfg=darkcyan ctermbg=NONE cterm=NONE
-hi Ignore ctermfg=black ctermbg=black cterm=NONE
-hi PreProc ctermfg=darkmagenta ctermbg=NONE cterm=NONE
-hi Special ctermfg=darkyellow ctermbg=NONE cterm=NONE
-hi Statement ctermfg=darkyellow ctermbg=NONE cterm=bold
-hi Todo ctermfg=darkblue ctermbg=darkyellow cterm=NONE
-hi Type ctermfg=darkgreen ctermbg=NONE cterm=bold
-hi Underlined ctermfg=NONE ctermbg=NONE cterm=underline
-hi ToolbarLine ctermfg=NONE ctermbg=NONE cterm=NONE
-hi ToolbarButton ctermfg=grey ctermbg=black cterm=bold,reverse
-hi DiffAdd ctermfg=white ctermbg=darkgreen cterm=NONE
-hi DiffChange ctermfg=white ctermbg=darkblue cterm=NONE
-hi DiffText ctermfg=black ctermbg=grey cterm=NONE
-hi DiffDelete ctermfg=white ctermbg=darkmagenta cterm=NONE
+" colorscheme settings ------------------------------------------------------------------------------
 
-" supplements of koehler colorsheme
-hi Error ctermfg=darkyellow ctermbg=NONE cterm=NONE
 hi TabLine ctermfg=white ctermbg=NONE cterm=bold
 hi TabLineFill ctermfg=NONE ctermbg=NONE cterm=bold
-hi TabLineSel ctermfg=white ctermbg=darkgray cterm=bold
+hi TabLineSel ctermfg=black ctermbg=grey cterm=bold
+hi Visual ctermfg=white ctermbg=darkgray cterm=bold
+hi Error ctermfg=darkyellow ctermbg=NONE cterm=NONE
 hi Folded ctermfg=lightyellow ctermbg=darkgray cterm=NONE
-hi ModeMsg ctermfg=magenta ctermbg=NONE cterm=bold
-hi LineNr ctermfg=darkgray ctermbg=NONE cterm=NONE
-hi Search ctermbg=grey
-hi NonText ctermfg=darkyellow ctermbg=NONE cterm=bold
-hi MatchParen ctermfg=NONE ctermbg=grey cterm=NONE
-hi Comment ctermfg=darkgray ctermbg=NONE cterm=NONE
-hi Pmenu ctermfg=grey ctermbg=black cterm=NONE
-hi PmenuSbar ctermfg=NONE ctermbg=grey cterm=NONE
-hi PmenuSel ctermfg=black ctermbg=darkcyan cterm=bold
-hi PmenuThumb ctermfg=NONE ctermbg=darkcyan cterm=NONE
+hi Statement ctermfg=darkyellow ctermbg=NONE cterm=bold
+hi Identifier ctermfg=lightyellow ctermbg=NONE cterm=bold
+hi Constant ctermfg=brown ctermbg=NONE cterm=NONE
 
 " common settings for colorscheme
 hi VertSplit ctermfg=darkgray ctermbg=NONE cterm=NONE
