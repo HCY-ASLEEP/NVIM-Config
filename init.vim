@@ -94,7 +94,6 @@ nnoremap t :call<SPACE>SwitchWin()<LEFT>
 
 
 " netrw settings ----------------------------------------------------------------------------------
-" 
 " not show the help banner on top 
 let g:netrw_banner = 0
 
@@ -160,10 +159,10 @@ endfunction
 autocmd TabEnter,VimEnter * call ExploreWhenEnter()
 
 
-" vim-plug(3) ---------------------------------------------------------------------------------------
+" vim-plug(4) ---------------------------------------------------------------------------------------
 call plug#begin('/home/asleep/.local/share/nvim/site/autoload')
 Plug 'neoclide/coc.nvim', {'branch': 'release'}
-Plug 'tpope/vim-fugitive'
+Plug 'tpope/vim-fugitive',{ 'on': ['Git'] }
 Plug 'Yggdroot/LeaderF', { 'do': ':LeaderfInstallCExtension' }
 " load markdown plugin according filetype
 Plug 'iamcco/markdown-preview.nvim', { 'for': ['markdown'], 'do': 'cd app && yarn install' }
@@ -174,13 +173,15 @@ call plug#end()
 auto Filetype markdown source /home/asleep/.config/nvim/markdown.vim
 
 
+" fugitive settings --------------------------------------------------------------------------------
+cnoreabbrev g Git
+
+
 " LeaderF settings ---------------------------------------------------------------------------------
 let g:Lf_WindowPosition = 'popup'
 let g:Lf_ShowDevIcons = 0
+nnoremap f :Leaderf<SPACE>
 cnoreabbrev ls LeaderfBuffer
-cnoreabbrev fp LeaderfFile
-cnoreabbrev ft LeaderfBufTag
-cnoreabbrev ff LeaderfFunction
 
 
 " coc settings -------------------------------------------------------------------------------------
@@ -221,11 +222,10 @@ hi CocMenuSel ctermfg=white ctermbg=black cterm=bold
 
 
 " colorscheme settings ------------------------------------------------------------------------------
-
 hi TabLine ctermfg=white ctermbg=NONE cterm=bold
 hi TabLineFill ctermfg=NONE ctermbg=NONE cterm=bold
 hi TabLineSel ctermfg=black ctermbg=grey cterm=bold
-hi Visual ctermfg=white ctermbg=darkgray cterm=bold
+hi Visual ctermfg=lightred ctermbg=darkgray cterm=bold
 hi Error ctermfg=darkyellow ctermbg=NONE cterm=NONE
 hi Folded ctermfg=lightyellow ctermbg=darkgray cterm=NONE
 hi Statement ctermfg=darkyellow ctermbg=NONE cterm=bold
@@ -236,15 +236,12 @@ hi Constant ctermfg=brown ctermbg=NONE cterm=NONE
 hi VertSplit ctermfg=darkgray ctermbg=NONE cterm=NONE
 hi StatuslineNC ctermfg=black ctermbg=darkgray cterm=NONE
 hi Statusline ctermfg=black ctermbg=darkgray cterm=bold
-set fillchars=eob:\ 
+set fillchars+=eob:\ 
 
 " bottem statusline settings
-set statusline=%*\ %.50F\               " show filename and filepath
-set statusline+=%=%l/%L:%c\ %*          " show the column and raw num where cursor in
-set statusline+=%3p%%\ \                " show proportion of the text in front of the cursor to the total text
-set statusline+=%y%m%r%h%w\ \ %*        " show filetype and filestatus
-set statusline+=%{&ff}\[%{&fenc}]\ %*   " show encoding type of file
-set statusline+=\ %{strftime('%H:%M')}  " show current time
-set statusline+=\ \ [%{winnr()}]        " show winNum of current
-
-
+set statusline=%*\ %.50F\ %m\               " show filename and filepath
+set statusline+=%=%l/%L:%c\ \ %*            " show the column and raw num where cursor in
+set statusline+=%3p%%\ \                    " show proportion of the text in front of the cursor to the total text
+set statusline+=%{&ff}\[%{&fenc}]\ %*       " show encoding type of file
+set statusline+=\ %{strftime('%H:%M')}\ \   " show current time
+set statusline+=[%{winnr()}]                " show winNum of current
