@@ -222,23 +222,12 @@ nnoremap <silent><nowait> <space>o  :<C-u>CocList outline<cr>
 
 
 " colorscheme settings ------------------------------------------------------------------------------
-colorscheme koehler
 hi TabLine ctermfg=white ctermbg=NONE cterm=bold
 hi TabLineFill ctermfg=NONE ctermbg=NONE cterm=bold
 hi TabLineSel ctermfg=white ctermbg=darkgray cterm=bold
-hi Visual ctermfg=lightred ctermbg=darkgray cterm=bold
 hi Error ctermfg=darkyellow ctermbg=NONE cterm=NONE
 hi Folded ctermfg=lightyellow ctermbg=darkgray cterm=NONE
 hi LineNr ctermfg=darkgray ctermbg=NONE cterm=NONE
-hi Comment ctermfg=darkgray ctermbg=NONE cterm=italic
-hi Normal ctermfg=NONE ctermbg=NONE cterm=NONE
-hi ModeMsg ctermfg=white ctermbg=NONE cterm=italic
-
-" common settings for colorscheme
-hi VertSplit ctermfg=darkgray ctermbg=NONE cterm=NONE
-hi StatuslineNC ctermfg=white ctermbg=darkgray cterm=NONE
-hi Statusline ctermfg=white ctermbg=darkgray cterm=bold
-set fillchars+=eob:\ 
 
 " bottem statusline settings
 set statusline=%*\ %.50F\ %m\               " show filename and filepath
