@@ -218,24 +218,26 @@ nnoremap <silent><nowait> <space>e  :<C-u>CocList extensions<cr>
 nnoremap <silent><nowait> <space>o  :<C-u>CocList outline<cr>
 
 " hi selected item of coc pum menu
-hi CocMenuSel ctermfg=white ctermbg=black cterm=bold
+""hi CocMenuSel ctermfg=white ctermbg=black cterm=bold
 
 
 " colorscheme settings ------------------------------------------------------------------------------
+colorscheme koehler
 hi TabLine ctermfg=white ctermbg=NONE cterm=bold
 hi TabLineFill ctermfg=NONE ctermbg=NONE cterm=bold
-hi TabLineSel ctermfg=black ctermbg=grey cterm=bold
+hi TabLineSel ctermfg=white ctermbg=darkgray cterm=bold
 hi Visual ctermfg=lightred ctermbg=darkgray cterm=bold
 hi Error ctermfg=darkyellow ctermbg=NONE cterm=NONE
 hi Folded ctermfg=lightyellow ctermbg=darkgray cterm=NONE
-hi Statement ctermfg=darkyellow ctermbg=NONE cterm=bold
-hi Identifier ctermfg=lightyellow ctermbg=NONE cterm=bold
-hi Constant ctermfg=brown ctermbg=NONE cterm=NONE
+hi LineNr ctermfg=darkgray ctermbg=NONE cterm=NONE
+hi Comment ctermfg=darkgray ctermbg=NONE cterm=italic
+hi Normal ctermfg=NONE ctermbg=NONE cterm=NONE
+hi ModeMsg ctermfg=white ctermbg=NONE cterm=italic
 
 " common settings for colorscheme
 hi VertSplit ctermfg=darkgray ctermbg=NONE cterm=NONE
-hi StatuslineNC ctermfg=black ctermbg=darkgray cterm=NONE
-hi Statusline ctermfg=black ctermbg=darkgray cterm=bold
+hi StatuslineNC ctermfg=white ctermbg=darkgray cterm=NONE
+hi Statusline ctermfg=white ctermbg=darkgray cterm=bold
 set fillchars+=eob:\ 
 
 " bottem statusline settings
