@@ -181,7 +181,6 @@ cnoreabbrev g Git
 let g:Lf_WindowPosition = 'popup'
 let g:Lf_ShowDevIcons = 0
 nnoremap f :Leaderf<SPACE>
-cnoreabbrev ls LeaderfBuffer
 
 
 " coc settings -------------------------------------------------------------------------------------
@@ -217,8 +216,8 @@ nnoremap <silent><nowait> <space>e  :<C-u>CocList extensions<cr>
 " Find symbol of current document.
 nnoremap <silent><nowait> <space>o  :<C-u>CocList outline<cr>
 
-" hi selected item of coc pum menu
-""hi CocMenuSel ctermfg=white ctermbg=black cterm=bold
+" setting CocInlayHint color
+hi CocInlayHint ctermfg=darkblue ctermbg=NONE cterm=italic
 
 
 " colorscheme settings ------------------------------------------------------------------------------
@@ -226,8 +225,15 @@ hi TabLine ctermfg=white ctermbg=NONE cterm=bold
 hi TabLineFill ctermfg=NONE ctermbg=NONE cterm=bold
 hi TabLineSel ctermfg=white ctermbg=darkgray cterm=bold
 hi Error ctermfg=darkyellow ctermbg=NONE cterm=NONE
-hi Folded ctermfg=lightyellow ctermbg=darkgray cterm=NONE
+hi Folded ctermfg=yellow ctermbg=darkgray cterm=NONE
 hi LineNr ctermfg=darkgray ctermbg=NONE cterm=NONE
+hi Comment ctermfg=darkgray ctermbg=NONE cterm=italic
+hi Visual ctermfg=lightred ctermbg=darkgray cterm=NONE
+
+hi VertSplit ctermfg=darkgray ctermbg=NONE cterm=NONE
+hi Statusline ctermfg=lightyellow ctermbg=darkgray cterm=bold
+hi StatuslineNC ctermfg=lightyellow ctermbg=darkgray cterm=NONE
+set fillchars+=eob:\ 
 
 " bottem statusline settings
 set statusline=%*\ %.50F\ %m\               " show filename and filepath
