@@ -23,8 +23,8 @@ set timeoutlen=200
 " jump to the last position when reopening a file
 " ! You must mkdir viewdir first !
 set viewdir=~/.vimviews/
-autocmd BufWinLeave *.* mkview
-autocmd BufWinEnter *.* silent! loadview 
+autocmd! BufWinLeave *.* mkview
+autocmd! BufWinEnter *.* silent! loadview 
 
 " visual block short-cut
 nnoremap vv <C-v>
@@ -33,9 +33,8 @@ nnoremap vv <C-v>
 cnoremap <C-v> <C-r>"
 
 " show current buffer path
-echo expand("%:p:h")
-
 cnoreabbrev fd echo expand("%:p:h")
+
 cnoreabbrev vt vs<ENTER>:term
 cnoreabbrev st sp<ENTER>:term
 
@@ -103,42 +102,64 @@ let g:netrw_liststyle = 3
 " see help doc to know more about this global var
 let g:netrw_browse_split = 4
 
+" skip the netrw win when the netrw hidden
+function! SkipNetrwWin()
+    augroup skipNetrwWin
+        autocmd!
+        autocmd BufEnter NetrwTreeListing :wincmd w
+    augroup END
+endfunction
+
 " open explorer by specific size
 function! OpenExplorerOnSize(size)
     let t:win_width=a:size
     set splitright
     exec t:win_width."vsplit"
     set nosplitright
-    Explore
-    let t:expl_buf_num = bufnr("%")
+    exec "Explore"
 endfunction
 
 function! ToggleExplorer()
-    if exists("t:expl_buf_num")
-        let l:expl_win_num = bufwinnr(t:expl_buf_num)
+    let l:expl_win_num = bufwinnr(bufnr('NetrwTreeListing'))
+    
+    " if expl_win_num exists
+    if l:expl_win_num != -1
         
-        " if expl_win_num exists
-        if l:expl_win_num != -1
-            
-            " if cursor is not in explorer
-            if l:expl_win_num != winnr()
-               let t:cur_work_win_num = winnr() 
-            endif
-            
-            " if explorer is hidden
-            if t:win_width!=0
-                let t:win_width=0
-                exec t:cur_work_win_num."wincmd w"
-            else
-                let t:win_width=t:max_win_width
-                exec l:expl_win_num."wincmd w"
-            endif
-            exec "vertical ".l:expl_win_num."resize ".t:win_width
-        else 
-            call OpenExplorerOnSize(t:max_win_width)            
+        " if cursor is not in explorer
+        if l:expl_win_num != winnr()
+           let t:cur_work_win_num = winnr() 
         endif
-    else
-        call OpenExplorerOnSize(t:max_win_width)
+        
+        " if explorer is not hidden
+        if winwidth(l:expl_win_num)!=0
+            let t:win_width=0
+            exec t:cur_work_win_num."wincmd w"
+            call SkipNetrwWin()
+        else
+            let t:win_width=t:max_win_width
+            
+            " disable skip netrw win
+            autocmd! skipNetrwWin
+            exec l:expl_win_num."wincmd w"
+        endif
+        exec "vertical ".l:expl_win_num."resize ".t:win_width
+    else 
+        call OpenExplorerOnSize(t:max_win_width)            
+    endif
+endfunction
+
+function! HiddenExplorer()
+    let l:expl_win_num = bufwinnr(bufnr('NetrwTreeListing'))
+    
+    " if expl_win_num exists
+    if l:expl_win_num != -1
+        
+        " if cursor is not in explorer
+        if l:expl_win_num != winnr()
+           let t:cur_work_win_num = winnr() 
+        endif
+        call SkipNetrwWin()
+        exec "vertical ".l:expl_win_num."resize ".0
     endif
 endfunction
 
@@ -151,18 +172,17 @@ function! ExploreWhenEnter()
     
     " record the win num of workspace except explorer where cursor in
     let t:cur_work_win_num = winnr()
-    
     call OpenExplorerOnSize(t:max_win_width)
     wincmd w
 endfunction
 
-autocmd TabEnter,VimEnter * call ExploreWhenEnter()
+autocmd! TabEnter,VimEnter * call ExploreWhenEnter()
 
 
 " vim-plug(4) ---------------------------------------------------------------------------------------
 call plug#begin('/home/asleep/.local/share/nvim/site/autoload')
 Plug 'neoclide/coc.nvim', {'branch': 'release'}
-Plug 'tpope/vim-fugitive',{ 'on': ['Git'] }
+Plug 'tpope/vim-fugitive'
 Plug 'Yggdroot/LeaderF', { 'do': ':LeaderfInstallCExtension' }
 " load markdown plugin according filetype
 Plug 'iamcco/markdown-preview.nvim', { 'for': ['markdown'], 'do': 'cd app && yarn install' }
@@ -171,10 +191,6 @@ call plug#end()
 
 " markdown settings --------------------------------------------------------------------------------
 auto Filetype markdown source /home/asleep/.config/nvim/markdown.vim
-
-
-" fugitive settings --------------------------------------------------------------------------------
-cnoreabbrev g Git
 
 
 " LeaderF settings ---------------------------------------------------------------------------------
@@ -190,6 +206,7 @@ nnoremap gd <Plug>(coc-definition)
 nnoremap gt <Plug>(coc-type-definition)
 nnoremap gi <Plug>(coc-implementation)
 nnoremap gr <Plug>(coc-references)
+nnoremap <silent>gb :call CocAction('showOutline') \| call HiddenExplorer()<CR>
 
 " Use K to show documentation in preview window.
 function! ShowDocumentation()
@@ -202,7 +219,7 @@ endfunction
 nnoremap <silent> K :call ShowDocumentation()<CR>
 
 " Highlight the symbol and its references when holding the cursor.
-autocmd CursorHold * silent call CocActionAsync('highlight')
+autocmd! CursorHold * silent call CocActionAsync('highlight')
 
 " Symbol renaming.
 nnoremap <space>r <Plug>(coc-rename)
@@ -242,3 +259,11 @@ set statusline+=%3p%%\ \                    " show proportion of the text in fro
 set statusline+=%{&ff}\[%{&fenc}]\ %*       " show encoding type of file
 set statusline+=\ %{strftime('%H:%M')}\ \   " show current time
 set statusline+=[%{winnr()}]                " show winNum of current
+
+autocmd! Filetype python 
+    \  set list
+    \| set listchars=space:\ 
+    \| set listchars+=multispace:···+
+    \| hi NonText ctermfg=darkblue ctermbg=NONE cterm=NONE
+
+
