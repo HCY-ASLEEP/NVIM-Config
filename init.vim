@@ -35,8 +35,8 @@ cnoremap <C-v> <C-r>"
 " show current buffer path
 cnoreabbrev fd echo expand("%:p:h")
 
-cnoreabbrev vt vs<ENTER>:term
-cnoreabbrev st sp<ENTER>:term
+cnoreabbrev vt vs \| term
+cnoreabbrev st sp \| term
 
 "buffer vertical split
 cnoreabbrev vb vertical<SPACE>sb
