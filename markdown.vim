@@ -29,8 +29,7 @@ inoremap <expr> <c-l> RIGHT_PICTURE_DIALOUGE()
 inoremap <expr> <c-p> INSERT_A_PICTURE()
 
 
-cnoreabbrev mt MarkdownPreviewToggle
-let g:mkdp_theme = "light"
+cnoreabbrev mp CocCommand markdown-preview-enhanced.openPreview
 
 
 

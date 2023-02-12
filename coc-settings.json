@@ -1,4 +1,9 @@
 {
-  "suggest.noselect":true,
-  "suggest.enablePreselect":false,
+    "suggest.noselect":true,
+    "suggest.enablePreselect": false,
+    
+    "outline.splitCommand": "to 30vs",
+    "outline.autoPreview": true,
+    "outline.checkBufferSwitch": false,
+    "outline.expandLevel": 5
 }
