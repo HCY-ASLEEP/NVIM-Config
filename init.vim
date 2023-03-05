@@ -304,6 +304,7 @@ let g:Lf_ShowDevIcons = 0
 
 " coc settings -------------------------------------------------------------------------------------
 inoremap <silent><expr> <TAB> coc#pum#visible() ? coc#pum#next(1) :"\<Tab>" 
+inoremap <silent><expr> <CR> coc#pum#visible() ? coc#pum#confirm() : "\<C-g>u\<CR>\<c-r>=coc#on_enter()\<CR>"
 
 nnoremap gd <Plug>(coc-definition)
 nnoremap gt <Plug>(coc-type-definition)
