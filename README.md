@@ -28,19 +28,3 @@ apt update;\
     sudo sh -c 'echo "devenv ALL=(ALL) NOPASSWD:ALL" >> /etc/sudoers';\
     su devenv
 ```
-
-</br>
-
-To config all in one leap of docker ubuntu (or docker debian):
-
-```bash
-apt update;\
-    apt upgrade -y;\
-    apt install neovim xz-utils curl sudo git -y;\
-    useradd -m devenv;\
-    usermod -s /bin/bash devenv;\
-    sudo sh -c 'echo "devenv ALL=(ALL) NOPASSWD:ALL" >> /etc/sudoers';\
-    su devenv;\
-    curl -sL https://raw.githubusercontent.com/HCY-ASLEEP/NVIM-Config/main/nvim-config.sh | sh;\
-    curl -sL https://raw.githubusercontent.com/HCY-ASLEEP/NVIM-Config/main/coc-nodejs-installer.sh | bash
-```
