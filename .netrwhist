@@ -1,5 +1,0 @@
-let g:netrw_dirhistmax  =10
-let g:netrw_dirhistcnt =3
-let g:netrw_dirhist_3='/home/devenv/Gateway/hexo_blogs/_posts'
-let g:netrw_dirhist_2='/home/devenv/.config/nvim'
-let g:netrw_dirhist_1='/home/devenv/Gateway/hexo_blogs/links'
