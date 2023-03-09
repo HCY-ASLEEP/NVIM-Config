@@ -22,7 +22,7 @@ To quickly config your neovim develop environment in docker ubuntu, after enter 
 ```bash
 apt update;\
     apt upgrade -y;\
-    apt install neovim xz-utils curl sudo apt-transport-https ca-certificates -y;\
+    apt install neovim xz-utils curl sudo git apt-transport-https ca-certificates -y;\
     useradd -m devenv;\
     usermod -s /bin/bash devenv;\
     sudo sh -c 'echo "devenv ALL=(ALL) NOPASSWD:ALL" >> /etc/sudoers';\
