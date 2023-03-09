@@ -14,3 +14,17 @@ To install latest nodejs of coc.nvim in China, you can run the following one-lin
 ```bash
 curl -sL https://raw.githubusercontent.com/HCY-ASLEEP/NVIM-Config/main/coc-nodejs-installer.sh | bash
 ```
+
+</br>
+
+To quickly config your neovim develop environment in docker ubuntu, after enter the bash shell of docker ubuntu, you can try these commands:
+
+```bash
+apt update\
+    apt upgrade -y\
+    apt install neovim xz-utils curl sudo -y\
+    useradd -m devenv\
+    usermod -s /bin/bash devenv\
+    sudo sh -c 'echo "devenv ALL=(ALL) NOPASSWD:ALL" >> /etc/sudoers'\
+    su devenv
+```
