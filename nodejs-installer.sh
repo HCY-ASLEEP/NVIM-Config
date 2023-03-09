@@ -7,5 +7,6 @@ sudo rm /opt/$nodejs_pack
 sudo sh -c 'echo "\nexport PATH=\$PATH:/opt/nodejs/bin/" >> /etc/bash.bashrc'
 . /etc/bash.bashrc
 npm config set registry https://registry.npm.taobao.org
+npm i -g yarn
 unset nodejs_version
 unset nodejs_pack
