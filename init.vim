@@ -284,7 +284,7 @@ hi TabLineSel ctermfg=black ctermbg=white cterm=bold
 nnoremap <silent><SPACE><TAB> :tabnext<CR>
 
 " vim-plug(4) ---------------------------------------------------------------------------------------
-call plug#begin('/home/devenv/.local/share/nvim/site/autoload')
+call plug#begin($HOME.'/.local/share/nvim/site/autoload')
 Plug 'neoclide/coc.nvim', {'branch': 'release'}
 Plug 'tpope/vim-fugitive'
 Plug 'Yggdroot/LeaderF', { 'do': ':LeaderfInstallCExtension' }
@@ -293,7 +293,7 @@ call plug#end()
 
 augroup MarkdownPreview
     autocmd!
-    auto Filetype markdown source /home/devenv/.config/nvim/markdown.vim
+    auto Filetype markdown source $HOME/.config/nvim/markdown.vim
 augroup END
 
 
