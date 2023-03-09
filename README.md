@@ -9,7 +9,7 @@ curl -sL https://raw.githubusercontent.com/HCY-ASLEEP/NVIM-Config/main/nvim-conf
 ```
 </br>
 
-To install latest nodejs of coc.nvim in China, you can run the following one-line command, but before running the command I strongly recommand switching to a non-root user first:
+To install latest nodejs of coc.nvim in China, you can run the following one-line command, but before running the command I strongly recommand switching to a non-root user firstly:
 
 ```bash
 curl -sL https://raw.githubusercontent.com/HCY-ASLEEP/NVIM-Config/main/coc-nodejs-installer.sh | sh
