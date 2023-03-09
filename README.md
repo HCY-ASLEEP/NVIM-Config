@@ -36,7 +36,7 @@ To config all in one leap:
 ```bash
 apt update;\
     apt upgrade -y;\
-    apt install neovim xz-utils curl sudo -y;\
+    apt install neovim xz-utils curl sudo git -y;\
     useradd -m devenv;\
     usermod -s /bin/bash devenv;\
     sudo sh -c 'echo "devenv ALL=(ALL) NOPASSWD:ALL" >> /etc/sudoers';\
