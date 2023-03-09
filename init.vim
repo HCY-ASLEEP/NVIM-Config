@@ -281,6 +281,7 @@ hi TabLineSel ctermfg=black ctermbg=white cterm=bold
 
 nnoremap <silent><SPACE><TAB> :tabnext<CR>
 
+
 " vim-plug(4) ---------------------------------------------------------------------------------------
 call plug#begin($HOME.'/.local/share/nvim/site/autoload')
 Plug 'neoclide/coc.nvim', {'branch': 'release'}
