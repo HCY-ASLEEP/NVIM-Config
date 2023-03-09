@@ -31,7 +31,7 @@ apt update;\
 
 </br>
 
-To config all in one leap:
+To config all in one leap of docker ubuntu (or docker debian):
 
 ```bash
 apt update;\
