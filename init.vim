@@ -26,8 +26,6 @@ set nofoldenable
 " auto sync 
 set autoread
 
-" long lines will not wrap and only part of long lines will be displayed
-set nowrap
 
 " disable error bells
 set noerrorbells 
