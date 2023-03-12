@@ -31,7 +31,7 @@ apt update;\
 
 </br>
 
-To config all of docker ubuntu in one step:
+To config all of the docker ubuntu in one step:
 
 ```bash
 apt update;\
