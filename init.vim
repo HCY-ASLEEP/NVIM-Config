@@ -301,6 +301,7 @@ augroup END
 let g:Lf_ShowDevIcons = 0
 let g:Lf_PreviewResult = {'Function': 1, 'BufTag': 1, 'Rg': 1, 'File': 1, 'Mru': 1, 'Colorscheme': 1 }
 
+
 " coc settings -------------------------------------------------------------------------------------
 inoremap <silent><expr> <TAB> coc#pum#visible() ? coc#pum#next(1) :"\<Tab>" 
 inoremap <silent><expr> <CR> coc#pum#visible() ? coc#pum#confirm() : "\<C-g>u\<CR>\<c-r>=coc#on_enter()\<CR>"
