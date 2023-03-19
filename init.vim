@@ -286,6 +286,7 @@ nnoremap <silent><SPACE><TAB> :tabnext<CR>
 call plug#begin($HOME.'/.local/share/nvim/site/autoload')
 Plug 'neoclide/coc.nvim', {'branch': 'release'}
 Plug 'tpope/vim-fugitive'
+" It needs ripgrep to exec ':Leaderf rg'
 Plug 'Yggdroot/LeaderF', { 'do': ':LeaderfInstallCExtension' }
 call plug#end()
 
