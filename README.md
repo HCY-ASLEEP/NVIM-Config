@@ -41,6 +41,6 @@ apt update;\
     usermod -s /bin/bash devenv;\
     sudo sh -c 'echo "devenv ALL=(ALL) NOPASSWD:ALL" >> /etc/sudoers';\
     su -c 'curl -sL https://raw.githubusercontent.com/HCY-ASLEEP/NVIM-Config/main/nvim-config.sh | sh' devenv;\
-    su -c 'curl -sL https://raw.githubusercontent.com/HCY-ASLEEP/NVIM-Config/main/coc-nodejs-installer.sh | sh' devenv;\
+    su -c 'curl -sL https://raw.githubusercontent.com/HCY-ASLEEP/NVIM-Config/main/coc-nodejs-installer.sh | bash' devenv;\
     su devenv
 ```
