@@ -281,6 +281,7 @@ hi TabLineSel ctermfg=black ctermbg=white cterm=bold
 
 nnoremap <silent><SPACE><TAB> :tabnext<CR>
 
+
 " Simple tab completion -----------------------------------------------------------------------------
 " A simple tab completion, if you use the coc.nvim, you should remove this simple completion
 inoremap <expr> <Tab> getline('.')[col('.')-2] !~ '^\s\?$' \|\| pumvisible()
