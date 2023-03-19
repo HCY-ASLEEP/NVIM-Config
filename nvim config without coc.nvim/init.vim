@@ -281,6 +281,18 @@ hi TabLineSel ctermfg=black ctermbg=white cterm=bold
 
 nnoremap <silent><SPACE><TAB> :tabnext<CR>
 
+" Simple tab completion
+" A simple tab completion, if you use the coc.nvim, you should remove this simple completion
+inoremap <expr> <Tab> getline('.')[col('.')-2] !~ '^\s\?$' \|\| pumvisible()
+      \ ? '<C-N>' : '<Tab>'
+inoremap <expr> <S-Tab> pumvisible() \|\| getline('.')[col('.')-2] !~ '^\s\?$'
+      \ ? '<C-P>' : '<Tab>'
+augroup SimpleComplete
+    autocmd CmdwinEnter * inoremap <expr> <buffer> <Tab>
+          \ getline('.')[col('.')-2] !~ '^\s\?$' \|\| pumvisible()
+          \ ? '<C-X><C-V>' : '<Tab>'
+augroup END
+
 
 " vim-plug(4) ---------------------------------------------------------------------------------------
 call plug#begin($HOME.'/.local/share/nvim/site/autoload')
@@ -300,16 +312,3 @@ augroup END
 " let g:Lf_WindowPosition = 'popup'
 let g:Lf_ShowDevIcons = 0
 let g:Lf_PreviewResult = {'Function': 1, 'BufTag': 1, 'Rg': 1, 'File': 1, 'Mru': 1, 'Colorscheme': 1 }
-
-
-" A simple tab completion, if you use the coc.nvim, you should remove this simple completion
-inoremap <expr> <Tab> getline('.')[col('.')-2] !~ '^\s\?$' \|\| pumvisible()
-      \ ? '<C-N>' : '<Tab>'
-inoremap <expr> <S-Tab> pumvisible() \|\| getline('.')[col('.')-2] !~ '^\s\?$'
-      \ ? '<C-P>' : '<Tab>'
-augroup SimpleComplete
-    autocmd CmdwinEnter * inoremap <expr> <buffer> <Tab>
-          \ getline('.')[col('.')-2] !~ '^\s\?$' \|\| pumvisible()
-          \ ? '<C-X><C-V>' : '<Tab>'
-augroup END
-
