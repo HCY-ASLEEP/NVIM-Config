@@ -9,7 +9,7 @@ curl -sL https://raw.githubusercontent.com/HCY-ASLEEP/NVIM-Config/main/nvim-conf
 ```
 </br>
 
-To use neovim config without coc.nvim but with self-contained autocompletion of vim, and can also edit markdown at the same time, you can download files to your customized path or run the following one-line command:
+To use neovim config without coc.nvim but with self-contained auto completion of vim, and can also edit markdown at the same time, you can download files to your customized path or run the following one-line command:
 
 ```bash
 curl -sL https://raw.githubusercontent.com/HCY-ASLEEP/NVIM-Config/main/nvim-config-without-coc.nvim/nvim-config.sh | sh
