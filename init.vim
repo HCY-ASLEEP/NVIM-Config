@@ -307,10 +307,10 @@ let g:Lf_PreviewResult = {'Function': 1, 'BufTag': 1, 'Rg': 1, 'File': 1, 'Mru':
 inoremap <silent><expr> <TAB> coc#pum#visible() ? coc#pum#next(1) :"\<Tab>" 
 inoremap <silent><expr> <CR> coc#pum#visible() ? coc#pum#confirm() : "\<C-g>u\<CR>\<c-r>=coc#on_enter()\<CR>"
 
-nnoremap gd <Plug>(coc-definition)
-nnoremap gt <Plug>(coc-type-definition)
-nnoremap gi <Plug>(coc-implementation)
-nnoremap gr <Plug>(coc-references)
+nmap gd <Plug>(coc-definition)
+nmap gt <Plug>(coc-type-definition)
+nmap gi <Plug>(coc-implementation)
+nmap gr <Plug>(coc-references)
 
 " Use K to show documentation in preview window.
 function! ShowDocumentation()
