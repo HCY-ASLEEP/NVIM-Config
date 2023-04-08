@@ -58,7 +58,7 @@ apt update;\
 
 </br>
 
-To install miniconda of docker ubuntu in China, you must 'su devenv' first, then exec follows: 
+To install miniconda of docker ubuntu in China, you must 'su devenv' first!!! Then exec follows: 
 ```bash
 curl https://mirrors.tuna.tsinghua.edu.cn/anaconda/miniconda/Miniconda3-latest-Linux-x86_64.sh -o ~/miniconda.sh;\
     sh ~/miniconda.sh -b;\
@@ -69,4 +69,4 @@ curl https://mirrors.tuna.tsinghua.edu.cn/anaconda/miniconda/Miniconda3-latest-L
     echo 'alias cab="source ~/.condainit"' >> ~/.bashrc;\
     . ~/.bashrc
 ```
-Then you can activate the conda env using 'cab' (alias of 'conda activate base')
+Then you can activate the conda env using 'cab' ( alias of 'conda activate base' )
