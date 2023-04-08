@@ -58,6 +58,10 @@ apt update;\
 
 </br>
 
+***
+
+</br>
+
 To install miniconda of docker ubuntu in China, you must 'su devenv' first!!! Then exec follows: 
 ```bash
 curl https://mirrors.tuna.tsinghua.edu.cn/anaconda/miniconda/Miniconda3-latest-Linux-x86_64.sh -o ~/miniconda.sh;\
