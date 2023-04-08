@@ -59,5 +59,6 @@ apt update;\
 ```bash
 curl https://mirrors.tuna.tsinghua.edu.cn/anaconda/miniconda/Miniconda3-latest-Linux-x86_64.sh -o ~/miniconda.sh;\
     sh ~/miniconda.sh -b;\
-    rm ~/miniconda.sh
+    rm ~/miniconda.sh;\
+    ~/miniconda3/bin/conda init bash
 ```
