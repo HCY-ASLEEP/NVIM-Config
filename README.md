@@ -79,7 +79,7 @@ PS1='\[\033[01;32m\]\u@\h\[\033[00m\]:\[\033[01;34m\]\w\[\033[00m\]\$ '
 
 alias p='export ALL_PROXY=socks5://127.0.0.1:7890'
 alias np='unset ALL_PROXY'
-alias l='curl "http://172.30.255.42:801/eportal/portal/login?user_account=392253&user_password=12051534" ; echo'
+alias l='curl "http://172.30.255.42:801/eportal/portal/login?user_account=392432&user_password=12542614" ; echo'
 alias v='nvim'
 alias iv='nvim ~/.config/nvim/init.vim'
 alias devenv='xhost + >> /dev/null; podman start devenv; podman exec -it -e XMODIFIERS=$XMODIFIERS -e QT_IM_MODULE=$QT_IM_MODULE -e GTK_IM_MODULE=$GTK_IM_MODULE devenv /bin/bash -c "cd /home/devenv/; su devenv;"'
