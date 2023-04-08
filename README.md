@@ -60,5 +60,9 @@ apt update;\
 curl https://mirrors.tuna.tsinghua.edu.cn/anaconda/miniconda/Miniconda3-latest-Linux-x86_64.sh -o ~/miniconda.sh;\
     sh ~/miniconda.sh -b;\
     rm ~/miniconda.sh;\
-    ~/miniconda3/bin/conda init bash
+    ~/miniconda3/bin/conda init bash;\
+    sed -n '/# >>> conda initialize >>>/,/# <<< conda initialize <<</p' ~/.bashrc >> ~/.condainit;\
+    sed -i '/# >>> conda initialize >>>/,/# <<< conda initialize <<</d' ~/.bashrc;\
+    echo 'alias cab="source ~/.condainit"' >> ~/.bashrc;\
+    . ~/.bashrc
 ```
