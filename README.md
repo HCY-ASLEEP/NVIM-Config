@@ -95,6 +95,6 @@ alias np='unset ALL_PROXY'
 alias l='curl "http://172.30.255.42:801/eportal/portal/login?user_account=392432&user_password=12542614" ; echo'
 alias v='nvim'
 alias iv='nvim ~/.config/nvim/init.vim'
-alias devenv='xhost + >> /dev/null; podman start devenv; podman exec -it -e XMODIFIERS=$XMODIFIERS -e QT_IM_MODULE=$QT_IM_MODULE -e GTK_IM_MODULE=$GTK_IM_MODULE devenv /bin/bash -c "cd /home/devenv/; su devenv;"'
+alias devenv='xhost + >> /dev/null; podman start devenv; podman exec -it -e XMODIFIERS=$XMODIFIERS -e QT_IM_MODULE=$QT_IM_MODULE -e GTK_IM_MODULE=$GTK_IM_MODULE -e DISPLAY=$DISPLAY devenv /bin/bash -c "cd /home/devenv/; su devenv;"'
 alias u='sudo apt update; sudo apt upgrade -y;'
 ```
