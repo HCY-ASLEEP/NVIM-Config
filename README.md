@@ -58,6 +58,15 @@ apt update;\
 
 </br>
 
+To edit nvim config easily, you can:
+
+```bash
+echo "alias iv = 'nvim ~/.config/nvim/init.vim'" >> ~/.bashrc
+echo "alias v = 'nvim" >> ~/.bashrc
+```
+
+</br>
+
 ***
 
 </br>
