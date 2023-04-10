@@ -1,6 +1,9 @@
 This my neovim config.
 
-</br>
+
+[国内 Gitee 加速](https://gitee.com/mygiteehcy/NVIM-Config/tree/main/)
+
+
 
 To use neovim config with coc.nvim, you can download files to your customized path or run the following one-line command:
 
