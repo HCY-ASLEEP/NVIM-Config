@@ -1,7 +1,7 @@
 This my neovim config.
 
 
-[国内 Gitee 加速](https://gitee.com/mygiteehcy/NVIM-Config/tree/main/)
+[国内 Gitee 加速 (并不是单纯的仓库克隆，而是把所有需要的源都换成了国内的)](https://gitee.com/mygiteehcy/NVIM-Config/tree/main/)
 
 
 
