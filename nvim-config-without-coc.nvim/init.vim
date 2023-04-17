@@ -313,12 +313,22 @@ augroup END
 
 
 " Find key words in all files -----------------------------------------------------------------------
-function! GlobalWordsSearch(substr)
+function! GlobalWordsSearchWithGit(substr)
+    " :lvimgrep /substr/gj `git ls-files`
+    noautocmd exec "lvimgrep /".a:substr."/gj `git ls-files`" | lw 
+endfunction
+
+" Gs means 'git search', search according .gitignore
+command! -nargs=1 -complete=command Gs silent call GlobalWordsSearchWithGit(<q-args>)
+
+function! GlobalWordsSearchWithoutGit(substr)
     " :lvimgrep /substr/gj **/*
     noautocmd exec "lvimgrep /".a:substr."/gj **/*" | lw 
 endfunction
 
-command! -nargs=1 -complete=command GlobalWordsSearch silent call GlobalWordsSearch(<q-args>)
+" Ws means 'word search', search without .gitignore
+command! -nargs=1 -complete=command Ws silent call GlobalWordsSearchWithoutGit(<q-args>)
+
 
 nnoremap <C-down> :lnext<CR>
 nnoremap <C-up> :lprev<CR>
@@ -360,11 +370,13 @@ endfunction
 
 nnoremap <C-Space> :call JumpToFile()<CR>:set nocursorline<CR>:noh<CR>
 
-command! -nargs=1 -complete=command FuzzyFilenameSearch silent call FuzzyFilenameSearch(<q-args>)
+" Fs means 'file search', search file names fuzzily
+command! -nargs=1 -complete=command Fs silent call FuzzyFilenameSearch(<q-args>)
 
 function! CdCurBufDir()
     exec "cd ".expand("%:p:h")    
     echo expand("%:p:h")
 endfunction
 
-command! -nargs=1 -complete=command CdCurBufDir silent call CdCurBufDir()
+" Cc means 'cd cur', cd cur buf dir
+command! -nargs=1 -complete=command Cc silent call CdCurBufDir()
