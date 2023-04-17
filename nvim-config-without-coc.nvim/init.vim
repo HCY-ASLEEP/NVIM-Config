@@ -315,7 +315,7 @@ augroup END
 " Find key words in all files -----------------------------------------------------------------------
 function! GlobalWordsSearchWithGit(substr)
     " :lvimgrep /substr/gj `git ls-files`
-    noautocmd exec "lvimgrep /".a:substr."/gj `git ls-files`" | lw 
+    noautocmd exec "lvimgrep /".a:substr."\\c/gj `git ls-files`" | lw 
 endfunction
 
 " Gs means 'git search', search according .gitignore
@@ -323,7 +323,7 @@ command! -nargs=1 -complete=command Gs silent call GlobalWordsSearchWithGit(<q-a
 
 function! GlobalWordsSearchWithoutGit(substr)
     " :lvimgrep /substr/gj **/*
-    noautocmd exec "lvimgrep /".a:substr."/gj **/*" | lw 
+    noautocmd exec "lvimgrep /".a:substr."\\c/gj **/*" | lw 
 endfunction
 
 " Ws means 'word search', search without .gitignore
