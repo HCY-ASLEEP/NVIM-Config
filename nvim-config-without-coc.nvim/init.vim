@@ -329,7 +329,6 @@ endfunction
 " Ws means 'word search', search without .gitignore
 command! -nargs=1 -complete=command Ws silent call GlobalWordsSearchWithoutGit(<q-args>)
 
-
 nnoremap <C-down> :lnext<CR>
 nnoremap <C-up> :lprev<CR>
 
