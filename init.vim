@@ -26,7 +26,6 @@ set nofoldenable
 " auto sync 
 set autoread
 
-
 " disable error bells
 set noerrorbells 
 set novisualbell
@@ -77,7 +76,7 @@ function! InsertCRBrace()
         call feedkeys("\<CR>", 'n')
     endif
 endfunction
-inoremap <expr> <ENTER> InsertCRBrace()
+inoremap <expr> <CR> InsertCRBrace()
 
 
 " map ;; to esc -----------------------------------------------------------------------------------
@@ -288,13 +287,13 @@ function! GlobalWordsSearchWithGit(substr)
     noautocmd exec "lvimgrep /".a:substr."\\c/gj `git ls-files`" | lw 
 endfunction
 
-" Gs means 'git word', search words according .gitignore
-command! -nargs=1 -complete=command Gw silent call GlobalWordsSearchWithGit(<q-args>)
-
 function! GlobalWordsSearchWithoutGit(substr)
     " :lvimgrep /substr/gj **/*
     noautocmd exec "lvimgrep /".a:substr."\\c/gj **/*" | lw 
 endfunction
+
+" Wg means 'word git', search words according .gitignore
+command! -nargs=1 -complete=command Wg silent call GlobalWordsSearchWithGit(<q-args>)
 
 " Ws means 'word search', search words without .gitignore
 command! -nargs=1 -complete=command Ws silent call GlobalWordsSearchWithoutGit(<q-args>)
@@ -326,14 +325,12 @@ function! FuzzyFilenameSearchWithGit(substr)
     call feedkeys("/".a:substr."\\c\<CR>")
 endfunction
 
-
 " Show Files searched fuzzily without git
 function! FuzzyFilenameSearchWithoutGit(substr)
     " :Redir !find searchRootPath -iname '*substr*'
     call feedkeys(":Redir !find ".getcwd()." -iname '*".a:substr."*'\<CR>" ,'n')
     call feedkeys("/".a:substr."\\c\<CR>")
 endfunction
-
 
 " Go to the file on line
 function! JumpToFile()
@@ -348,12 +345,11 @@ endfunction
 
 nnoremap <C-Space> :call JumpToFile()<CR>:set nocursorline<CR>:noh<CR>
 
-" Gf means 'Git file', search file names fuzzily with git
-command! -nargs=1 -complete=command Gf silent call FuzzyFilenameSearchWithGit(<q-args>)
+" Fg means 'file git', search file names fuzzily with git
+command! -nargs=1 -complete=command Fg silent call FuzzyFilenameSearchWithGit(<q-args>)
 
 " Fs means 'file search', search file names fuzzily
 command! -nargs=1 -complete=command Fs silent call FuzzyFilenameSearchWithoutGit(<q-args>)
-
 
 function! CdCurBufDir()
     exec "cd ".expand("%:p:h")    
