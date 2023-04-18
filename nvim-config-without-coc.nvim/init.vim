@@ -26,7 +26,6 @@ set nofoldenable
 " auto sync 
 set autoread
 
-
 " disable error bells
 set noerrorbells 
 set novisualbell
@@ -282,45 +281,19 @@ hi TabLineSel ctermfg=black ctermbg=white cterm=bold
 nnoremap <silent><SPACE><TAB> :tabnext<CR>
 
 
-" Simple tab completion -----------------------------------------------------------------------------
-" A simple tab completion, if you use the coc.nvim, you should remove this simple completion
-inoremap <expr> <Tab> getline('.')[col('.')-2] !~ '^\s\?$' \|\| pumvisible()
-      \ ? '<C-N>' : '<Tab>'
-inoremap <expr> <S-Tab> pumvisible() \|\| getline('.')[col('.')-2] !~ '^\s\?$'
-      \ ? '<C-P>' : '<Tab>'
-
-augroup SimpleComplete
-    autocmd CmdwinEnter * inoremap <expr> <buffer> <Tab>
-          \ getline('.')[col('.')-2] !~ '^\s\?$' \|\| pumvisible()
-          \ ? '<C-X><C-V>' : '<Tab>'
-augroup END
-
-
-" vim-plug(4) ---------------------------------------------------------------------------------------
-call plug#begin($HOME.'/.local/share/nvim/site/autoload')
-Plug 'iamcco/markdown-preview.nvim', { 'do': { -> mkdp#util#install() }, 'for': ['markdown', 'vim-plug']}
-call plug#end()
-
-
-augroup MarkdownPreview
-    autocmd!
-    auto Filetype markdown source $HOME/.config/nvim/markdown.vim
-augroup END
-
-
 " Find key words in all files -----------------------------------------------------------------------
 function! GlobalWordsSearchWithGit(substr)
     " :lvimgrep /substr/gj `git ls-files`
     noautocmd exec "lvimgrep /".a:substr."\\c/gj `git ls-files`" | lw 
 endfunction
 
-" Gs means 'git word', search words according .gitignore
-command! -nargs=1 -complete=command Gw silent call GlobalWordsSearchWithGit(<q-args>)
-
 function! GlobalWordsSearchWithoutGit(substr)
     " :lvimgrep /substr/gj **/*
     noautocmd exec "lvimgrep /".a:substr."\\c/gj **/*" | lw 
 endfunction
+
+" Wg means 'word git', search words according .gitignore
+command! -nargs=1 -complete=command Wg silent call GlobalWordsSearchWithGit(<q-args>)
 
 " Ws means 'word search', search words without .gitignore
 command! -nargs=1 -complete=command Ws silent call GlobalWordsSearchWithoutGit(<q-args>)
@@ -352,14 +325,12 @@ function! FuzzyFilenameSearchWithGit(substr)
     call feedkeys("/".a:substr."\\c\<CR>")
 endfunction
 
-
 " Show Files searched fuzzily without git
 function! FuzzyFilenameSearchWithoutGit(substr)
     " :Redir !find searchRootPath -iname '*substr*'
     call feedkeys(":Redir !find ".getcwd()." -iname '*".a:substr."*'\<CR>" ,'n')
     call feedkeys("/".a:substr."\\c\<CR>")
 endfunction
-
 
 " Go to the file on line
 function! JumpToFile()
@@ -374,12 +345,11 @@ endfunction
 
 nnoremap <C-Space> :call JumpToFile()<CR>:set nocursorline<CR>:noh<CR>
 
-" Gf means 'Git file', search file names fuzzily with git
-command! -nargs=1 -complete=command Gf silent call FuzzyFilenameSearchWithGit(<q-args>)
+" Fg means 'file git', search file names fuzzily with git
+command! -nargs=1 -complete=command Fg silent call FuzzyFilenameSearchWithGit(<q-args>)
 
 " Fs means 'file search', search file names fuzzily
 command! -nargs=1 -complete=command Fs silent call FuzzyFilenameSearchWithoutGit(<q-args>)
-
 
 function! CdCurBufDir()
     exec "cd ".expand("%:p:h")    
@@ -388,3 +358,32 @@ endfunction
 
 " Cc means 'cd cur', cd cur buf dir
 command! -nargs=1 -complete=command Cc silent call CdCurBufDir()
+
+
+" Simple tab completion -----------------------------------------------------------------------------
+" A simple tab completion, if you use the coc.nvim, you should remove this simple completion
+inoremap <expr> <Tab> getline('.')[col('.')-2] !~ '^\s\?$' \|\| pumvisible()
+      \ ? '<C-N>' : '<Tab>'
+inoremap <expr> <S-Tab> pumvisible() \|\| getline('.')[col('.')-2] !~ '^\s\?$'
+      \ ? '<C-P>' : '<Tab>'
+
+augroup SimpleComplete
+    autocmd CmdwinEnter * inoremap <expr> <buffer> <Tab>
+          \ getline('.')[col('.')-2] !~ '^\s\?$' \|\| pumvisible()
+          \ ? '<C-X><C-V>' : '<Tab>'
+augroup END
+
+
+" vim-plug(4) ---------------------------------------------------------------------------------------
+call plug#begin($HOME.'/.local/share/nvim/site/autoload')
+Plug 'iamcco/markdown-preview.nvim', { 'do': { -> mkdp#util#install() }, 'for': ['markdown', 'vim-plug']}
+call plug#end()
+
+
+augroup MarkdownPreview
+    autocmd!
+    auto Filetype markdown source $HOME/.config/nvim/markdown.vim
+augroup END
+
+
+
