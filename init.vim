@@ -282,12 +282,81 @@ hi TabLineSel ctermfg=black ctermbg=white cterm=bold
 nnoremap <silent><SPACE><TAB> :tabnext<CR>
 
 
+" Find key words in all files -----------------------------------------------------------------------
+function! GlobalWordsSearchWithGit(substr)
+    " :lvimgrep /substr/gj `git ls-files`
+    noautocmd exec "lvimgrep /".a:substr."\\c/gj `git ls-files`" | lw 
+endfunction
+
+" Gs means 'git search', search according .gitignore
+command! -nargs=1 -complete=command Gs silent call GlobalWordsSearchWithGit(<q-args>)
+
+function! GlobalWordsSearchWithoutGit(substr)
+    " :lvimgrep /substr/gj **/*
+    noautocmd exec "lvimgrep /".a:substr."\\c/gj **/*" | lw 
+endfunction
+
+" Ws means 'word search', search without .gitignore
+command! -nargs=1 -complete=command Ws silent call GlobalWordsSearchWithoutGit(<q-args>)
+
+nnoremap <C-down> :lnext<CR>
+nnoremap <C-up> :lprev<CR>
+
+
+" Fuzzy Match filenames -----------------------------------------------------------------------------
+" redirect the command output to a buffer
+function! Redir(cmd)
+	redir => output
+	execute a:cmd
+	redir END
+	let output = split(output, "\n")
+	enew
+	setlocal buftype=nofile bufhidden=wipe nobuflisted noswapfile
+    file FuzzyFilenameSearchBuf
+	call setline(1, output)
+    exec "set cursorline"
+endfunction
+
+command! -nargs=1 -complete=command Redir silent call Redir(<q-args>)
+
+" Show Files searched fuzzily
+function! FuzzyFilenameSearch(substr)
+    " :Redir !find searchRootPath -iname '*substr*'
+    call feedkeys(":Redir !find ".getcwd()." -iname '*".a:substr."*'\<CR>" ,'n')
+    call feedkeys("/".a:substr."\\c\<CR>")
+endfunction
+
+" Go to the file on line
+function! JumpToFile()
+    let l:path=getline('.')
+    if filereadable(l:path)
+        echo "SpecificFile exists"
+        exec "edit ".l:path
+    else
+        echo "File loaded error, can not call JumpToFile"
+    endif
+endfunction
+
+nnoremap <C-Space> :call JumpToFile()<CR>:set nocursorline<CR>:noh<CR>
+
+" Fs means 'file search', search file names fuzzily
+command! -nargs=1 -complete=command Fs silent call FuzzyFilenameSearch(<q-args>)
+
+function! CdCurBufDir()
+    exec "cd ".expand("%:p:h")    
+    echo expand("%:p:h")
+endfunction
+
+" Cc means 'cd cur', cd cur buf dir
+command! -nargs=1 -complete=command Cc silent call CdCurBufDir()
+
+
 " vim-plug(4) ---------------------------------------------------------------------------------------
 call plug#begin($HOME.'/.local/share/nvim/site/autoload')
 Plug 'neoclide/coc.nvim', {'branch': 'release'}
 Plug 'tpope/vim-fugitive'
 " It needs ripgrep to exec ':Leaderf rg'
-Plug 'Yggdroot/LeaderF', { 'do': ':LeaderfInstallCExtension' }
+" Plug 'Yggdroot/LeaderF', { 'do': ':LeaderfInstallCExtension' }
 call plug#end()
 
 
@@ -297,10 +366,10 @@ augroup MarkdownPreview
 augroup END
 
 
-" LeaderF settings ---------------------------------------------------------------------------------
-" let g:Lf_WindowPosition = 'popup'
-let g:Lf_ShowDevIcons = 0
-let g:Lf_PreviewResult = {'Function': 1, 'BufTag': 1, 'Rg': 1, 'File': 1, 'Mru': 1, 'Colorscheme': 1 }
+" " LeaderF settings ---------------------------------------------------------------------------------
+" " let g:Lf_WindowPosition = 'popup'
+" let g:Lf_ShowDevIcons = 0
+" let g:Lf_PreviewResult = {'Function': 1, 'BufTag': 1, 'Rg': 1, 'File': 1, 'Mru': 1, 'Colorscheme': 1 }
 
 
 " coc settings -------------------------------------------------------------------------------------
