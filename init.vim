@@ -288,15 +288,15 @@ function! GlobalWordsSearchWithGit(substr)
     noautocmd exec "lvimgrep /".a:substr."\\c/gj `git ls-files`" | lw 
 endfunction
 
-" Gs means 'git search', search according .gitignore
-command! -nargs=1 -complete=command Gs silent call GlobalWordsSearchWithGit(<q-args>)
+" Gs means 'git word', search words according .gitignore
+command! -nargs=1 -complete=command Gw silent call GlobalWordsSearchWithGit(<q-args>)
 
 function! GlobalWordsSearchWithoutGit(substr)
     " :lvimgrep /substr/gj **/*
     noautocmd exec "lvimgrep /".a:substr."\\c/gj **/*" | lw 
 endfunction
 
-" Ws means 'word search', search without .gitignore
+" Ws means 'word search', search words without .gitignore
 command! -nargs=1 -complete=command Ws silent call GlobalWordsSearchWithoutGit(<q-args>)
 
 nnoremap <C-down> :lnext<CR>
@@ -319,12 +319,21 @@ endfunction
 
 command! -nargs=1 -complete=command Redir silent call Redir(<q-args>)
 
-" Show Files searched fuzzily
-function! FuzzyFilenameSearch(substr)
+" Show Files searched fuzzily with git
+function! FuzzyFilenameSearchWithGit(substr)
+    " :Redir !find $(git ls-files) -iname '*substr*'
+    call feedkeys(":Redir !find $(git ls-files) -iname '*".a:substr."*'\<CR>" ,'n')
+    call feedkeys("/".a:substr."\\c\<CR>")
+endfunction
+
+
+" Show Files searched fuzzily without git
+function! FuzzyFilenameSearchWithoutGit(substr)
     " :Redir !find searchRootPath -iname '*substr*'
     call feedkeys(":Redir !find ".getcwd()." -iname '*".a:substr."*'\<CR>" ,'n')
     call feedkeys("/".a:substr."\\c\<CR>")
 endfunction
+
 
 " Go to the file on line
 function! JumpToFile()
@@ -339,8 +348,12 @@ endfunction
 
 nnoremap <C-Space> :call JumpToFile()<CR>:set nocursorline<CR>:noh<CR>
 
+" Gf means 'Git file', search file names fuzzily with git
+command! -nargs=1 -complete=command Gf silent call FuzzyFilenameSearchWithGit(<q-args>)
+
 " Fs means 'file search', search file names fuzzily
-command! -nargs=1 -complete=command Fs silent call FuzzyFilenameSearch(<q-args>)
+command! -nargs=1 -complete=command Fs silent call FuzzyFilenameSearchWithoutGit(<q-args>)
+
 
 function! CdCurBufDir()
     exec "cd ".expand("%:p:h")    
