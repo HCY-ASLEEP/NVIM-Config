@@ -298,8 +298,8 @@ command! -nargs=1 -complete=command Wg silent call GlobalWordsSearchWithGit(<q-a
 " Ws means 'word search', search words without .gitignore
 command! -nargs=1 -complete=command Ws silent call GlobalWordsSearchWithoutGit(<q-args>)
 
-nnoremap <C-down> :lnext<CR>
-nnoremap <C-up> :lprev<CR>
+nnoremap <S-down> :lnext<CR>
+nnoremap <S-up> :lprev<CR>
 
 
 " Fuzzy Match filenames -----------------------------------------------------------------------------
