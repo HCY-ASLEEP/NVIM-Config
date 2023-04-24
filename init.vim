@@ -330,7 +330,7 @@ endfunction
 " redirect the command output to a buffer
 function! Redir(cmd)
     call JumpToFileWithCR()
-	edit FuzzyFilenameSearch
+edit FuzzyFilenameSearch
 	redir => output
 	execute a:cmd
 	redir END
