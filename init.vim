@@ -330,13 +330,13 @@ endfunction
 " redirect the command output to a buffer
 function! Redir(cmd)
     call JumpToFileWithCR()
-edit FuzzyFilenameSearch
-	redir => output
-	execute a:cmd
-	redir END
-	let output = split(output, "\n")
-	setlocal buftype=nofile bufhidden=wipe nobuflisted noswapfile
-	call setline(1, output)
+    edit FuzzyFilenameSearch
+    redir => output
+    execute a:cmd
+    redir END
+    let output = split(output, "\n")
+    setlocal buftype=nofile bufhidden=wipe nobuflisted noswapfile
+    call setline(1, output)
 endfunction
 
 function! CdCurBufDir()
