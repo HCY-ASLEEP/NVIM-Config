@@ -113,6 +113,8 @@ nnoremap <silent><TAB> :wincmd w<CR>
 set wildcharm=<TAB>
 cnoremap <expr> <up> wildmenumode() ? "\<left>" : "\<up>"
 cnoremap <expr> <down> wildmenumode() ? "\<right>" : "\<down>"
+cnoremap <expr> <left> wildmenumode() ? "\<SPACE>\<BS>" : "\<left>"
+cnoremap <expr> <right> wildmenumode() ? "\<SPACE>\<BS>" : "\<right>"
 
 
 " netrw settings -----------------------------------------------------------------------------------
@@ -303,17 +305,43 @@ nnoremap <S-up> :lprev<CR>
 
 
 " Fuzzy Match filenames -----------------------------------------------------------------------------
+" Go to the file on line
+function! JumpToFile()
+    let l:path=getline('.')
+    if filereadable(l:path)
+        echo "SpecificFile exists"
+        exec "edit ".l:path
+    else
+        echo "File loaded error, can not call JumpToFile"
+    endif
+endfunction
+
+" autocmd to jump to file with CR
+function! JumpToFileWithCR()
+    augroup jumpToFileWithCR
+        autocmd!
+        autocmd BufEnter FuzzyFilenameSearch silent! nnoremap <CR> :call JumpToFile()<CR>
+        autocmd BufLeave FuzzyFilenameSearch silent! unmap <CR>
+        autocmd BufEnter FuzzyFilenameSearch silent! set cursorline
+        autocmd BufLeave FuzzyFilenameSearch silent! set nocursorline
+    augroup END
+endfunction
+
 " redirect the command output to a buffer
 function! Redir(cmd)
-	redir => output
-	execute a:cmd
-	redir END
-	let output = split(output, "\n")
-	enew
-	setlocal buftype=nofile bufhidden=wipe nobuflisted noswapfile
-    file FuzzyFilenameSearchBuf
-	call setline(1, output)
-    exec "set cursorline"
+    call JumpToFileWithCR()
+    edit FuzzyFilenameSearch
+    redir => output
+    execute a:cmd
+    redir END
+    let output = split(output, "\n")
+    setlocal buftype=nofile bufhidden=wipe nobuflisted noswapfile
+    call setline(1, output)
+endfunction
+
+function! CdCurBufDir()
+    exec "cd ".expand("%:p:h")    
+    echo expand("%:p:h")
 endfunction
 
 command! -nargs=1 -complete=command Redir silent call Redir(<q-args>)
@@ -332,29 +360,11 @@ function! FuzzyFilenameSearchWithoutGit(substr)
     call feedkeys("/".a:substr."\\c\<CR>")
 endfunction
 
-" Go to the file on line
-function! JumpToFile()
-    let l:path=getline('.')
-    if filereadable(l:path)
-        echo "SpecificFile exists"
-        exec "edit ".l:path
-    else
-        echo "File loaded error, can not call JumpToFile"
-    endif
-endfunction
-
-nnoremap <C-Space> :call JumpToFile()<CR>:set nocursorline<CR>:noh<CR>
-
 " Fg means 'file git', search file names fuzzily with git
 command! -nargs=1 -complete=command Fg silent call FuzzyFilenameSearchWithGit(<q-args>)
 
 " Fs means 'file search', search file names fuzzily
 command! -nargs=1 -complete=command Fs silent call FuzzyFilenameSearchWithoutGit(<q-args>)
-
-function! CdCurBufDir()
-    exec "cd ".expand("%:p:h")    
-    echo expand("%:p:h")
-endfunction
 
 " Cc means 'cd cur', cd cur buf dir
 command! -nargs=1 -complete=command Cc silent call CdCurBufDir()
