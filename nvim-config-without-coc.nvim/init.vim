@@ -331,12 +331,12 @@ endfunction
 function! Redir(cmd)
     call JumpToFileWithCR()
     edit FuzzyFilenameSearch
-    redir => output
+    redir => l:output
     execute a:cmd
     redir END
-    let output = split(output, "\n")
+    let l:output = split(l:output, "\n")
     setlocal buftype=nofile bufhidden=wipe nobuflisted noswapfile
-    call setline(1, output)
+    call setline(1, l:output)
 endfunction
 
 function! CdCurBufDir()
@@ -351,6 +351,7 @@ function! FuzzyFilenameSearchWithGit(substr)
     " :Redir !find $(git ls-files) -iname '*substr*'
     call feedkeys(":Redir !find $(git ls-files) -iname '*".a:substr."*'\<CR>" ,'n')
     call feedkeys("/".a:substr."\\c\<CR>")
+    call feedkeys("\<down>\<down>")
 endfunction
 
 " Show Files searched fuzzily without git
@@ -358,6 +359,7 @@ function! FuzzyFilenameSearchWithoutGit(substr)
     " :Redir !find searchRootPath -iname '*substr*'
     call feedkeys(":Redir !find ".getcwd()." -iname '*".a:substr."*'\<CR>" ,'n')
     call feedkeys("/".a:substr."\\c\<CR>")
+    call feedkeys("\<down>\<down>")
 endfunction
 
 " Fg means 'file git', search file names fuzzily with git
