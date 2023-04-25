@@ -324,6 +324,7 @@ function! JumpToFileWithCR()
         autocmd BufLeave FuzzyFilenameSearch silent! unmap <CR>
         autocmd BufEnter FuzzyFilenameSearch silent! set cursorline
         autocmd BufLeave FuzzyFilenameSearch silent! set nocursorline
+        autocmd BufLeave FuzzyFilenameSearch silent! call feedkeys( ":nohlsearch\<CR>" )
     augroup END
 endfunction
 
