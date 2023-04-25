@@ -417,7 +417,7 @@ nnoremap <silent> K :call ShowDocumentation()<CR>
 autocmd! CursorHold * silent call CocActionAsync('highlight')
 
 " Symbol renaming.
-nnoremap <space>r <Plug>(coc-rename)
+nnoremap <silent><space>r :call CocActionAsync('rename')<CR>
 
 " Show all diagnostics.
 nnoremap <silent><nowait> <space>a  :<C-u>CocList diagnostics<cr>
