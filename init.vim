@@ -309,6 +309,7 @@ function! JumpToFile()
         exec "edit ".l:path
     elseif isdirectory(l:path)
         call feedkeys(":Redir !ls -ad ".l:path."/*\<CR>" ,'n')
+        call feedkeys("\<down>\<down>" ,'n')
     else
         echo "File loaded error, can not call JumpToFile"
     endif
