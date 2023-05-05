@@ -145,6 +145,11 @@ endfunction
 function! ToggleExplorer()
     let l:expl_win_num = bufwinnr(bufnr('NetrwTreeListing'))
     
+    if l:expl_win_num == 1
+        enew
+        let l:expl_win_num = -1
+    endif
+    
     " if expl_win_num exists
     if l:expl_win_num != -1
         
@@ -168,21 +173,6 @@ function! ToggleExplorer()
         exec "vertical ".l:expl_win_num."resize ".t:win_width
     else 
         call OpenExplorerOnSize(t:max_win_width)            
-    endif
-endfunction
-
-function! HideExplorer()
-    let l:expl_win_num = bufwinnr(bufnr('NetrwTreeListing'))
-    
-    " if expl_win_num exists
-    if l:expl_win_num != -1
-        
-        " if cursor is not in explorer
-        if l:expl_win_num != winnr()
-           let t:cur_work_win_num = winnr() 
-        endif
-        call SkipNetrwWin()
-        exec "vertical ".l:expl_win_num."resize ".0
     endif
 endfunction
 
@@ -305,8 +295,8 @@ nnoremap <S-up> :lprev<CR>
 
 " After hit enter, let cursor stay in quickfix window
 augroup StayInQF
-au!
-au FileType qf nnoremap <buffer> <CR> <CR><C-W>p
+    autocmd!
+    autocmd FileType qf nnoremap <buffer> <CR> <CR><C-W>p
 augroup END
 
 
@@ -317,6 +307,8 @@ function! JumpToFile()
     if filereadable(l:path)
         echo "SpecificFile exists"
         exec "edit ".l:path
+    elseif isdirectory(l:path)
+        call feedkeys(":Redir !ls -ad ".l:path."/*\<CR>" ,'n')
     else
         echo "File loaded error, can not call JumpToFile"
     endif
@@ -330,7 +322,7 @@ function! JumpToFileWithCR()
         autocmd BufLeave FuzzyFilenameSearch silent! unmap <CR>
         autocmd BufEnter FuzzyFilenameSearch silent! set cursorline
         autocmd BufLeave FuzzyFilenameSearch silent! set nocursorline
-        autocmd BufLeave FuzzyFilenameSearch silent! call feedkeys( ":nohlsearch\<CR>" )
+        autocmd BufLeave FuzzyFilenameSearch silent! call feedkeys(":nohlsearch\<CR>",'n')
     augroup END
 endfunction
 
@@ -357,16 +349,16 @@ command! -nargs=1 -complete=command Redir silent call Redir(<q-args>)
 function! FuzzyFilenameSearchWithGit(substr)
     " :Redir !find $(git ls-files) -iname '*substr*'
     call feedkeys(":Redir !find $(git ls-files) -iname '*".a:substr."*'\<CR>" ,'n')
-    call feedkeys("/".a:substr."\\c\<CR>")
-    call feedkeys("\<down>\<down>")
+    call feedkeys("/".a:substr."\\c\<CR>" ,'n')
+    call feedkeys("\<down>\<down>" ,'n')
 endfunction
 
 " Show Files searched fuzzily without git
 function! FuzzyFilenameSearchWithoutGit(substr)
     " :Redir !find searchRootPath -iname '*substr*'
     call feedkeys(":Redir !find ".getcwd()." -iname '*".a:substr."*'\<CR>" ,'n')
-    call feedkeys("/".a:substr."\\c\<CR>")
-    call feedkeys("\<down>\<down>")
+    call feedkeys("/".a:substr."\\c\<CR>" ,'n')
+    call feedkeys("\<down>\<down>", 'n')
 endfunction
 
 " Fg means 'file git', search file names fuzzily with git
