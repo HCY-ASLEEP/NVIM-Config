@@ -270,7 +270,7 @@ hi TabLine ctermfg=lightmagenta ctermbg=darkgray cterm=bold
 hi TabLineFill ctermfg=NONE ctermbg=darkgray cterm=bold
 hi TabLineSel ctermfg=black ctermbg=white cterm=bold
 
-nnoremap <silent><SPACE><TAB> :tabnext<CR>
+nnoremap <silent><S-TAB> :tabnext<CR>
 
 
 " Find key words in all files -----------------------------------------------------------------------
@@ -331,12 +331,13 @@ endfunction
 function! Redir(cmd)
     call JumpToFileWithCR()
     edit FuzzyFilenameSearch
-    redir => l:output
+    let t:redirOutput = ""
+    redir => t:redirOutput
     execute a:cmd
     redir END
-    let l:output = split(l:output, "\n")
+    let t:redirOutput = split(t:redirOutput, "\n")
     setlocal buftype=nofile bufhidden=wipe nobuflisted noswapfile
-    call setline(1, l:output)
+    call setline(1, t:redirOutput)
 endfunction
 
 function! CdCurBufDir()
