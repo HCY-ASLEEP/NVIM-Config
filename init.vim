@@ -303,6 +303,12 @@ command! -nargs=1 -complete=command Ws silent call GlobalWordsSearchWithoutGit(<
 nnoremap <S-down> :lnext<CR>
 nnoremap <S-up> :lprev<CR>
 
+" After hit enter, let cursor stay in quickfix window
+augroup StayInQF
+au!
+au FileType qf nnoremap <buffer> <CR> <CR><C-W>p
+augroup END
+
 
 " Fuzzy Match filenames -----------------------------------------------------------------------------
 " Go to the file on line
