@@ -144,20 +144,22 @@ endfunction
 
 function! ToggleExplorer()
     let l:expl_win_num = bufwinnr(bufnr('NetrwTreeListing'))
-    
+
+    let l:enewFlag = 0
     if l:expl_win_num == 1
         enew
         let l:expl_win_num = -1
+        let l:enewFlag = 1
     endif
-    
+
     " if expl_win_num exists
     if l:expl_win_num != -1
-        
+
         " if cursor is not in explorer
         if l:expl_win_num != winnr()
-           let t:cur_work_win_num = winnr() 
+           let t:cur_work_win_num = winnr()
         endif
-        
+
         " if explorer is not hidden
         if winwidth(l:expl_win_num)!=0
             let t:win_width=0
@@ -165,14 +167,17 @@ function! ToggleExplorer()
             call SkipNetrwWin()
         else
             let t:win_width=t:max_win_width
-            
+
             " disable skip netrw win
             autocmd! skipNetrwWin
             exec l:expl_win_num."wincmd w"
         endif
         exec "vertical ".l:expl_win_num."resize ".t:win_width
-    else 
-        call OpenExplorerOnSize(t:max_win_width)            
+    else
+        call OpenExplorerOnSize(t:max_win_width)
+        if l:enewFlag == 1
+            wincmd w
+        endif
     endif
 endfunction
 
