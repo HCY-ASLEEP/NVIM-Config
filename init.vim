@@ -416,7 +416,7 @@ function! ShowDocumentation()
     call feedkeys('K', 'in')
   endif
 endfunction
-nnoremap <silent> K :call ShowDocumentation()<CR>
+nnoremap <silent> <C-k> :call ShowDocumentation()<CR>
 
 " Highlight the symbol and its references when holding the cursor.
 autocmd! CursorHold * silent call CocActionAsync('highlight')
