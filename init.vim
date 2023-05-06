@@ -295,8 +295,8 @@ command! -nargs=1 -complete=command Wg silent call GlobalWordsSearchWithGit(<q-a
 " Ws means 'word search', search words without .gitignore
 command! -nargs=1 -complete=command Ws silent call GlobalWordsSearchWithoutGit(<q-args>)
 
-nnoremap <S-down> :lnext<CR>
-nnoremap <S-up> :lprev<CR>
+nnoremap <silent>J :lnext<CR>
+nnoremap <silent>K :lprev<CR>
 
 " After hit enter, let cursor stay in quickfix window
 augroup StayInQF
