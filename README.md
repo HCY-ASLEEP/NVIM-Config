@@ -92,7 +92,7 @@ Then you can activate the conda env using 'cab' ( alias of 'conda activate base'
 To use fcitx input methed in GUI programes of the container, you can run commands below:
 
 ```bash
-echo -e "\nexport GTK_IM_MODULE=fcitx\nexport QT_IM_MODULE=fcitx\nexport XMODIFIERS=@im=fcitx\n" >> /etc/bash.bashrc;\
+sudo echo -e "\nexport GTK_IM_MODULE=fcitx\nexport QT_IM_MODULE=fcitx\nexport XMODIFIERS=@im=fcitx\n" >> /etc/bash.bashrc;\
     . /etc/bash.bashrc;
 ```
 
