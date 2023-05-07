@@ -89,6 +89,17 @@ Then you can activate the conda env using 'cab' ( alias of 'conda activate base'
 
 </br>
 
+To use fcitx input methed in GUI programes of the container, you can run commands below:
+
+```bash
+echo -e "\nexport GTK_IM_MODULE=fcitx\nexport QT_IM_MODULE=fcitx\nexport XMODIFIERS=@im=fcitx\n" >> /etc/bash.bashrc;\
+    . /etc/bash.bashrc;
+```
+
+However, fcitx may still not work in QT programes of the container. I had met this problem in xfce4 host environment, anyone has solution can commit an issue, thanks.
+
+</br>
+
 Here are configs of my host .bashrc:
 ```bash
 PS1='\[\033[01;32m\]\u@\h\[\033[00m\]:\[\033[01;34m\]\w\[\033[00m\]\$ '
