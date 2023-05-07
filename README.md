@@ -96,7 +96,7 @@ sudo sh -c 'echo "\nexport GTK_IM_MODULE=fcitx\nexport QT_IM_MODULE=fcitx\nexpor
     . /etc/bash.bashrc
 ```
 
-However, fcitx may still not work in QT programes of the container. I had met this problem in xfce4 host environment, anyone has solution can commit an issue, thanks.
+However, fcitx may still not work in QT programes of the container. I had met this problem in xfce4 host environment, anyone has solutions can commit an issue, thanks.
 
 </br>
 
