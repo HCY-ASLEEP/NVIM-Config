@@ -443,6 +443,21 @@ function! ToggleCocOutline()
     endif
 endfunction
 
+function! HideExplorer()
+    let l:expl_win_num = bufwinnr(bufnr('NetrwTreeListing'))
+    
+    " if expl_win_num exists
+    if l:expl_win_num != -1
+        
+        " if cursor is not in explorer
+        if l:expl_win_num != winnr()
+           let t:cur_work_win_num = winnr() 
+        endif
+        call SkipNetrwWin()
+        exec "vertical ".l:expl_win_num."resize ".0
+    endif
+endfunction
+
 " setting CocInlayHint color
 hi CocInlayHint ctermfg=darkblue ctermbg=NONE cterm=italic
 
