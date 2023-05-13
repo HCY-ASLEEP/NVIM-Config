@@ -17,7 +17,7 @@ set expandtab
 set autoindent
 
 " highlight search
-set hlsearch
+nnoremap <silent><space><space> :set hlsearch! hlsearch?<CR>
 
 " foldmethod
 set foldmethod=syntax
@@ -181,7 +181,7 @@ function! ToggleExplorer()
     endif
 endfunction
 
-nnoremap <silent>e :call ToggleExplorer()<CR>
+nnoremap <silent>E :call ToggleExplorer()<CR>
 
 function! ExploreWhenEnter()
     
