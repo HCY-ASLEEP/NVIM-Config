@@ -297,7 +297,6 @@ command! -nargs=1 -complete=command Ws silent call GlobalWordsSearchWithoutGit(<
 
 nnoremap <silent>J :lnext<CR>
 nnoremap <silent>K :lprev<CR>
-nnoremap <silent><C-Space> :lclose<CR>
 
 " After hit enter, let cursor stay in quickfix window
 augroup StayInQF
