@@ -388,9 +388,9 @@ inoremap <expr> <Tab> getline('.')[col('.')-2] !~ '^\s\?$' \|\| pumvisible()
       \ ? '<C-N>' : '<Tab>'
 inoremap <expr> <S-Tab> pumvisible() \|\| getline('.')[col('.')-2] !~ '^\s\?$'
       \ ? '<C-P>' : '<Tab>'
-inoremap <expr> <Down> getline('.')[col('.')-2] !~ '^\s\?$' \|\| pumvisible()
+inoremap <expr> <S-Down> getline('.')[col('.')-2] !~ '^\s\?$' \|\| pumvisible()
       \ ? '<C-N>' : '<Down>'
-inoremap <expr> <Up> pumvisible() \|\| getline('.')[col('.')-2] !~ '^\s\?$'
+inoremap <expr> <S-Up> pumvisible() \|\| getline('.')[col('.')-2] !~ '^\s\?$'
       \ ? '<C-P>' : '<Up>'
 
 
