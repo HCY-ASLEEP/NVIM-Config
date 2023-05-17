@@ -385,12 +385,10 @@ inoremap <expr> <Tab> getline('.')[col('.')-2] !~ '^\s\?$' \|\| pumvisible()
       \ ? '<C-N>' : '<Tab>'
 inoremap <expr> <S-Tab> pumvisible() \|\| getline('.')[col('.')-2] !~ '^\s\?$'
       \ ? '<C-P>' : '<Tab>'
-
-augroup SimpleComplete
-    autocmd CmdwinEnter * inoremap <expr> <buffer> <Tab>
-          \ getline('.')[col('.')-2] !~ '^\s\?$' \|\| pumvisible()
-          \ ? '<C-X><C-V>' : '<Tab>'
-augroup END
+inoremap <expr> <Down> getline('.')[col('.')-2] !~ '^\s\?$' \|\| pumvisible()
+      \ ? '<C-N>' : '<Down>'
+inoremap <expr> <Up> pumvisible() \|\| getline('.')[col('.')-2] !~ '^\s\?$'
+      \ ? '<C-P>' : '<Up>'
 
 
 " vim-plug(4) ---------------------------------------------------------------------------------------
