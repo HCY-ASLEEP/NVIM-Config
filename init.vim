@@ -2,6 +2,9 @@
 " show line number
 set number
 
+" case insensitive
+set ignorecase
+
 " only support command mode, no click
 set mouse=c
 
