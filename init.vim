@@ -283,8 +283,8 @@ nnoremap <silent><S-TAB> :tabnext<CR>
 
 " Find key words in all files -----------------------------------------------------------------------
 function! GlobalWordsSearchWithGit(substr)
-    " :lvimgrep /substr/gj `git ls-files`
-    noautocmd exec "lvimgrep /".a:substr."\\c/gj `git ls-files`" | lw 
+    " :lvimgrep /substr/gj `git ls-files --others --exclude-standard --cache`
+    noautocmd exec "lvimgrep /".a:substr."\\c/gj `git ls-files --others --exclude-standard --cache`" | lw 
 endfunction
 
 function! GlobalWordsSearchWithoutGit(substr)
@@ -358,8 +358,8 @@ command! -nargs=1 -complete=command Redir silent call Redir(<q-args>)
 
 " Show Files searched fuzzily with git
 function! FuzzyFilenameSearchWithGit(substr)
-    " :Redir !find $(git ls-files) -iname '*substr*'
-    call feedkeys(":Redir !find $(git ls-files) -iname '*".a:substr."*'\<CR>" ,'n')
+    " :Redir !find $(git ls-files --others --exclude-standard --cache) -iname '*substr*'
+    call feedkeys(":Redir !find $(git ls-files --others --exclude-standard --cache) -iname '*".a:substr."*'\<CR>" ,'n')
     call feedkeys("/".a:substr."\\c\<CR>" ,'n')
     call feedkeys("\<down>\<down>" ,'n')
 endfunction
