@@ -218,6 +218,8 @@ hi LineNr ctermfg=darkgray ctermbg=NONE cterm=NONE
 hi Comment ctermfg=darkgray ctermbg=NONE cterm=italic
 hi Visual ctermfg=lightred ctermbg=darkgray cterm=NONE
 hi VertSplit ctermfg=darkgray ctermbg=NONE cterm=NONE
+hi CursorLine ctermfg=black ctermbg=blue cterm=bold
+hi CursorLineNr ctermfg=darkyellow ctermbg=NONE cterm=NONE
 set fillchars+=eob:\ 
 
 
@@ -281,7 +283,7 @@ hi TabLineSel ctermfg=black ctermbg=white cterm=bold
 nnoremap <silent><S-TAB> :tabnext<CR>
 
 
-" Fuzzy Match filenames -----------------------------------------------------------------------------
+" set ripgrep root dir
 let g:rgRootDir=getcwd()
 
 function! CdCurBufDir()
@@ -292,16 +294,33 @@ endfunction
 " Cc means 'cd cur', cd cur buf dir
 command! -nargs=1 -complete=command Cc silent call CdCurBufDir()
 
-let t:findPreviewWinnr=1
+let t:redirPreviewWinnr = 1
+
+function! OpenRedirWindow()
+    let l:findWinNum=bufwinnr(bufnr('FuzzyFilenameSearch'))
+    let l:rgWinNum=bufwinnr(bufnr('RipgrepWordSearch'))
+    if l:findWinNum != -1
+        exec l:findWinNum."wincmd w"
+        enew
+    elseif l:rgWinNum != -1
+        exec l:rgWinNum."wincmd w"
+        enew
+    else
+        let t:redirPreviewWinnr = winnr()
+        botright 10new
+    endif
+endfunction
+
+" Fuzzy Match filenames -----------------------------------------------------------------------------
 " Go to the file on line
 function! FindJump(path)
     exec "cd ".g:rgRootDir
     let l:path=a:path
-    exec t:findPreviewWinnr."wincmd w"
+    exec t:redirPreviewWinnr."wincmd w"
     exec "edit ".l:path
 endfunction
 
-" autocmd to jump to file with CR
+" autocmd to jump to file with CR only in FuzzyFilenameSearch buffer
 function! FindJumpWithCR()
     augroup findJumpWithCR
         autocmd!
@@ -312,19 +331,16 @@ endfunction
 " redirect the command output to a buffer
 function! FindRedir(cmd)
     call FindJumpWithCR()
-    botright 10new
+    call OpenRedirWindow()
     edit FuzzyFilenameSearch
-    execute "read ".a:cmd
+    exec "read ".a:cmd
     setlocal buftype=nofile bufhidden=wipe nobuflisted noswapfile cursorline filetype=FuzzyFilenameSearch
 endfunction
 
 command! -nargs=1 -complete=command FindRedir silent call FindRedir(<q-args>)
 
-" Show Files searched fuzzily with git
+" Show Files fuzzily searched with git
 function! FindWithGit(substr)
-    " :FindRedir !find $(git ls-files --others --exclude-standard --cache) -iname '*substr*'
-    let t:findPreviewWinnr=winnr()
-    ""call feedkeys(":FindRedir !find $(git ls-files --others --exclude-standard --cache) -iname '*".a:substr."*'\<CR>" ,'n')
     exec "FindRedir !rg --files \| rg --ignore-case ".a:substr
     exec "normal! gg"
     if getline('.') == ""
@@ -335,8 +351,6 @@ endfunction
 
 " Show Files searched fuzzily without git
 function! FindWithoutGit(substr)
-    " :FindRedir !find searchRootPath -iname '*substr*'
-    let t:findPreviewWinnr=winnr()
     exec "FindRedir !rg --no-ignore --files \| rg --ignore-case ".a:substr
     exec "normal! gg"
     if getline('.') == ""
@@ -351,30 +365,122 @@ command! -nargs=1 -complete=command Fg silent call FindWithGit(<q-args>)
 " Fs means 'file search', search file names fuzzily
 command! -nargs=1 -complete=command Fs silent call FindWithoutGit(<q-args>)
 
-
-
+" To show file preview, underlying of FindNext, imitate 'cNext' command
 function! FindShow(direction)
     let l:findWinNum=bufwinnr(bufnr('FuzzyFilenameSearch'))
-    let t:findPreviewPath=""
-    if l:findWinNum != t:findPreviewWinnr
-        let l:findWinId=win_getid(l:findWinNum)
-        call win_execute(l:findWinId, "normal! ".a:direction)
-        call win_execute(l:findWinId, "let t:findPreviewPath=getline('.')")
-        call FindJump(t:findPreviewPath)
+    if l:findWinNum == -1
+        echo ">> No FuzzyFilenameSearch Buffer!"
     else
-        call FindJump(getline('.'))
+        if l:findWinNum != t:redirPreviewWinnr
+            let l:findWinId=win_getid(l:findWinNum)
+            call win_execute(l:findWinId, "normal! ".a:direction)
+            call win_execute(l:findWinId, "let t:findPreviewPath=getline('.')")
+            call FindJump(t:findPreviewPath)
+        else
+            call FindJump(getline('.'))
+        endif
     endif
 endfunction
 
+" imitate 'cNext'
 function! FindNext()
     call FindShow("+")
 endfunction
 
+" imitate 'cprevious'
 function! FindPre()
     call FindShow("-")
 endfunction
 
-nnoremap <F5> :call FindNext()<CR>
+nnoremap <silent><C-down> :call FindNext()<CR>
+nnoremap <silent><C-up> :call FindPre()<CR>
+
+
+" Global Fuzzy Match words -------------------------------------------------------------------------
+" Go to the file on line
+function! RgJump(location)
+    exec "cd ".g:rgRootDir
+    let l:location = split(a:location, ":")
+    exec t:redirPreviewWinnr."wincmd w"
+    exec "edit ".l:location[0]
+    cal cursor(l:location[1], l:location[2])
+endfunction
+
+" autocmd to jump to file with CR only in RipgrepWordSearch buffer
+function! RgJumpWithCR()
+    augroup rgJumpWithCR
+        autocmd!
+        autocmd FileType RipgrepWordSearch nnoremap <buffer><silent><CR> :call RgJump(getline('.'))<CR>
+    augroup END
+endfunction
+
+" redirect the command output to a buffer
+function! RgRedir(cmd)
+    call RgJumpWithCR()
+    call OpenRedirWindow()
+    edit RipgrepWordSearch
+    exec "read "a:cmd
+    setlocal buftype=nofile bufhidden=wipe nobuflisted noswapfile cursorline filetype=RipgrepWordSearch
+endfunction
+
+command! -nargs=1 -complete=command RgRedir silent call RgRedir(<q-args>)
+
+" Show Words fuzzily searched with git
+function! RgWithGit(substr)
+    exec "RgRedir !rg '".a:substr."' ".getcwd()." --ignore-case --vimgrep --no-heading"
+    exec "normal! gg"
+    if getline('.') == ""
+        exec "normal! dd"
+    endif
+    call feedkeys("/".a:substr."\\c\<CR>" ,'n')
+endfunction
+
+" Show Files fuzzily searched without git
+function! RgWithoutGit(substr)
+    exec "RgRedir !rg '".a:substr."' ".getcwd()." --ignore-case --vimgrep --no-heading --no-ignore"
+    exec "normal! gg"
+    if getline('.') == ""
+        exec "normal! dd"
+    endif
+    call feedkeys("/".a:substr."\\c\<CR>" ,'n')
+endfunction
+
+" Wg means 'word git', search file fuzzily names with git
+command! -nargs=1 -complete=command Wg silent call RgWithGit(<q-args>)
+
+" Ws means 'word search', search file fuzzily names without git
+command! -nargs=1 -complete=command Ws silent! call RgWithoutGit(<q-args>)
+
+" To show file preview, underlying of RgNext, imitate 'cNext' command
+function! RgShow(direction)
+    let l:rgWinNum=bufwinnr(bufnr('RipgrepWordSearch'))
+    if l:rgWinNum == -1
+        echo ">> No RipgrepWordSearch Buffer!"
+    else
+        if l:rgWinNum != t:redirPreviewWinnr
+            let l:rgWinId=win_getid(l:rgWinNum)
+            call win_execute(l:rgWinId, "normal! ".a:direction)
+            call win_execute(l:rgWinId, "let t:rgPreviewLocation=getline('.')")
+            call RgJump(t:rgPreviewLocation)
+        else
+            call RgJump(getline('.'))
+        endif
+    endif
+endfunction
+
+" imitate 'cNext'
+function! RgNext()
+    call RgShow("+")
+endfunction
+
+" imitate 'cprevious'
+function! RgPre()
+    call RgShow("-")
+endfunction
+
+nnoremap <silent><S-down> :call RgNext()<CR>
+nnoremap <silent><S-up> :call RgPre()<CR>
+
 
 " Simple tab completion -----------------------------------------------------------------------------
 " A simple tab completion, if you use the coc.nvim, you should remove this simple completion
@@ -396,90 +502,3 @@ augroup MarkdownPreview
 augroup END
 
 
-let t:rgPreviewWinnr=1
-
-function! RgJump(location)
-    exec "cd ".g:rgRootDir
-    let l:location = split(a:location, ":")
-    exec t:rgPreviewWinnr."wincmd w"
-    exec "edit ".l:location[0]
-    cal cursor(l:location[1], l:location[2])
-endfunction
-
-function! RgJumpWithCR()
-    augroup rgJumpWithCR
-        autocmd!
-        autocmd FileType RipgrepWordSearch nnoremap <buffer><silent><CR> :call RgJump(getline('.'))<CR>
-    augroup END
-endfunction
-
-" redirect the command output to a buffer
-function! RgRedir(cmd)
-    call RgJumpWithCR()
-    botright 10new
-    edit RipgrepWordSearch
-    execute "read "a:cmd
-    setlocal buftype=nofile bufhidden=wipe nobuflisted noswapfile cursorline filetype=RipgrepWordSearch
-endfunction
-
-command! -nargs=1 -complete=command RgRedir silent call RgRedir(<q-args>)
-
-" Show Files searched fuzzily with git
-function! RgWithGit(substr)
-    " :RgRedir !rg 'substr' searchRootPath --ignore-case --vimgrep --no-heading
-    let t:rgPreviewWinnr=winnr()
-    ""silent! call feedkeys(":RgRedir !rg '".a:substr."' ".getcwd()." --ignore-case --vimgrep --no-heading\<CR>" ,'n')
-    exec "RgRedir !rg '".a:substr."' ".getcwd()." --ignore-case --vimgrep --no-heading"
-    ""call feedkeys("gg", 'n')
-    exec "normal! gg"
-    if getline('.') == ""
-        exec "normal! dd"
-    endif
-    call feedkeys("/".a:substr."\\c\<CR>" ,'n')
-endfunction
-
-" Show Files searched fuzzily with git
-function! RgWithoutGit(substr)
-    " :RgRedir !rg 'substr' searchRootPath --ignore-case --vimgrep --no-heading --no-ignore
-    let t:rgPreviewWinnr=winnr()
-    exec "RgRedir !rg '".a:substr."' ".getcwd()." --ignore-case --vimgrep --no-heading --no-ignore"
-    ""call feedkeys("\<CR>ggdd", 'n')
-    ""call feedkeys("gg", 'n')
-    exec "normal! gg"
-    if getline('.') == ""
-        exec "normal! dd"
-    endif
-    call feedkeys("/".a:substr."\\c\<CR>" ,'n')
-endfunction
-
-" Fg means 'file git', search file names fuzzily with git
-command! -nargs=1 -complete=command Wg silent call RgWithGit(<q-args>)
-
-" Fs means 'file search', search file names fuzzily
-command! -nargs=1 -complete=command Ws silent! call RgWithoutGit(<q-args>)
-
-function! RgShow(direction)
-    let l:rgWinNum=bufwinnr(bufnr('RipgrepWordSearch'))
-    let t:rgPreviewLocation=""
-    if l:rgWinNum != t:rgPreviewWinnr
-        let l:rgWinId=win_getid(l:rgWinNum)
-        call win_execute(l:rgWinId, "normal! ".a:direction)
-        call win_execute(l:rgWinId, "let t:rgPreviewLocation=getline('.')")
-        call RgJump(t:rgPreviewLocation)
-    else
-        call RgJump(getline('.'))
-    endif
-endfunction
-
-function! RgNext()
-    call RgShow("+")
-endfunction
-
-function! RgPre()
-    call RgShow("-")
-endfunction
-
-nnoremap <F4> :call RgNext()<CR>
-
-hi CursorLine ctermfg=black ctermbg=blue cterm=bold
-hi CursorLineNr ctermfg=darkyellow ctermbg=NONE cterm=NONE
