@@ -311,6 +311,20 @@ function! OpenRedirWindow()
     endif
 endfunction
 
+function! QuitRedirWindow()
+    let l:findWinNum=bufwinnr(bufnr('FuzzyFilenameSearch'))
+    let l:rgWinNum=bufwinnr(bufnr('RipgrepWordSearch'))
+    if l:findWinNum != -1
+        exec l:findWinNum."close"
+    elseif l:rgWinNum != -1
+        exec l:rgWinNum."close"
+    else
+        echo ">> No OpenRedirWindow!"
+    endif
+endfunction
+
+nnoremap <silent><space>q :call QuitRedirWindow()<CR>
+
 " Fuzzy Match filenames -----------------------------------------------------------------------------
 " Go to the file on line
 function! FindJump(path)
