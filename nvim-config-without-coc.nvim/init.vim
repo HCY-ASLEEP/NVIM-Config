@@ -240,8 +240,7 @@ augroup pythonSpecialFocus
     autocmd Filetype python 
         \  setlocal list
         \| setlocal listchars=space:\ 
-        \| setlocal listchars+=multispace:···+
-        \| hi SpecialKey ctermfg=darkblue ctermbg=NONE cterm=NONE
+        \| setlocal listchars+=multispace:\ \ \ ┊
 augroup END
 
 
