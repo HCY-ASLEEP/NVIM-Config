@@ -1,4 +1,7 @@
 " hovel settings -----------------------------------------------------------------------------------
+" share system clipboard
+set clipboard+=unnamedplus
+
 " show line number
 set number
 
