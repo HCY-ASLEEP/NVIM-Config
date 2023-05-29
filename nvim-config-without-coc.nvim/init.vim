@@ -286,26 +286,39 @@ nnoremap <silent><S-TAB> :tabnext<CR>
 
 
 " set ripgrep root dir
-let g:rgRootDir=getcwd()
+let g:rootDir=getcwd()
 
-function! CdCurBufDir()
-    let g:rgRootDir=expand("%:p:h")
-    echo expand("%:p:h")
+function! ChangeDir(path)
+    if isdirectory(a:path)
+        if a:path=="."
+            let g:rootDir=expand("%:p:h")
+            exec "cd ".g:rootDir
+        else
+            let g:rootDir=a:path
+            exec "cd ".g:rootDir
+        endif
+        echo getcwd()
+    else
+        echo ">> Error Path!"
+    endif
 endfunction
 
-" Cc means 'cd cur', cd cur buf dir
-command! -nargs=1 -complete=command Cc silent call CdCurBufDir()
+command! -nargs=1 -complete=command C call ChangeDir(<f-args>)
 
 let t:redirPreviewWinnr = 1
 
 function! OpenRedirWindow()
     let l:findWinNum=bufwinnr(bufnr('FuzzyFilenameSearch'))
     let l:rgWinNum=bufwinnr(bufnr('RipgrepWordSearch'))
+    let l:bufferListWinNum=bufwinnr(bufnr('BufferList'))
     if l:findWinNum != -1
         exec l:findWinNum."wincmd w"
         enew
     elseif l:rgWinNum != -1
         exec l:rgWinNum."wincmd w"
+        enew
+    elseif l:bufferListWinNum !=-1
+        exec l:bufferListWinNum."wincmd w"
         enew
     else
         let t:redirPreviewWinnr = winnr()
@@ -316,10 +329,13 @@ endfunction
 function! QuitRedirWindow()
     let l:findWinNum=bufwinnr(bufnr('FuzzyFilenameSearch'))
     let l:rgWinNum=bufwinnr(bufnr('RipgrepWordSearch'))
+    let l:bufferListWinNum=bufwinnr(bufnr('BufferList'))
     if l:findWinNum != -1
         exec l:findWinNum."close"
     elseif l:rgWinNum != -1
         exec l:rgWinNum."close"
+    elseif l:bufferListWinNum !=-1
+        exec l:bufferListWinNum."close"
     else
         echo ">> No OpenRedirWindow!"
     endif
@@ -330,7 +346,7 @@ nnoremap <silent><space>q :call QuitRedirWindow()<CR>
 " Fuzzy Match filenames -----------------------------------------------------------------------------
 " Go to the file on line
 function! FindJump(path)
-    exec "cd ".g:rgRootDir
+    exec "cd ".g:rootDir
     let l:path=a:path
     exec t:redirPreviewWinnr."wincmd w"
     exec "edit ".l:path
@@ -415,7 +431,7 @@ nnoremap <silent><C-up> :call FindPre()<CR>
 " Global Fuzzy Match words -------------------------------------------------------------------------
 " Go to the file on line
 function! RgJump(location)
-    exec "cd ".g:rgRootDir
+    exec "cd ".g:rootDir
     let l:location = split(a:location, ":")
     exec t:redirPreviewWinnr."wincmd w"
     exec "edit ".l:location[0]
@@ -496,6 +512,73 @@ endfunction
 
 nnoremap <silent><S-down> :call RgNext()<CR>
 nnoremap <silent><S-up> :call RgPre()<CR>
+
+
+" Go to the buffer on line
+function! BufferListJump(bufInfo)
+    exec "cd ".g:rootDir
+    let l:bufNum=split(a:bufInfo,"\ ")[0]
+    echo l:bufNum
+    exec t:redirPreviewWinnr."wincmd w"
+    exec "buffer".l:bufNum
+endfunction
+
+" autocmd to jump to buffer with CR only in BufferList buffer
+function! BufferListJumpWithCR()
+    augroup findJumpWithCR
+        autocmd!
+        autocmd FileType BufferList nnoremap <buffer><silent><CR> :call BufferListJump(getline('.'))<CR>
+    augroup END
+endfunction
+
+" redirect the command output to a buffer
+function! BufferListRedir()
+    call BufferListJumpWithCR()
+    call OpenRedirWindow()
+    edit BufferList
+    setlocal buftype=nofile bufhidden=wipe nobuflisted noswapfile cursorline filetype=BufferList
+    put = execute('buffers')
+    exec "normal! gg"
+    let l:empty=2
+    while empty > 0
+        if getline('.') == ""
+            exec "normal! dd"
+        endif
+        let l:empty-=1
+    endwhile
+endfunction
+
+command! B call BufferListRedir()
+
+" To show the buffer selected, underlying of BufferListNext, imitate 'cNext' command
+function! BufferListShow(direction)
+    let l:bufferListWinNum=bufwinnr(bufnr('BufferList'))
+    if l:bufferListWinNum==-1
+        echo ">> No BufferList Buffer!"
+    else
+        if l:bufferListWinNum != t:redirPreviewWinnr
+            let l:bufferListWinId=win_getid(l:bufferListWinNum)
+            call win_execute(l:bufferListWinId, "normal! ".a:direction)
+            call win_execute(l:bufferListWinId, "let t:bufferListPreviewInfo=getline('.')")
+            call BufferListJump(t:bufferListPreviewInfo)
+        else
+            call BufferListJump(getline('.'))
+        endif
+    endif
+endfunction
+
+" imitate 'cNext'
+function! BufferListNext()
+    call BufferListShow("+")
+endfunction
+
+" imitate 'cprevious'
+function! BufferListPre()
+    call BufferListShow("-")
+endfunction
+
+nnoremap <silent><M-down> :call BufferListNext()<CR>
+nnoremap <silent><M-up> :call BufferListPre()<CR>
 
 
 " Simple tab completion -----------------------------------------------------------------------------
