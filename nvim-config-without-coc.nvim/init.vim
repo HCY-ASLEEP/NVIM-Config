@@ -579,6 +579,7 @@ endfunction
 
 nnoremap <silent><M-down> :call BufferListNext()<CR>
 nnoremap <silent><M-up> :call BufferListPre()<CR>
+nnoremap <silent><space>l :B<CR>
 
 
 " Simple tab completion -----------------------------------------------------------------------------
