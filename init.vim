@@ -665,4 +665,7 @@ endfunction
 " setting CocInlayHint color
 hi CocInlayHint ctermfg=darkblue ctermbg=NONE cterm=italic
 
+" Remap scroll float windows/popups.
+nnoremap <expr><C-S-down> coc#float#has_scroll() ? coc#float#scroll(1) : "\<C-S-down>"
+nnoremap <expr><C-S-up> coc#float#has_scroll() ? coc#float#scroll(0) : "\<C-S-up>"
 
