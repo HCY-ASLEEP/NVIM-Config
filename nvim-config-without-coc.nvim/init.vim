@@ -123,6 +123,23 @@ cnoremap <expr> <left> wildmenumode() ? "\<SPACE>\<BS>" : "\<left>"
 cnoremap <expr> <right> wildmenumode() ? "\<SPACE>\<BS>" : "\<right>"
 
 
+" highlight settings -------------------------------------------------------------------------------
+function! StressCurMatch()
+  let l:target = '\c\%#'.@/
+  call matchadd('MatchParen', l:target)
+endfunction
+
+" centre the screen on the current search result
+nnoremap <silent> n n:call StressCurMatch()<CR>
+nnoremap <silent> N N:call StressCurMatch()<CR>
+nnoremap * *zz
+nnoremap # #zz
+nnoremap g* g*zz
+nnoremap g# g#zz
+
+hi MatchParen ctermfg=white ctermbg=red cterm=bold
+
+
 " netrw settings -----------------------------------------------------------------------------------
 " not show the help banner on top 
 let g:netrw_banner = 0
