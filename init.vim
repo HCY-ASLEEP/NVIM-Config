@@ -453,6 +453,7 @@ function! RgJump(location)
     exec t:redirPreviewWinnr."wincmd w"
     exec "edit ".l:location[0]
     cal cursor(l:location[1], l:location[2])
+    call matchadd('MatchParen', '\c\%#'.@/)
 endfunction
 
 " autocmd to jump to file with CR only in RipgrepWordSearch buffer
