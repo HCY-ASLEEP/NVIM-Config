@@ -132,10 +132,6 @@ endfunction
 " centre the screen on the current search result
 nnoremap <silent> n n:call StressCurMatch()<CR>
 nnoremap <silent> N N:call StressCurMatch()<CR>
-nnoremap * *zz
-nnoremap # #zz
-nnoremap g* g*zz
-nnoremap g# g#zz
 
 hi MatchParen ctermfg=white ctermbg=red cterm=bold
 
