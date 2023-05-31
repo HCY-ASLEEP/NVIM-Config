@@ -126,15 +126,15 @@ cnoremap <expr> <right> wildmenumode() ? "\<SPACE>\<BS>" : "\<right>"
 " highlight settings -------------------------------------------------------------------------------
 function! StressCurMatch()
   let l:target = '\c\%#'.@/
-  call matchadd('MatchParen', l:target)
+  call matchadd('FocusCurMatch', l:target)
 endfunction
 
+" centre the screen on the current search result
 nnoremap <silent> n n:call StressCurMatch()<CR>
 nnoremap <silent> N N:call StressCurMatch()<CR>
-" stress in the first time
 cnoremap <silent><expr> <CR> getcmdtype() =~ '[/?]' ? '<CR>:call StressCurMatch()<CR>' : '<CR>'
 
-hi MatchParen ctermfg=white ctermbg=red cterm=bold
+hi FocusCurMatch ctermfg=white ctermbg=red cterm=bold
 
 
 " netrw settings -----------------------------------------------------------------------------------
@@ -303,7 +303,7 @@ nnoremap <silent><S-TAB> :tabnext<CR>
 let g:rootDir=getcwd()
 
 function! ChangeDir(path)
-    if isdirectory(a:path)
+    if isdirectory(expand(a:path))
         if a:path=="."
             let g:rootDir=expand("%:p:h")
             exec "cd ".g:rootDir
@@ -363,7 +363,11 @@ function! FindJump(path)
     exec "cd ".g:rootDir
     let l:path=a:path
     exec t:redirPreviewWinnr."wincmd w"
-    exec "edit ".l:path
+    if filereadable(expand(l:path))
+        exec "edit ".l:path
+    else
+        echo ">> File Not Exist!"
+    endif
 endfunction
 
 " autocmd to jump to file with CR only in FuzzyFilenameSearch buffer
@@ -448,9 +452,13 @@ function! RgJump(location)
     exec "cd ".g:rootDir
     let l:location = split(a:location, ":")
     exec t:redirPreviewWinnr."wincmd w"
-    exec "edit ".l:location[0]
-    cal cursor(l:location[1], l:location[2])
-    call matchadd('MatchParen', '\c\%#'.@/)
+    try
+        exec "edit ".l:location[0]
+        cal cursor(l:location[1], l:location[2])
+        call matchadd('FocusCurMatch', '\c\%#'.@/)
+    catch
+        echo ">> File Not Exist!"
+    endtry
 endfunction
 
 " autocmd to jump to file with CR only in RipgrepWordSearch buffer
