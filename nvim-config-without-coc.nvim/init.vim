@@ -132,6 +132,7 @@ endfunction
 " centre the screen on the current search result
 nnoremap <silent> n n:call StressCurMatch()<CR>
 nnoremap <silent> N N:call StressCurMatch()<CR>
+cnoremap <silent><expr> <CR> getcmdtype() =~ '[/?]' ? '<CR>:call StressCurMatch()<CR>' : '<CR>'
 
 hi MatchParen ctermfg=white ctermbg=red cterm=bold
 
