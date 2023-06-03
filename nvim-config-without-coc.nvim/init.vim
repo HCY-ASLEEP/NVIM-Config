@@ -60,9 +60,6 @@ cnoreabbrev fd echo expand("%:p:h")
 cnoreabbrev vt vs \| term
 cnoreabbrev st sp \| term
 
-" buffer vertical split
-cnoreabbrev vb vertical<SPACE>sb
-
 
 " auto pair ---------------------------------------------------------------------------------------
 inoremap { {}<LEFT>
@@ -201,7 +198,7 @@ function! ToggleExplorer()
     endif
 endfunction
 
-nnoremap <silent>E :call ToggleExplorer()<CR>
+nnoremap <silent><SPACE>e :call ToggleExplorer()<CR>
 
 function! ExploreWhenEnter()
     
@@ -541,9 +538,12 @@ nnoremap <silent><S-up> :call RgPre()<CR>
 function! BufferListJump(bufInfo)
     exec "cd ".g:rootDir
     let l:bufNum=split(a:bufInfo,"\ ")[0]
-    echo l:bufNum
     exec t:redirPreviewWinnr."wincmd w"
-    exec "buffer".l:bufNum
+    try
+        exec "buffer".l:bufNum
+    catch
+        echo ">> Buffer Not Exist!"
+    endtry
 endfunction
 
 " autocmd to jump to buffer with CR only in BufferList buffer
@@ -605,12 +605,29 @@ nnoremap <silent><M-up> :call BufferListPre()<CR>
 nnoremap <silent><space>l :B<CR>
 
 
-" Simple tab completion -----------------------------------------------------------------------------
-" A simple tab completion, if you use the coc.nvim, you should remove this simple completion
-inoremap <expr> <Tab> getline('.')[col('.')-2] !~ '^\s\?$' \|\| pumvisible()
-      \ ? '<C-N>' : '<Tab>'
-inoremap <expr> <S-Tab> pumvisible() \|\| getline('.')[col('.')-2] !~ '^\s\?$'
-      \ ? '<C-P>' : '<Tab>'
+set completeopt=menuone,noselect
+
+" use tab for navigating the autocomplete menu
+inoremap <expr> <TAB> pumvisible() ? "\<C-n>" : "\<TAB>"
+inoremap <expr> <S-TAB> pumvisible() ? "\<C-p>" : "\<S-TAB>"
+
+function! OpenNoLSPCompletion()
+    if v:char =~ '[A-Za-z]' && !pumvisible() 
+        call feedkeys("\<C-n>", "n")
+    endif
+endfunction
+
+function! AutoComplete()
+    augroup openNoLSPCompletion
+        autocmd!
+        autocmd InsertCharPre * silent! call OpenNoLSPCompletion()
+    augroup END
+endfunction
+
+augroup initAutoComplete
+    autocmd!
+    autocmd TabEnter,VimEnter * call AutoComplete()
+augroup END
 
 
 " vim-plug(4) ---------------------------------------------------------------------------------------
