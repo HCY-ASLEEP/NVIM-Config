@@ -60,9 +60,6 @@ cnoreabbrev fd echo expand("%:p:h")
 cnoreabbrev vt vs \| term
 cnoreabbrev st sp \| term
 
-" buffer vertical split
-cnoreabbrev vb vertical<SPACE>sb
-
 
 " auto pair ---------------------------------------------------------------------------------------
 inoremap { {}<LEFT>
@@ -201,7 +198,7 @@ function! ToggleExplorer()
     endif
 endfunction
 
-nnoremap <silent>E :call ToggleExplorer()<CR>
+nnoremap <silent><SPACE>e :call ToggleExplorer()<CR>
 
 function! ExploreWhenEnter()
     
@@ -541,9 +538,12 @@ nnoremap <silent><S-up> :call RgPre()<CR>
 function! BufferListJump(bufInfo)
     exec "cd ".g:rootDir
     let l:bufNum=split(a:bufInfo,"\ ")[0]
-    echo l:bufNum
     exec t:redirPreviewWinnr."wincmd w"
-    exec "buffer".l:bufNum
+    try
+        exec "buffer".l:bufNum
+    catch
+        echo ">> Buffer Not Exist!"
+    endtry
 endfunction
 
 " autocmd to jump to buffer with CR only in BufferList buffer
@@ -607,10 +607,8 @@ nnoremap <silent><space>l :B<CR>
 
 " vim-plug(4) ---------------------------------------------------------------------------------------
 call plug#begin($HOME.'/.local/share/nvim/site/autoload')
-Plug 'neoclide/coc.nvim', {'branch': 'release'}
+Plug 'neovim/nvim-lspconfig'
 Plug 'tpope/vim-fugitive'
-" It needs ripgrep to exec ':Leaderf rg'
-" Plug 'Yggdroot/LeaderF', { 'do': ':LeaderfInstallCExtension' }
 call plug#end()
 
 
@@ -619,76 +617,53 @@ augroup MarkdownPreview
     auto Filetype markdown source $HOME/.config/nvim/markdown.vim
 augroup END
 
+lua << EOF
+require'lspconfig'.clangd.setup{}
+require'lspconfig'.pyright.setup{}
+EOF
 
-" " LeaderF settings ---------------------------------------------------------------------------------
-" " let g:Lf_WindowPosition = 'popup'
-" let g:Lf_ShowDevIcons = 0
-" let g:Lf_PreviewResult = {'Function': 1, 'BufTag': 1, 'Rg': 1, 'File': 1, 'Mru': 1, 'Colorscheme': 1 }
+nnoremap <silent>gs <cmd>lua vim.lsp.buf.document_symbol()<CR>
+nnoremap <silent>gr <cmd>lua vim.lsp.buf.references()<CR>
+nnoremap <silent>gd <cmd>lua vim.lsp.buf.definition()<CR>
+nnoremap <silent>ga <cmd>lua vim.diagnostic.setloclist()<CR>
+nnoremap <silent>g; <cmd>lua vim.lsp.diagnostic.goto_prev()<CR>
+nnoremap <silent>g, <cmd>lua vim.lsp.diagnostic.goto_next()<CR>
 
 
-" coc settings -------------------------------------------------------------------------------------
-inoremap <silent><expr> <TAB> coc#pum#visible() ? coc#pum#next(1) :"\<Tab>" 
-inoremap <silent><expr> <CR> coc#pum#visible() ? coc#pum#confirm() : "\<C-g>u\<CR>\<c-r>=coc#on_enter()\<CR>"
+set completeopt=menuone,noselect
 
-nmap gd <Plug>(coc-definition)
-nmap gt <Plug>(coc-type-definition)
-nmap gi <Plug>(coc-implementation)
-nmap gr <Plug>(coc-references)
+" use tab for navigating the autocomplete menu
+inoremap <expr> <TAB> pumvisible() ? "\<C-n>" : "\<TAB>"
+inoremap <expr> <S-TAB> pumvisible() ? "\<C-p>" : "\<S-TAB>"
 
-" Use K to show documentation in preview window.
-function! ShowDocumentation()
-  if CocAction('hasProvider', 'hover')
-    call CocActionAsync('doHover')
-  else
-    call feedkeys('K', 'in')
-  endif
+function! OpenLSPCompletion()
+    if v:char =~ '[A-Za-z.]' && !pumvisible() 
+        call feedkeys("\<C-x>\<C-o>", "n")
+    endif
 endfunction
-nnoremap <silent> <C-k> :call ShowDocumentation()<CR>
 
-" Highlight the symbol and its references when holding the cursor.
-autocmd! CursorHold * silent call CocActionAsync('highlight')
+function! OpenNoLSPCompletion()
+    if v:char =~ '[A-Za-z]' && !pumvisible() 
+        call feedkeys("\<C-n>", "n")
+    endif
+endfunction
 
-" Symbol renaming.
-nnoremap <silent><space>r :call CocActionAsync('rename')<CR>
-
-" Show all diagnostics.
-nnoremap <silent><nowait> <space>a  :<C-u>CocList diagnostics<cr>
-
-" Manage extensions.
-nnoremap <silent><nowait> <space>e  :<C-u>CocList extensions<cr>
-
-" Find symbol of current document.
-nnoremap <silent><nowait> co  :call ToggleCocOutline()<cr>
-
-function! ToggleCocOutline()
-    let l:winid = coc#window#find('cocViewId', 'OUTLINE')
-    if l:winid == -1
-        exec "CocOutline"
+function! AutoComplete()
+    if &filetype =~# 'python\|cpp\|java'
+        augroup openLSPCompletion
+            autocmd!
+            autocmd InsertCharPre * silent! call OpenLSPCompletion()
+        augroup END
     else
-        call coc#window#close(l:winid)
-        call HideExplorer()
+        augroup openNoLSPCompletion
+            autocmd!
+            autocmd InsertCharPre * silent! call OpenNoLSPCompletion()
+        augroup END
     endif
 endfunction
 
-function! HideExplorer()
-    let l:expl_win_num = bufwinnr(bufnr('NetrwTreeListing'))
-    
-    " if expl_win_num exists
-    if l:expl_win_num != -1
-        
-        " if cursor is not in explorer
-        if l:expl_win_num != winnr()
-           let t:cur_work_win_num = winnr() 
-        endif
-        call SkipNetrwWin()
-        exec "vertical ".l:expl_win_num."resize ".0
-    endif
-endfunction
-
-" setting CocInlayHint color
-hi CocInlayHint ctermfg=darkblue ctermbg=NONE cterm=italic
-
-" Remap scroll float windows/popups.
-nnoremap <expr><C-S-down> coc#float#has_scroll() ? coc#float#scroll(1) : "\<C-S-down>"
-nnoremap <expr><C-S-up> coc#float#has_scroll() ? coc#float#scroll(0) : "\<C-S-up>"
+augroup initAutoComplete
+    autocmd!
+    autocmd TabEnter,VimEnter * call AutoComplete()
+augroup END
 
