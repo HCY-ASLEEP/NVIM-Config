@@ -368,16 +368,18 @@ function! FindJump(path)
 endfunction
 
 " autocmd to jump to file with CR only in FuzzyFilenameSearch buffer
-function! FindJumpWithCR()
-    augroup findJumpWithCR
+function! FindJumpMap()
+    augroup findJumpMap
         autocmd!
         autocmd FileType FuzzyFilenameSearch nnoremap <buffer><silent><CR> :call FindJump(getline('.'))<CR>
     augroup END
+    nnoremap <silent><S-down> :call FindNext()<CR>
+    nnoremap <silent><S-up> :call FindPre()<CR>
 endfunction
 
 " redirect the command output to a buffer
 function! FindRedir(cmd)
-    call FindJumpWithCR()
+    call FindJumpMap()
     call OpenRedirWindow()
     edit FuzzyFilenameSearch
     exec "read ".a:cmd
@@ -439,9 +441,6 @@ function! FindPre()
     call FindShow("-")
 endfunction
 
-nnoremap <silent><C-down> :call FindNext()<CR>
-nnoremap <silent><C-up> :call FindPre()<CR>
-
 
 " Global Fuzzy Match words -------------------------------------------------------------------------
 " Go to the file on line
@@ -459,16 +458,18 @@ function! RgJump(location)
 endfunction
 
 " autocmd to jump to file with CR only in RipgrepWordSearch buffer
-function! RgJumpWithCR()
-    augroup rgJumpWithCR
+function! RgJumpMap()
+    augroup rgJumpMap
         autocmd!
         autocmd FileType RipgrepWordSearch nnoremap <buffer><silent><CR> :call RgJump(getline('.'))<CR>
     augroup END
+    nnoremap <silent><S-down> :call RgNext()<CR>
+    nnoremap <silent><S-up> :call RgPre()<CR>
 endfunction
 
 " redirect the command output to a buffer
 function! RgRedir(cmd)
-    call RgJumpWithCR()
+    call RgJumpMap()
     call OpenRedirWindow()
     edit RipgrepWordSearch
     exec "read "a:cmd
@@ -530,9 +531,6 @@ function! RgPre()
     call RgShow("-")
 endfunction
 
-nnoremap <silent><S-down> :call RgNext()<CR>
-nnoremap <silent><S-up> :call RgPre()<CR>
-
 
 " Go to the buffer on line
 function! BufferListJump(bufInfo)
@@ -547,16 +545,18 @@ function! BufferListJump(bufInfo)
 endfunction
 
 " autocmd to jump to buffer with CR only in BufferList buffer
-function! BufferListJumpWithCR()
-    augroup findJumpWithCR
+function! BufferListJumpMap()
+    augroup BufferListJumpMap
         autocmd!
         autocmd FileType BufferList nnoremap <buffer><silent><CR> :call BufferListJump(getline('.'))<CR>
     augroup END
+    nnoremap <silent><S-down> :call BufferListNext()<CR>
+    nnoremap <silent><S-up> :call BufferListPre()<CR>
 endfunction
 
 " redirect the command output to a buffer
 function! BufferListRedir()
-    call BufferListJumpWithCR()
+    call BufferListJumpMap()
     call OpenRedirWindow()
     edit BufferList
     setlocal buftype=nofile bufhidden=wipe nobuflisted noswapfile cursorline filetype=BufferList
@@ -600,8 +600,6 @@ function! BufferListPre()
     call BufferListShow("-")
 endfunction
 
-nnoremap <silent><M-down> :call BufferListNext()<CR>
-nnoremap <silent><M-up> :call BufferListPre()<CR>
 nnoremap <silent><space>l :B<CR>
 
 
