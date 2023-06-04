@@ -637,13 +637,13 @@ inoremap <expr> <TAB> pumvisible() ? "\<C-n>" : "\<TAB>"
 inoremap <expr> <S-TAB> pumvisible() ? "\<C-p>" : "\<S-TAB>"
 
 function! OpenLSPCompletion()
-    if v:char =~ '[A-Za-z.]' && !pumvisible() 
+    if v:char =~ '[A-Za-z0-9_.]' && !pumvisible() 
         call feedkeys("\<C-x>\<C-o>", "n")
     endif
 endfunction
 
 function! OpenNoLSPCompletion()
-    if v:char =~ '[A-Za-z]' && !pumvisible() 
+    if v:char =~ '[A-Za-z0-9_]' && !pumvisible() 
         call feedkeys("\<C-n>", "n")
     endif
 endfunction
