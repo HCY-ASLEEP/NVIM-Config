@@ -652,7 +652,7 @@ function! OpenNoLSPCompletion()
 endfunction
 
 function! AutoComplete()
-    if &filetype =~# 'python\|cpp\|java'
+    if &filetype =~# 'python\|cpp\|c\|java'
         augroup openLSPCompletion
             autocmd!
             autocmd InsertCharPre * silent! call OpenLSPCompletion()
