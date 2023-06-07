@@ -634,6 +634,8 @@ nnoremap <silent><C-down> <cmd>lua vim.diagnostic.goto_next()<CR>
 
 
 set completeopt=menuone,noselect
+" hide commplete info under the statusline
+set shortmess+=c
 
 " use tab for navigating the autocomplete menu
 inoremap <expr> <TAB> pumvisible() ? "\<C-n>" : "\<TAB>"
