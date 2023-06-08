@@ -74,7 +74,7 @@ function! InsertCRBrace()
     call feedkeys("\<BS>",'n')
     let l:frontChar = getline('.')[col('.') - 2]
     if l:frontChar == "{" || l:frontChar == "("
-        call feedkeys("\<CR>\<ESC>\O", 'n')
+        call feedkeys("\<CR>\<C-c>\O", 'n')
     else
         call feedkeys("\<CR>", 'n')
     endif
