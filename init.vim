@@ -618,6 +618,7 @@ augroup END
 lua << EOF
 require'lspconfig'.clangd.setup{}
 require'lspconfig'.pyright.setup{}
+require'lspconfig'.vimls.setup{}
 EOF
 
 nnoremap <silent>gh <cmd>lua vim.lsp.buf.hover()<CR>
@@ -654,7 +655,7 @@ function! OpenNoLSPCompletion()
 endfunction
 
 function! AutoComplete()
-    if &filetype =~# 'python\|cpp\|c\|java'
+    if &filetype =~# 'python\|cpp\|c\|vim\|java'
         augroup openLSPCompletion
             autocmd!
             autocmd InsertCharPre * silent! call OpenLSPCompletion()
