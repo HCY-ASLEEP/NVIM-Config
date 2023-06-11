@@ -629,6 +629,7 @@ nnoremap <silent>gD <cmd>lua vim.lsp.buf.declaration()<CR>
 nnoremap <silent>gi <cmd>lua vim.lsp.buf.implementation()<CR>
 nnoremap <silent>gt <cmd>lua vim.lsp.buf.type_definition()<CR>
 nnoremap <silent><SPACE>r <cmd>lua vim.lsp.buf.rename()<CR>
+nnoremap <silent><SPACE>f <cmd>lua vim.lsp.buf.format({async = true})<CR>
 nnoremap <silent><SPACE>a <cmd>lua vim.diagnostic.setloclist()<CR>
 nnoremap <silent><C-up> <cmd>lua vim.diagnostic.goto_prev()<CR>
 nnoremap <silent><C-down> <cmd>lua vim.diagnostic.goto_next()<CR>
@@ -655,7 +656,7 @@ function! OpenNoLSPCompletion()
 endfunction
 
 function! AutoComplete()
-    if &filetype =~# 'python\|cpp\|c\|vim\|java'
+    if &filetype =~# 'python\|cpp\|c\|java'
         augroup openLSPCompletion
             autocmd!
             autocmd InsertCharPre * silent! call OpenLSPCompletion()
@@ -672,4 +673,3 @@ augroup initAutoComplete
     autocmd!
     autocmd TabEnter,VimEnter * call AutoComplete()
 augroup END
-
