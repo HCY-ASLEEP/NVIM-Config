@@ -636,6 +636,33 @@ endfunction
 nnoremap <silent><SPACE>z :call ToggleSearchFolding()<CR>
 
 
+set completeopt=menuone,noselect
+" hide commplete info under the statusline
+set shortmess+=c
+
+" use tab for navigating the autocomplete menu
+inoremap <expr> <TAB> pumvisible() ? "\<C-n>" : "\<TAB>"
+inoremap <expr> <S-TAB> pumvisible() ? "\<C-p>" : "\<S-TAB>"
+
+function! OpenNoLSPCompletion()
+    if v:char =~ '[A-Za-z_]' && !pumvisible() 
+        call feedkeys("\<C-n>", "n")
+    endif
+endfunction
+
+function! AutoComplete()
+    augroup openNoLSPCompletion
+        autocmd!
+        autocmd InsertCharPre * silent! call OpenNoLSPCompletion()
+    augroup END
+endfunction
+
+augroup initAutoComplete
+    autocmd!
+    autocmd TabEnter,VimEnter * call AutoComplete()
+augroup END
+
+
 " vim-plug(4) ---------------------------------------------------------------------------------------
 call plug#begin($HOME.'/.local/share/nvim/site/autoload')
 Plug 'iamcco/markdown-preview.nvim', { 'do': { -> mkdp#util#install() }, 'for': ['markdown', 'vim-plug']}
@@ -646,5 +673,4 @@ augroup MarkdownPreview
     autocmd!
     auto Filetype markdown source $HOME/.config/nvim/markdown.vim
 augroup END
-
 
