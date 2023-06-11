@@ -122,8 +122,8 @@ cnoremap <expr> <right> wildmenumode() ? "\<SPACE>\<BS>" : "\<right>"
 
 " highlight settings -------------------------------------------------------------------------------
 function! StressCurMatch()
-  let l:target = '\c\%#'.@/
-  call matchadd('FocusCurMatch', l:target)
+    let l:target = '\c\%#'.@/
+    call matchadd('FocusCurMatch', l:target)
 endfunction
 
 " centre the screen on the current search result
@@ -174,7 +174,7 @@ function! ToggleExplorer()
 
         " if cursor is not in explorer
         if l:expl_win_num != winnr()
-           let t:cur_work_win_num = winnr()
+            let t:cur_work_win_num = winnr()
         endif
 
         " if explorer is not hidden
@@ -201,20 +201,20 @@ endfunction
 nnoremap <silent><SPACE>e :call ToggleExplorer()<CR>
 
 function! ExploreWhenEnter()
-    
+
     let l:expl_win_num = bufwinnr(bufnr('NetrwTreeListing'))
-    
+
     " if expl_win_num not exists
     if l:expl_win_num == -1
-    
+
         " explorer vertical split max win width
         let t:max_win_width=25
-        
+
         " record the win num of workspace except explorer where cursor in
         let t:cur_work_win_num = winnr()
         call OpenExplorerOnSize(t:max_win_width)
         wincmd w
-        
+
     endif
 endfunction
 
@@ -252,9 +252,9 @@ hi StatuslineNC ctermfg=lightmagenta ctermbg=darkgray cterm=bold
 augroup pythonSpecialFocus
     autocmd!
     autocmd Filetype python 
-        \  setlocal list
-        \| setlocal listchars=space:\ 
-        \| setlocal listchars+=multispace:\ \ \ ┊
+                \  setlocal list
+                \| setlocal listchars=space:\ 
+                \| setlocal listchars+=multispace:\ \ \ ┊
 augroup END
 
 
@@ -269,17 +269,17 @@ function! Tabline()
         let l:bufnr = l:buflist[l:winnr - 1]
         let l:bufname = bufname(l:bufnr)
         let l:bufmodified = getbufvar(l:bufnr, "&mod")
-    
+
         let l:s .= '%' . l:tab . 'T'
         let l:s .= (l:tab == tabpagenr() ? '%#TabLineSel#' : '%#TabLine#')
         let l:s .= ' ' . l:tab .' '
         let l:s .= (l:bufname != '' ? '['. fnamemodify(l:bufname, ':t') . '] ' : '[No Name] ')
-    
+
         if l:bufmodified
             let l:s .= '[+] '
         endif
     endfor
-    
+
     let l:s .= '%#TabLineFill#'
     if (exists("g:tablineclosebutton"))
         let l:s .= '%=%999XX'
@@ -603,31 +603,37 @@ endfunction
 nnoremap <silent><space>l :B<CR>
 
 
-set completeopt=menuone,noselect
-" hide commplete info under the statusline
-set shortmess+=c
+function! HasFolds()
+    let l:numLines = line('$')
+    for l:lineNum in range(1, l:numLines)
+        if foldclosed(l:lineNum) != -1
+            return 1
+        endif
+    endfor
+    return 0
+endfunction
 
-" use tab for navigating the autocomplete menu
-inoremap <expr> <TAB> pumvisible() ? "\<C-n>" : "\<TAB>"
-inoremap <expr> <S-TAB> pumvisible() ? "\<C-p>" : "\<S-TAB>"
-
-function! OpenNoLSPCompletion()
-    if v:char =~ '[A-Za-z_]' && !pumvisible() 
-        call feedkeys("\<C-n>", "n")
+function! SearchFoldEpxr()
+    if getline(v:lnum) =~ @/
+        return 0
+    elseif getline(v:lnum-1) =~ @/ || getline(v:lnum+1) =~ @/
+        return 1
+    else
+        return 2
     endif
 endfunction
 
-function! AutoComplete()
-    augroup openNoLSPCompletion
-        autocmd!
-        autocmd InsertCharPre * silent! call OpenNoLSPCompletion()
-    augroup END
+" Folding according to search result
+function! ToggleSearchFolding()
+    if HasFolds()
+        setlocal foldmethod=syntax foldcolumn=0
+        exec "normal! zR"
+    else
+        setlocal foldexpr=SearchFoldEpxr() foldmethod=expr foldlevel=0 foldcolumn=2
+    endif
 endfunction
 
-augroup initAutoComplete
-    autocmd!
-    autocmd TabEnter,VimEnter * call AutoComplete()
-augroup END
+nnoremap <silent><SPACE>z :call ToggleSearchFolding()<CR>
 
 
 " vim-plug(4) ---------------------------------------------------------------------------------------
