@@ -23,7 +23,7 @@ set expandtab
 set autoindent
 
 " highlight search
-nnoremap <silent><space><space> :set hlsearch! hlsearch?<CR>
+nnoremap <silent><space><space> <cmd>set hlsearch! hlsearch?<CR>
 
 " foldmethod
 set foldmethod=syntax
@@ -109,7 +109,7 @@ augroup internal_terminal
 augroup END
 
 " switch windows -----------------------------------------------------------------------------------
-nnoremap <silent><TAB> :wincmd w<CR>
+nnoremap <silent><TAB> <cmd>wincmd w<CR>
 
 
 " wild* settings -----------------------------------------------------------------------------------
@@ -148,7 +148,7 @@ let g:netrw_browse_split = 4
 function! SkipNetrwWin()
     augroup skipNetrwWin
         autocmd!
-        autocmd BufEnter NetrwTreeListing :wincmd w
+        autocmd BufEnter NetrwTreeListing wincmd w
     augroup END
 endfunction
 
@@ -198,7 +198,7 @@ function! ToggleExplorer()
     endif
 endfunction
 
-nnoremap <silent><SPACE>e :call ToggleExplorer()<CR>
+nnoremap <silent><SPACE>e <cmd>call ToggleExplorer()<CR>
 
 function! ExploreWhenEnter()
 
@@ -293,7 +293,7 @@ hi TabLine ctermfg=lightmagenta ctermbg=darkgray cterm=bold
 hi TabLineFill ctermfg=NONE ctermbg=darkgray cterm=bold
 hi TabLineSel ctermfg=black ctermbg=white cterm=bold
 
-nnoremap <silent><S-TAB> :tabnext<CR>
+nnoremap <silent><S-TAB> <cmd>tabnext<CR>
 
 
 " set ripgrep root dir
@@ -352,7 +352,7 @@ function! QuitRedirWindow()
     endif
 endfunction
 
-nnoremap <silent><space>q :call QuitRedirWindow()<CR>
+nnoremap <silent><space>q <cmd>call QuitRedirWindow()<CR>
 
 " Fuzzy Match filenames -----------------------------------------------------------------------------
 " Go to the file on line
@@ -371,10 +371,10 @@ endfunction
 function! FindJumpMap()
     augroup findJumpMap
         autocmd!
-        autocmd FileType FuzzyFilenameSearch nnoremap <buffer><silent><CR> :call FindJump(getline('.'))<CR>
+        autocmd FileType FuzzyFilenameSearch nnoremap <buffer><silent><CR> <cmd>call FindJump(getline('.'))<CR>
     augroup END
-    nnoremap <silent><S-down> :call FindNext()<CR>
-    nnoremap <silent><S-up> :call FindPre()<CR>
+    nnoremap <silent><S-down> <cmd>call FindNext()<CR>
+    nnoremap <silent><S-up> <cmd>call FindPre()<CR>
 endfunction
 
 " redirect the command output to a buffer
@@ -461,10 +461,10 @@ endfunction
 function! RgJumpMap()
     augroup rgJumpMap
         autocmd!
-        autocmd FileType RipgrepWordSearch nnoremap <buffer><silent><CR> :call RgJump(getline('.'))<CR>
+        autocmd FileType RipgrepWordSearch nnoremap <buffer><silent><CR> <cmd>call RgJump(getline('.'))<CR>
     augroup END
-    nnoremap <silent><S-down> :call RgNext()<CR>
-    nnoremap <silent><S-up> :call RgPre()<CR>
+    nnoremap <silent><S-down> <cmd>call RgNext()<CR>
+    nnoremap <silent><S-up> <cmd>call RgPre()<CR>
 endfunction
 
 " redirect the command output to a buffer
@@ -548,10 +548,10 @@ endfunction
 function! BufferListJumpMap()
     augroup BufferListJumpMap
         autocmd!
-        autocmd FileType BufferList nnoremap <buffer><silent><CR> :call BufferListJump(getline('.'))<CR>
+        autocmd FileType BufferList nnoremap <buffer><silent><CR> <cmd>call BufferListJump(getline('.'))<CR>
     augroup END
-    nnoremap <silent><S-down> :call BufferListNext()<CR>
-    nnoremap <silent><S-up> :call BufferListPre()<CR>
+    nnoremap <silent><S-down> <cmd>call BufferListNext()<CR>
+    nnoremap <silent><S-up> <cmd>call BufferListPre()<CR>
 endfunction
 
 " redirect the command output to a buffer
@@ -600,7 +600,7 @@ function! BufferListPre()
     call BufferListShow("-")
 endfunction
 
-nnoremap <silent><space>l :B<CR>
+nnoremap <silent><space>l <cmd>B<CR>
 
 
 function! HasFolds()
@@ -633,7 +633,18 @@ function! ToggleSearchFolding()
     endif
 endfunction
 
-nnoremap <silent><SPACE>z :call ToggleSearchFolding()<CR>
+nnoremap <silent><SPACE>z <cmd>call ToggleSearchFolding()<CR>
+
+
+" quick action to move the cursor to the begin or end of the line
+nnoremap <expr>0 col('.') == 1 ? '$' : '0'
+vnoremap <expr>0 col('.') == 1 ? '$' : '0'
+
+" move code block up or down
+nnoremap <silent><M-down> <cmd>m .+1<CR>==
+nnoremap <silent><M-up> <cmd>m .-2<CR>==
+vnoremap <silent><M-down> :m '>+1<CR>gv=gv
+vnoremap <silent><M-up> :m '<-2<CR>gv=gv
 
 
 " vim-plug(4) ---------------------------------------------------------------------------------------
@@ -662,7 +673,6 @@ nnoremap <silent>gD <cmd>lua vim.lsp.buf.declaration()<CR>
 nnoremap <silent>gi <cmd>lua vim.lsp.buf.implementation()<CR>
 nnoremap <silent>gt <cmd>lua vim.lsp.buf.type_definition()<CR>
 nnoremap <silent><SPACE>r <cmd>lua vim.lsp.buf.rename()<CR>
-nnoremap <silent><SPACE>f <cmd>lua vim.lsp.buf.format({async = true})<CR>
 nnoremap <silent><SPACE>a <cmd>lua vim.diagnostic.setloclist()<CR>
 nnoremap <silent><C-up> <cmd>lua vim.diagnostic.goto_prev()<CR>
 nnoremap <silent><C-down> <cmd>lua vim.diagnostic.goto_next()<CR>
