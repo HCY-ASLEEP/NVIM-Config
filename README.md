@@ -5,24 +5,24 @@ This my neovim config.
 
 
 
-To use neovim config with coc.nvim, you can download files to your customized path or run the following one-line command:
+To use neovim config with lsp, you can download files to your customized path or run the following one-line command:
 
 ```bash
 curl -sL https://raw.githubusercontent.com/HCY-ASLEEP/NVIM-Config/main/nvim-config.sh | sh
 ```
 </br>
 
-To use neovim config without coc.nvim but with self-contained auto completion of vim, and can also edit markdown at the same time, you can download files to your customized path or run the following one-line command:
+To use neovim config without lsp but with self-contained auto completion of vim, and can also edit markdown at the same time, you can download files to your customized path or run the following one-line command:
 
 ```bash
-curl -sL https://raw.githubusercontent.com/HCY-ASLEEP/NVIM-Config/main/nvim-config-without-coc.nvim/nvim-config.sh | sh
+curl -sL https://raw.githubusercontent.com/HCY-ASLEEP/NVIM-Config/main/nvim-config-without-lsp/nvim-config.sh | sh
 ```
 </br>
 
-To install latest nodejs of coc.nvim in China, you can run the following one-line command, but before running the command I strongly recommand switching to a non-root user firstly:
+To install latest nodejs in China, you can run the following one-line command, but before running the command I strongly recommand switching to a non-root user firstly:
 
 ```bash
-curl -sL https://raw.githubusercontent.com/HCY-ASLEEP/NVIM-Config/main/coc-nodejs-installer.sh | bash
+curl -sL https://raw.githubusercontent.com/HCY-ASLEEP/NVIM-Config/main/nodejs-installer.sh | bash
 ```
 
 </br>
@@ -43,7 +43,7 @@ apt update;\
 
 </br>
 
-To config all what coc.nvim need of the docker ubuntu in one step:
+To config all what lsp need of the docker ubuntu in one step:
 
 ```bash
 apt update;\
@@ -55,7 +55,7 @@ apt update;\
     sudo chown devenv /home/devenv/;\
     sudo chgrp devenv /home/devenv/;\
     su -c 'curl -sL https://raw.githubusercontent.com/HCY-ASLEEP/NVIM-Config/main/nvim-config.sh | sh' devenv;\
-    su -c 'curl -sL https://raw.githubusercontent.com/HCY-ASLEEP/NVIM-Config/main/coc-nodejs-installer.sh | bash' devenv;\
+    su -c 'curl -sL https://raw.githubusercontent.com/HCY-ASLEEP/NVIM-Config/main/nodejs-installer.sh | bash' devenv;\
     su devenv
 ```
 
