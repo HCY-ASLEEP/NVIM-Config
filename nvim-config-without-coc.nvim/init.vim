@@ -386,7 +386,7 @@ function! FindRedir(cmd)
     setlocal buftype=nofile bufhidden=wipe nobuflisted noswapfile cursorline filetype=FuzzyFilenameSearch
 endfunction
 
-command! -nargs=1 -complete=command FindRedir silent call FindRedir(<q-args>)
+command! -nargs=1 -complete=command FindRedir silent! call FindRedir(<q-args>)
 
 " Show Files fuzzily searched with git
 function! FindWithGit(substr)
@@ -409,10 +409,10 @@ function! FindWithoutGit(substr)
 endfunction
 
 " Fg means 'file git', search file names fuzzily with git
-command! -nargs=1 -complete=command Fg silent call FindWithGit(<q-args>)
+command! -nargs=1 -complete=command Fg silent! call FindWithGit(<q-args>)
 
 " Fs means 'file search', search file names fuzzily
-command! -nargs=1 -complete=command Fs silent call FindWithoutGit(<q-args>)
+command! -nargs=1 -complete=command Fs silent! call FindWithoutGit(<q-args>)
 
 " To show file preview, underlying of FindNext, imitate 'cNext' command
 function! FindShow(direction)
@@ -476,7 +476,7 @@ function! RgRedir(cmd)
     setlocal buftype=nofile bufhidden=wipe nobuflisted noswapfile cursorline filetype=RipgrepWordSearch
 endfunction
 
-command! -nargs=1 -complete=command RgRedir silent call RgRedir(<q-args>)
+command! -nargs=1 -complete=command RgRedir silent! call RgRedir(<q-args>)
 
 " Show Words fuzzily searched with git
 function! RgWithGit(substr)
@@ -499,7 +499,7 @@ function! RgWithoutGit(substr)
 endfunction
 
 " Wg means 'word git', search file fuzzily names with git
-command! -nargs=1 -complete=command Wg silent call RgWithGit(<q-args>)
+command! -nargs=1 -complete=command Wg silent! call RgWithGit(<q-args>)
 
 " Ws means 'word search', search file fuzzily names without git
 command! -nargs=1 -complete=command Ws silent! call RgWithoutGit(<q-args>)
@@ -571,7 +571,7 @@ function! BufferListRedir()
     endwhile
 endfunction
 
-command! B call BufferListRedir()
+nnoremap <silent><space>l <cmd>call BufferListRedir()<CR>
 
 " To show the buffer selected, underlying of BufferListNext, imitate 'cNext' command
 function! BufferListShow(direction)
@@ -599,8 +599,6 @@ endfunction
 function! BufferListPre()
     call BufferListShow("-")
 endfunction
-
-nnoremap <silent><space>l <cmd>B<CR>
 
 
 function! HasFolds()
@@ -630,6 +628,7 @@ function! ToggleSearchFolding()
         exec "normal! zR"
     else
         setlocal foldexpr=SearchFoldEpxr() foldmethod=expr foldlevel=0 foldcolumn=2
+        exec "normal! zM"
     endif
 endfunction
 
@@ -645,6 +644,25 @@ nnoremap <silent><M-down> <cmd>m .+1<CR>==
 nnoremap <silent><M-up> <cmd>m .-2<CR>==
 vnoremap <silent><M-down> :m '>+1<CR>gv=gv
 vnoremap <silent><M-up> :m '<-2<CR>gv=gv
+
+"" %s/\s\+$//e
+function! RmTrailingSpace()
+    exec "%s/\s\+$//e"
+endfunction
+
+command! RmTrailingSpace call RmTrailingSpace()
+
+
+" vim-plug(4) ---------------------------------------------------------------------------------------
+call plug#begin($HOME.'/.local/share/nvim/site/autoload')
+Plug 'iamcco/markdown-preview.nvim', { 'do': { -> mkdp#util#install() }, 'for': ['markdown', 'vim-plug']}
+call plug#end()
+
+
+augroup MarkdownPreview
+    autocmd!
+    auto Filetype markdown source $HOME/.config/nvim/markdown.vim
+augroup END
 
 
 set completeopt=menuone,noselect
@@ -670,18 +688,6 @@ endfunction
 
 augroup initAutoComplete
     autocmd!
-    autocmd TabEnter,VimEnter * call AutoComplete()
-augroup END
-
-
-" vim-plug(4) ---------------------------------------------------------------------------------------
-call plug#begin($HOME.'/.local/share/nvim/site/autoload')
-Plug 'iamcco/markdown-preview.nvim', { 'do': { -> mkdp#util#install() }, 'for': ['markdown', 'vim-plug']}
-call plug#end()
-
-
-augroup MarkdownPreview
-    autocmd!
-    auto Filetype markdown source $HOME/.config/nvim/markdown.vim
+    autocmd BufWinEnter * call AutoComplete()
 augroup END
 
