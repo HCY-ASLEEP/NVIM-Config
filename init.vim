@@ -386,7 +386,7 @@ function! FindRedir(cmd)
     setlocal buftype=nofile bufhidden=wipe nobuflisted noswapfile cursorline filetype=FuzzyFilenameSearch
 endfunction
 
-command! -nargs=1 -complete=command FindRedir silent call FindRedir(<q-args>)
+command! -nargs=1 -complete=command FindRedir silent! call FindRedir(<q-args>)
 
 " Show Files fuzzily searched with git
 function! FindWithGit(substr)
@@ -409,10 +409,10 @@ function! FindWithoutGit(substr)
 endfunction
 
 " Fg means 'file git', search file names fuzzily with git
-command! -nargs=1 -complete=command Fg silent call FindWithGit(<q-args>)
+command! -nargs=1 -complete=command Fg silent! call FindWithGit(<q-args>)
 
 " Fs means 'file search', search file names fuzzily
-command! -nargs=1 -complete=command Fs silent call FindWithoutGit(<q-args>)
+command! -nargs=1 -complete=command Fs silent! call FindWithoutGit(<q-args>)
 
 " To show file preview, underlying of FindNext, imitate 'cNext' command
 function! FindShow(direction)
@@ -476,7 +476,7 @@ function! RgRedir(cmd)
     setlocal buftype=nofile bufhidden=wipe nobuflisted noswapfile cursorline filetype=RipgrepWordSearch
 endfunction
 
-command! -nargs=1 -complete=command RgRedir silent call RgRedir(<q-args>)
+command! -nargs=1 -complete=command RgRedir silent! call RgRedir(<q-args>)
 
 " Show Words fuzzily searched with git
 function! RgWithGit(substr)
@@ -499,7 +499,7 @@ function! RgWithoutGit(substr)
 endfunction
 
 " Wg means 'word git', search file fuzzily names with git
-command! -nargs=1 -complete=command Wg silent call RgWithGit(<q-args>)
+command! -nargs=1 -complete=command Wg silent! call RgWithGit(<q-args>)
 
 " Ws means 'word search', search file fuzzily names without git
 command! -nargs=1 -complete=command Ws silent! call RgWithoutGit(<q-args>)
@@ -571,7 +571,7 @@ function! BufferListRedir()
     endwhile
 endfunction
 
-command! B call BufferListRedir()
+nnoremap <silent><space>l <cmd>call BufferListRedir()<CR>
 
 " To show the buffer selected, underlying of BufferListNext, imitate 'cNext' command
 function! BufferListShow(direction)
@@ -599,8 +599,6 @@ endfunction
 function! BufferListPre()
     call BufferListShow("-")
 endfunction
-
-nnoremap <silent><space>l <cmd>B<CR>
 
 
 function! HasFolds()
@@ -630,6 +628,7 @@ function! ToggleSearchFolding()
         exec "normal! zR"
     else
         setlocal foldexpr=SearchFoldEpxr() foldmethod=expr foldlevel=0 foldcolumn=2
+        exec "normal! zM"
     endif
 endfunction
 
@@ -646,10 +645,16 @@ nnoremap <silent><M-up> <cmd>m .-2<CR>==
 vnoremap <silent><M-down> :m '>+1<CR>gv=gv
 vnoremap <silent><M-up> :m '<-2<CR>gv=gv
 
+"" %s/\s\+$//e
+function! RmTrailingSpace()
+    exec "%s/\s\+$//e"
+endfunction
+
+command! RmTrailingSpace call RmTrailingSpace()
+
 
 " vim-plug(4) ---------------------------------------------------------------------------------------
 call plug#begin($HOME.'/.local/share/nvim/site/autoload')
-Plug 'neovim/nvim-lspconfig'
 Plug 'tpope/vim-fugitive'
 call plug#end()
 
@@ -658,24 +663,6 @@ augroup MarkdownPreview
     autocmd!
     auto Filetype markdown source $HOME/.config/nvim/markdown.vim
 augroup END
-
-lua << EOF
-require'lspconfig'.clangd.setup{}
-require'lspconfig'.pyright.setup{}
-require'lspconfig'.vimls.setup{}
-EOF
-
-nnoremap <silent>gh <cmd>lua vim.lsp.buf.hover()<CR>
-nnoremap <silent>gs <cmd>lua vim.lsp.buf.document_symbol()<CR>
-nnoremap <silent>gr <cmd>lua vim.lsp.buf.references()<CR>
-nnoremap <silent>gd <cmd>lua vim.lsp.buf.definition()<CR>
-nnoremap <silent>gD <cmd>lua vim.lsp.buf.declaration()<CR>
-nnoremap <silent>gi <cmd>lua vim.lsp.buf.implementation()<CR>
-nnoremap <silent>gt <cmd>lua vim.lsp.buf.type_definition()<CR>
-nnoremap <silent><SPACE>r <cmd>lua vim.lsp.buf.rename()<CR>
-nnoremap <silent><SPACE>a <cmd>lua vim.diagnostic.setloclist()<CR>
-nnoremap <silent><C-up> <cmd>lua vim.diagnostic.goto_prev()<CR>
-nnoremap <silent><C-down> <cmd>lua vim.diagnostic.goto_next()<CR>
 
 
 set completeopt=menuone,noselect
@@ -699,12 +686,18 @@ function! OpenNoLSPCompletion()
 endfunction
 
 function! AutoComplete()
-    if &filetype =~# 'python\|cpp\|c\|java'
+    if &filetype =~# 'python\|lua\|cpp\|c\|java'
+        if exists('#openNoLSPCompletion#InsertCharPre')
+            autocmd! openNoLSPCompletion
+        endif
         augroup openLSPCompletion
             autocmd!
             autocmd InsertCharPre * silent! call OpenLSPCompletion()
         augroup END
     else
+        if exists('#openLSPCompletion#InsertCharPre')
+            autocmd! openLSPCompletion
+        endif
         augroup openNoLSPCompletion
             autocmd!
             autocmd InsertCharPre * silent! call OpenNoLSPCompletion()
@@ -714,5 +707,9 @@ endfunction
 
 augroup initAutoComplete
     autocmd!
-    autocmd TabEnter,VimEnter * call AutoComplete()
+    autocmd BufWinEnter * call AutoComplete()
 augroup END
+
+
+source $HOME/.config/nvim/lsp.lua
+
