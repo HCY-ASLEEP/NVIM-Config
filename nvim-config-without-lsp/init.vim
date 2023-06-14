@@ -234,7 +234,7 @@ hi Visual ctermfg=lightred ctermbg=darkgray cterm=NONE
 hi VertSplit ctermfg=darkgray ctermbg=NONE cterm=NONE
 hi CursorLine ctermfg=black ctermbg=blue cterm=bold
 hi CursorLineNr ctermfg=darkyellow ctermbg=NONE cterm=NONE
-hi PmenuSel ctermfg=white ctermbg=green cterm=bold
+hi PmenuSel ctermfg=black ctermbg=green cterm=bold
 set fillchars+=eob:\ 
 
 
