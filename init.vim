@@ -232,9 +232,9 @@ hi LineNr ctermfg=darkgray ctermbg=NONE cterm=NONE
 hi Comment ctermfg=darkgray ctermbg=NONE cterm=italic
 hi Visual ctermfg=lightred ctermbg=darkgray cterm=NONE
 hi VertSplit ctermfg=darkgray ctermbg=NONE cterm=NONE
-hi CursorLine ctermfg=black ctermbg=blue cterm=bold
+hi CursorLine ctermfg=black ctermbg=gray cterm=NONE
 hi CursorLineNr ctermfg=darkyellow ctermbg=NONE cterm=NONE
-hi PmenuSel ctermfg=black ctermbg=green cterm=bold
+hi PmenuSel ctermfg=black ctermbg=lightmagenta cterm=NONE
 set fillchars+=eob:\ 
 
 
