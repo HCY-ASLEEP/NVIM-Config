@@ -209,12 +209,24 @@ function! ExploreWhenEnter()
 
     " if expl_win_num not exists
     if l:expl_win_num == -1
+        
+        if exists('#skipNetrwWin#BufEnter')
+            autocmd! skipNetrwWin
+        endif
 
         " record the win num of workspace except explorer where cursor in
         let t:cur_work_win_num = winnr()
         call OpenExplorerOnSize(g:max_explore_win_width)
         wincmd w
-
+        
+    else
+        
+        if winwidth(l:expl_win_num)!=0
+            autocmd! skipNetrwWin
+        else
+            call SkipNetrwWin()
+        endif
+        
     endif
 endfunction
 
