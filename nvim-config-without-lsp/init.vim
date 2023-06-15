@@ -144,6 +144,9 @@ let g:netrw_liststyle = 3
 " see help doc to know more about this global var
 let g:netrw_browse_split = 4
 
+" explorer vertical split max win width
+let g:max_explore_win_width=25
+
 " skip the netrw win when the netrw hidden
 function! SkipNetrwWin()
     augroup skipNetrwWin
@@ -183,7 +186,7 @@ function! ToggleExplorer()
             exec t:cur_work_win_num."wincmd w"
             call SkipNetrwWin()
         else
-            let t:win_width=t:max_win_width
+            let t:win_width=g:max_explore_win_width
 
             " disable skip netrw win
             autocmd! skipNetrwWin
@@ -191,7 +194,7 @@ function! ToggleExplorer()
         endif
         exec "vertical ".l:expl_win_num."resize ".t:win_width
     else
-        call OpenExplorerOnSize(t:max_win_width)
+        call OpenExplorerOnSize(g:max_explore_win_width)
         if l:enewFlag == 1
             wincmd w
         endif
@@ -207,12 +210,9 @@ function! ExploreWhenEnter()
     " if expl_win_num not exists
     if l:expl_win_num == -1
 
-        " explorer vertical split max win width
-        let t:max_win_width=25
-
         " record the win num of workspace except explorer where cursor in
         let t:cur_work_win_num = winnr()
-        call OpenExplorerOnSize(t:max_win_width)
+        call OpenExplorerOnSize(g:max_explore_win_width)
         wincmd w
 
     endif
@@ -292,7 +292,7 @@ set tabline=%!Tabline()
 " tabline colorscheme
 hi TabLine ctermfg=lightmagenta ctermbg=darkgray cterm=bold
 hi TabLineFill ctermfg=NONE ctermbg=darkgray cterm=bold
-hi TabLineSel ctermfg=black ctermbg=white cterm=bold
+hi TabLineSel ctermfg=lightyellow ctermbg=darkgray cterm=bold
 
 nnoremap <silent><S-TAB> <cmd>tabnext<CR>
 
