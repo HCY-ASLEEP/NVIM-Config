@@ -222,7 +222,11 @@ function! ExploreWhenEnter()
     else
         
         if winwidth(l:expl_win_num)!=0
-            autocmd! skipNetrwWin
+            
+            if exists('#skipNetrwWin#BufEnter')
+                autocmd! skipNetrwWin
+            endif
+
         else
             call SkipNetrwWin()
         endif
@@ -246,7 +250,8 @@ hi Visual ctermfg=lightred ctermbg=darkgray cterm=NONE
 hi VertSplit ctermfg=darkgray ctermbg=NONE cterm=NONE
 hi CursorLine ctermfg=black ctermbg=lightgray cterm=NONE
 hi CursorLineNr ctermfg=darkyellow ctermbg=NONE cterm=NONE
-hi PmenuSel ctermfg=black ctermbg=lightmagenta cterm=NONE
+hi PmenuSel ctermfg=black ctermbg=lightgreen cterm=NONE
+hi Pmenu ctermfg=black ctermbg=gray cterm=NONE
 set fillchars+=eob:\ 
 
 
