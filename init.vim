@@ -691,6 +691,10 @@ set shortmess+=c
 inoremap <expr> <TAB> pumvisible() ? "\<C-n>" : "\<TAB>"
 inoremap <expr> <S-TAB> pumvisible() ? "\<C-p>" : "\<S-TAB>"
 
+" use up and down keys for navigating the autocomplete menu
+inoremap <expr> <down> pumvisible() ? "\<C-n>" : "\<down>"
+inoremap <expr> <up> pumvisible() ? "\<C-p>" : "\<up>"
+
 function! OpenLSPCompletion()
     if v:char =~ '[A-Za-z_.]' && !pumvisible() 
         call feedkeys("\<C-x>\<C-o>", "n")
