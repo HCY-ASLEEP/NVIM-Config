@@ -209,7 +209,7 @@ function! ExploreWhenEnter()
 
     " if expl_win_num not exists
     if l:expl_win_num == -1
-        
+
         if exists('#skipNetrwWin#BufEnter')
             autocmd! skipNetrwWin
         endif
@@ -218,11 +218,11 @@ function! ExploreWhenEnter()
         let t:cur_work_win_num = winnr()
         call OpenExplorerOnSize(g:max_explore_win_width)
         wincmd w
-        
+
     else
-        
+
         if winwidth(l:expl_win_num)!=0
-            
+
             if exists('#skipNetrwWin#BufEnter')
                 autocmd! skipNetrwWin
             endif
@@ -230,7 +230,7 @@ function! ExploreWhenEnter()
         else
             call SkipNetrwWin()
         endif
-        
+
     endif
 endfunction
 
@@ -250,7 +250,7 @@ hi Visual ctermfg=lightred ctermbg=darkgray cterm=NONE
 hi VertSplit ctermfg=darkgray ctermbg=NONE cterm=NONE
 hi CursorLine ctermfg=black ctermbg=lightgray cterm=NONE
 hi CursorLineNr ctermfg=darkyellow ctermbg=NONE cterm=NONE
-hi PmenuSel ctermfg=black ctermbg=lightgreen cterm=NONE
+hi PmenuSel ctermfg=black ctermbg=lightred cterm=NONE
 hi Pmenu ctermfg=black ctermbg=gray cterm=NONE
 set fillchars+=eob:\ 
 
