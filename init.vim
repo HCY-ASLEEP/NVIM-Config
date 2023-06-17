@@ -734,4 +734,4 @@ augroup END
 
 
 source $HOME/.config/nvim/lsp.lua
-
+source $HOME/.config/nvim/format.vim
