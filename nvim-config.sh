@@ -10,6 +10,10 @@ echo "  lsp.lua download start"
 echo
 sh -c 'curl -fLo "${XDG_DATA_HOME:-$HOME/.config}"/nvim/lsp.lua --create-dirs https://raw.githubusercontent.com/HCY-ASLEEP/NVIM-Config/main/lsp.lua'
 echo
+echo "  format.vim download start"
+echo
+sh -c 'curl -fLo "${XDG_DATA_HOME:-$HOME/.config}"/nvim/format.vim --create-dirs https://raw.githubusercontent.com/HCY-ASLEEP/NVIM-Config/main/format.vim'
+echo
 echo "  markdown.vim download start"
 echo
 sh -c 'curl -fLo "${XDG_DATA_HOME:-$HOME/.config}"/nvim/markdown.vim --create-dirs https://raw.githubusercontent.com/HCY-ASLEEP/NVIM-Config/main/markdown.vim'
