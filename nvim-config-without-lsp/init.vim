@@ -39,6 +39,9 @@ set novisualbell
 " set double key separation time
 set timeoutlen=200
 
+" set no swap file
+set noswapfile
+
 " jump to the last position when reopening a file
 " ! You must mkdir viewdir first !
 set viewdir=~/.vimviews/
@@ -86,18 +89,18 @@ inoremap <expr> <CR> InsertCRBrace()
 function! ESC_IMAP()
     " If the char in front the cursor is ";"
     if getline('.')[col('.') - 2]== ";" 
-        call feedkeys("\<BS>\<BS>\<ESC>", 'n')
+        call feedkeys("\<BS>\<BS>\<C-c>", 'n')
     else
         call feedkeys("\<BS>\;", 'n')
     endif
 endfunction
 inoremap <expr> ; ESC_IMAP()
 
-vnoremap ;; <ESC>
-snoremap ;; <ESC>
-xnoremap ;; <ESC>
-cnoremap ;; <ESC>
-onoremap ;; <ESC>
+vnoremap ;; <C-c>
+snoremap ;; <C-c>
+xnoremap ;; <C-c>
+cnoremap ;; <C-c>
+onoremap ;; <C-c>
 
 " exit windows
 tnoremap ;; <C-\><C-n>
