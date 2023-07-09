@@ -8,7 +8,11 @@ sh -c 'curl -fLo "${XDG_DATA_HOME:-$HOME/.config}"/nvim/init.vim --create-dirs h
 echo
 echo "  lsp.lua download start"
 echo
-sh -c 'curl -fLo "${XDG_DATA_HOME:-$HOME/.config}"/nvim/lsp.lua --create-dirs https://raw.githubusercontent.com/HCY-ASLEEP/NVIM-Config/main/lsp.lua'
+sh -c 'curl -fLo "${XDG_DATA_HOME:-$HOME/.config}"/nvim/lua/lsp.lua --create-dirs https://raw.githubusercontent.com/HCY-ASLEEP/NVIM-Config/main/lua/lsp.lua'
+echo
+echo "  symbol-outline.lua download start"
+echo
+sh -c 'curl -fLo "${XDG_DATA_HOME:-$HOME/.config}"/nvim/lua/symbol-outline.lua --create-dirs https://raw.githubusercontent.com/HCY-ASLEEP/NVIM-Config/main/lua/symbol-outline.lua'
 echo
 echo "  format.vim download start"
 echo
