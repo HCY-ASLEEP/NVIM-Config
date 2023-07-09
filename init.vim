@@ -22,9 +22,6 @@ set expandtab
 " autoindent
 set autoindent
 
-" highlight search
-nnoremap <silent><space><space> <cmd>set hlsearch! hlsearch?<CR>
-
 " foldmethod
 set foldmethod=syntax
 set nofoldenable
@@ -47,8 +44,8 @@ set noswapfile
 set viewdir=~/.vimviews/
 augroup keepBufView
     autocmd!
-    autocmd BufWinLeave *.* mkview
-    autocmd BufWinEnter *.* silent! loadview 
+    autocmd BufWinLeave * silent! mkview
+    autocmd BufWinEnter * silent! loadview 
 augroup END
 
 " visual block short-cut
@@ -135,6 +132,19 @@ nnoremap <silent> N N:call StressCurMatch()<CR>
 cnoremap <silent><expr> <CR> getcmdtype() =~ '[/?]' ? '<CR>:call StressCurMatch()<CR>' : '<CR>'
 
 hi FocusCurMatch ctermfg=white ctermbg=red cterm=bold
+
+function! ToggleHlsearch()
+    if &hlsearch
+        set nohlsearch
+        hi clear FocusCurMatch
+    else
+        set hlsearch
+        hi FocusCurMatch ctermfg=white ctermbg=red cterm=bold
+    end
+endfunction
+
+" highlight search
+nnoremap <silent><space><space> <cmd>call ToggleHlsearch()<CR>
 
 
 " netrw settings -----------------------------------------------------------------------------------
@@ -255,6 +265,7 @@ hi CursorLine ctermfg=black ctermbg=lightgray cterm=NONE
 hi CursorLineNr ctermfg=darkyellow ctermbg=NONE cterm=NONE
 hi PmenuSel ctermfg=black ctermbg=lightred cterm=NONE
 hi Pmenu ctermfg=black ctermbg=gray cterm=NONE
+hi Identifier  ctermfg=lightgray ctermbg=NONE cterm=bold
 set fillchars+=eob:\ 
 
 
@@ -269,14 +280,10 @@ hi Statusline ctermfg=lightyellow ctermbg=darkgray cterm=bold
 hi StatuslineNC ctermfg=lightmagenta ctermbg=darkgray cterm=bold
 
 
-" python special focus -----------------------------------------------------------------------------
-augroup pythonSpecialFocus
-    autocmd!
-    autocmd Filetype python 
-                \  setlocal list
-                \| setlocal listchars=space:\ 
-                \| setlocal listchars+=multispace:\ \ \ ┊
-augroup END
+set list
+set listchars=tab:┊\ ,eol:\ 
+set listchars+=trail:\ 
+set listchars+=leadmultispace:┊\ \ \ 
 
 
 " tabline settings ---------------------------------------------------------------------------------
@@ -340,9 +347,9 @@ command! -nargs=1 -complete=command C call ChangeDir(<f-args>)
 let t:redirPreviewWinnr = 1
 
 function! OpenRedirWindow()
-    let l:findWinNum=bufwinnr(bufnr('FuzzyFilenameSearch'))
-    let l:rgWinNum=bufwinnr(bufnr('RipgrepWordSearch'))
-    let l:bufferListWinNum=bufwinnr(bufnr('BufferList'))
+    let l:findWinNum=bufwinnr(bufnr('^FuzzyFilenameSearch'.tabpagenr()))
+    let l:rgWinNum=bufwinnr(bufnr('^RipgrepWordSearch'.tabpagenr()))
+    let l:bufferListWinNum=bufwinnr(bufnr('^BufferList'.tabpagenr()))
     if l:findWinNum != -1
         exec l:findWinNum."wincmd w"
         enew
@@ -359,9 +366,9 @@ function! OpenRedirWindow()
 endfunction
 
 function! QuitRedirWindow()
-    let l:findWinNum=bufwinnr(bufnr('FuzzyFilenameSearch'))
-    let l:rgWinNum=bufwinnr(bufnr('RipgrepWordSearch'))
-    let l:bufferListWinNum=bufwinnr(bufnr('BufferList'))
+    let l:findWinNum=bufwinnr(bufnr('^FuzzyFilenameSearch'.tabpagenr()))
+    let l:rgWinNum=bufwinnr(bufnr('^RipgrepWordSearch'.tabpagenr()))
+    let l:bufferListWinNum=bufwinnr(bufnr('^BufferList'.tabpagenr()))
     if l:findWinNum != -1
         exec l:findWinNum."close"
     elseif l:rgWinNum != -1
@@ -402,7 +409,7 @@ endfunction
 function! FindRedir(cmd)
     call FindJumpMap()
     call OpenRedirWindow()
-    edit FuzzyFilenameSearch
+    exec "edit FuzzyFilenameSearch".tabpagenr()."\ ->\ ".t:findSubStr
     exec "read ".a:cmd
     setlocal buftype=nofile bufhidden=wipe nobuflisted noswapfile cursorline filetype=FuzzyFilenameSearch
 endfunction
@@ -411,22 +418,22 @@ command! -nargs=1 -complete=command FindRedir silent! call FindRedir(<q-args>)
 
 " Show Files fuzzily searched with git
 function! FindWithGit(substr)
+    let t:findSubStr=a:substr
     exec "FindRedir !rg --files \| rg --ignore-case ".a:substr
     exec "normal! gg"
     if getline('.') == ""
         exec "normal! dd"
     endif
-    call feedkeys("/".a:substr."\\c\<CR>" ,'n')
 endfunction
 
 " Show Files searched fuzzily without git
 function! FindWithoutGit(substr)
+    let t:findSubStr=a:substr
     exec "FindRedir !rg --no-ignore --files \| rg --ignore-case ".a:substr
     exec "normal! gg"
     if getline('.') == ""
         exec "normal! dd"
     endif
-    call feedkeys("/".a:substr."\\c\<CR>" ,'n')
 endfunction
 
 " Fg means 'file git', search file names fuzzily with git
@@ -437,7 +444,7 @@ command! -nargs=1 -complete=command Fs silent! call FindWithoutGit(<q-args>)
 
 " To show file preview, underlying of FindNext, imitate 'cNext' command
 function! FindShow(direction)
-    let l:findWinNum=bufwinnr(bufnr('FuzzyFilenameSearch'))
+    let l:findWinNum=bufwinnr(bufnr('^FuzzyFilenameSearch'.tabpagenr()))
     if l:findWinNum == -1
         echo ">> No FuzzyFilenameSearch Buffer!"
     else
@@ -492,7 +499,7 @@ endfunction
 function! RgRedir(cmd)
     call RgJumpMap()
     call OpenRedirWindow()
-    edit RipgrepWordSearch
+    exec "edit RipgrepWordSearch".tabpagenr()."\ ->\ ".t:rgrepSubStr
     exec "read "a:cmd
     setlocal buftype=nofile bufhidden=wipe nobuflisted noswapfile cursorline filetype=RipgrepWordSearch
 endfunction
@@ -501,22 +508,22 @@ command! -nargs=1 -complete=command RgRedir silent! call RgRedir(<q-args>)
 
 " Show Words fuzzily searched with git
 function! RgWithGit(substr)
+    let t:rgrepSubStr=a:substr
     exec "RgRedir !rg '".a:substr."' ".getcwd()." --ignore-case --vimgrep --no-heading"
     exec "normal! gg"
     if getline('.') == ""
         exec "normal! dd"
     endif
-    call feedkeys("/".a:substr."\\c\<CR>" ,'n')
 endfunction
 
 " Show Files fuzzily searched without git
 function! RgWithoutGit(substr)
+    let t:rgrepSubStr=a:substr
     exec "RgRedir !rg '".a:substr."' ".getcwd()." --ignore-case --vimgrep --no-heading --no-ignore"
     exec "normal! gg"
     if getline('.') == ""
         exec "normal! dd"
     endif
-    call feedkeys("/".a:substr."\\c\<CR>" ,'n')
 endfunction
 
 " Wg means 'word git', search file fuzzily names with git
@@ -527,7 +534,7 @@ command! -nargs=1 -complete=command Ws silent! call RgWithoutGit(<q-args>)
 
 " To show file preview, underlying of RgNext, imitate 'cNext' command
 function! RgShow(direction)
-    let l:rgWinNum=bufwinnr(bufnr('RipgrepWordSearch'))
+    let l:rgWinNum=bufwinnr(bufnr('^RipgrepWordSearch'.tabpagenr()))
     if l:rgWinNum == -1
         echo ">> No RipgrepWordSearch Buffer!"
     else
@@ -579,7 +586,7 @@ endfunction
 function! BufferListRedir()
     call BufferListJumpMap()
     call OpenRedirWindow()
-    edit BufferList
+    exec "edit BufferList".tabpagenr()
     setlocal buftype=nofile bufhidden=wipe nobuflisted noswapfile cursorline filetype=BufferList
     put = execute('buffers')
     exec "normal! gg"
@@ -596,7 +603,7 @@ nnoremap <silent><space>l <cmd>call BufferListRedir()<CR>
 
 " To show the buffer selected, underlying of BufferListNext, imitate 'cNext' command
 function! BufferListShow(direction)
-    let l:bufferListWinNum=bufwinnr(bufnr('BufferList'))
+    let l:bufferListWinNum=bufwinnr(bufnr('^BufferList'.tabpagenr()))
     if l:bufferListWinNum==-1
         echo ">> No BufferList Buffer!"
     else
@@ -736,5 +743,7 @@ augroup initAutoComplete
 augroup END
 
 
-source $HOME/.config/nvim/lsp.lua
+source $HOME/.config/nvim/lua/lsp.lua
 source $HOME/.config/nvim/format.vim
+
+
