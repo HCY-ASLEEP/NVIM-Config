@@ -1,3 +1,5 @@
+local vim = vim
+
 local clangd_lsp = vim.api.nvim_create_augroup("clangd_lsp", { clear = true })
 vim.api.nvim_create_autocmd("FileType", {
 	pattern = { "c", "cpp", "objc", "objcpp", "cuda", "proto" },
@@ -125,7 +127,6 @@ vim.keymap.set("n", "gD", vim.lsp.buf.declaration, { noremap = true, silent = tr
 vim.keymap.set("n", "gd", vim.lsp.buf.definition, { noremap = true, silent = true })
 vim.keymap.set("n", "gh", vim.lsp.buf.hover, { noremap = true, silent = true })
 vim.keymap.set("n", "gi", vim.lsp.buf.implementation, { noremap = true, silent = true })
-vim.keymap.set("n", "gs", vim.lsp.buf.document_symbol, { noremap = true, silent = true })
 vim.keymap.set("n", "gr", vim.lsp.buf.references, { noremap = true, silent = true })
 vim.keymap.set("n", "gt", vim.lsp.buf.type_definition, { noremap = true, silent = true })
 vim.keymap.set("n", "<space>r", vim.lsp.buf.rename, { noremap = true, silent = true })
@@ -133,3 +134,12 @@ vim.keymap.set("n", "<space>a", vim.diagnostic.setloclist, { noremap = true, sil
 vim.keymap.set("n", "<C-k>", vim.lsp.buf.signature_help, { noremap = true, silent = true })
 vim.keymap.set("n", "<C-up>", vim.diagnostic.goto_prev, { noremap = true, silent = true })
 vim.keymap.set("n", "<C-down>", vim.diagnostic.goto_next, { noremap = true, silent = true })
+
+-- symbol_outline
+local symbol_outline = require("symbol-outline")
+vim.keymap.set("n", "gs", function()
+	symbol_outline.open()
+end, { noremap = true, silent = true })
+vim.api.nvim_create_user_command("OpenSymbolOutline", function()
+	symbol_outline.open()
+end, {})
