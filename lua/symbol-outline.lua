@@ -328,6 +328,7 @@ local function locate_open_symbol_position_in_symbol_outline()
 	end
 	if open_symbol_position_in_symbol_outline ~= -1 then
 		vim.api.nvim_win_set_cursor(0, { open_symbol_position_in_symbol_outline, 0 })
+		vim.cmd.normal("zz")
 	end
 end
 
@@ -359,6 +360,10 @@ function M.open()
 		"textDocument/documentSymbol",
 		{ textDocument = vim.lsp.util.make_text_document_params() },
 		function(_, response)
+			if next(response) == nil then
+				print(">> No Symbols But LSP Is Working!")
+				return
+			end
 			inits()
 			parse(response, 0)
 			splice()
