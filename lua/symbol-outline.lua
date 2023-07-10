@@ -269,14 +269,15 @@ end
 
 -- open symbol outline win
 local function open_symbol_outline_win()
-	open_position = vim.api.nvim_win_get_cursor(0)[1]
+	--	open_position = vim.api.nvim_win_get_cursor(0)[1]
 	local symbol_outline_tabpage_handle = vim.api.nvim_get_current_tabpage()
-	local symbol_outline_win_handle = get_window_handle_by_buf_name("SymbolOutline" .. symbol_outline_tabpage_handle)
-	if symbol_outline_win_handle ~= -1 then
-		vim.api.nvim_set_current_win(symbol_outline_win_handle)
-	else
-		vim.cmd("topleft 45vs")
-	end
+	--	local symbol_outline_win_handle = get_window_handle_by_buf_name("SymbolOutline" .. symbol_outline_tabpage_handle)
+	--	if symbol_outline_win_handle ~= -1 then
+	--		vim.api.nvim_set_current_win(symbol_outline_win_handle)
+	--	else
+	--		vim.cmd("topleft 45vs")
+	--	end
+	vim.cmd("topleft 45vs")
 	vim.cmd.edit("SymbolOutline" .. symbol_outline_tabpage_handle)
 	vim.opt_local.buftype = "nofile"
 	vim.opt_local.bufhidden = "wipe"
@@ -364,6 +365,19 @@ end
 
 -- open symbol outline
 function M.open()
+	if vim.t.jump_buf_name ~= nil then
+		if vim.fn.bufnr(vim.t.jump_buf_name) == vim.api.nvim_get_current_buf() then
+			open_position = vim.api.nvim_win_get_cursor(0)[1]
+			local symbol_outline_tabpage_handle = vim.api.nvim_get_current_tabpage()
+			local symbol_outline_win_handle =
+				get_window_handle_by_buf_name("SymbolOutline" .. symbol_outline_tabpage_handle)
+			if symbol_outline_win_handle ~= -1 then
+				vim.api.nvim_set_current_win(symbol_outline_win_handle)
+				locate_open_symbol_position_in_symbol_outline()
+				return
+			end
+		end
+	end
 	vim.lsp.buf_request(
 		0,
 		"textDocument/documentSymbol",
