@@ -39,9 +39,6 @@ set timeoutlen=200
 " set no swap file
 set noswapfile
 
-"set vsplit right
-set splitright
-
 " jump to the last position when reopening a file
 " ! You must mkdir viewdir first !
 set viewdir=~/.vimviews/
