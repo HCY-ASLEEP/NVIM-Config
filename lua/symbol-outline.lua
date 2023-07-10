@@ -22,6 +22,12 @@ local jump_buf_name = nil
 -- jump position of each symbol in the source file
 local jump_positions = {}
 
+-- refresh signal
+local is_refresh = false
+
+-- store the symbol outline win handle needed to be refreshed
+local refresh_symbol_outline_win_handle = -1
+
 -- symbol kind names
 local kind_names = {
 	"File",
@@ -199,33 +205,33 @@ local function splice()
 	for i = 1, #symbol_infos do
 		local cur = symbol_infos[i]
 		local indent_splicing = " "
-		if cur[indent_num] ~= 0 then --如果不是第一列 indent
-			if prev[indent_num] == cur[indent_num] then --如果与上一个是处于同一个 indent
-				if cur[is_end] then --如果是这一个 indent 里面的最后一个
+		if cur[indent_num] ~= 0 then -- 如果不是第一列 indent
+			if prev[indent_num] == cur[indent_num] then -- 如果与上一个是处于同一个 indent
+				if cur[is_end] then -- 如果是这一个 indent 里面的最后一个
 					indent_markers[#indent_markers] = bottem
 				end
-			else --如果不是与上一个处于同一个 indent
-				if cur[indent_num] > prev[indent_num] then --如果是上一个的孩子
+			else -- 如果不是与上一个处于同一个 indent
+				if cur[indent_num] > prev[indent_num] then -- 如果是上一个的孩子
 					if #indent_markers ~= 0 then
-						if prev[is_end] then --如果上一个是它那一层的最后一个
+						if prev[is_end] then -- 如果上一个是它那一层的最后一个
 							indent_markers[#indent_markers] = spaces
-						else --如果上一个不是它那一层的最后一个
+						else -- 如果上一个不是它那一层的最后一个
 							indent_markers[#indent_markers] = vert
 						end
 					end
-					if cur[is_end] then --如果是这一个 indent 里面的最后一个
+					if cur[is_end] then -- 如果是这一个 indent 里面的最后一个
 						indent_markers[#indent_markers + 1] = bottem
-					else --如果不是这一个 indent 里面的最后一个
+					else -- 如果不是这一个 indent 里面的最后一个
 						indent_markers[#indent_markers + 1] = middle
 					end
-				else --如果不是上一个的孩子，而是上一个的长辈，但是辈分不清楚
-					--indent_markers = { unpack(indent_markers, 1, cur[indent_num]) }
+				else -- 如果不是上一个的孩子，而是上一个的长辈，但是辈分不清楚
+					-- indent_markers = { unpack(indent_markers, 1, cur[indent_num]) }
 					for j = cur[indent_num] + 1, #indent_markers do
 						indent_markers[j] = nil
 					end
-					if cur[is_end] then --如果是这一个 indent 里面的最后一个
+					if cur[is_end] then -- 如果是这一个 indent 里面的最后一个
 						indent_markers[#indent_markers] = bottem
-					else --如果不是这一个 indent 里面的最后一个
+					else -- 如果不是这一个 indent 里面的最后一个
 						indent_markers[#indent_markers] = middle
 					end
 				end
@@ -234,7 +240,7 @@ local function splice()
 				local marker_kind = indent_markers[k]
 				indent_splicing = indent_splicing .. indent_marker[marker_kind]
 			end
-		else --如果是第一列 indent
+		else -- 如果是第一列 indent
 			indent_markers = {}
 		end
 		presentings[#presentings + 1] = table.concat({
@@ -269,16 +275,14 @@ end
 
 -- open symbol outline win
 local function open_symbol_outline_win()
-	--	open_position = vim.api.nvim_win_get_cursor(0)[1]
-	local symbol_outline_tabpage_handle = vim.api.nvim_get_current_tabpage()
-	--	local symbol_outline_win_handle = get_window_handle_by_buf_name("SymbolOutline" .. symbol_outline_tabpage_handle)
-	--	if symbol_outline_win_handle ~= -1 then
-	--		vim.api.nvim_set_current_win(symbol_outline_win_handle)
-	--	else
-	--		vim.cmd("topleft 45vs")
-	--	end
-	vim.cmd("topleft 45vs")
-	vim.cmd.edit("SymbolOutline" .. symbol_outline_tabpage_handle)
+	if is_refresh then
+		is_refresh = false
+		vim.api.nvim_set_current_win(refresh_symbol_outline_win_handle)
+	else
+		vim.cmd("topleft 45vs")
+		local symbol_outline_tabpage_handle = vim.api.nvim_get_current_tabpage()
+		vim.cmd.edit("SymbolOutline" .. symbol_outline_tabpage_handle)
+	end
 	vim.opt_local.buftype = "nofile"
 	vim.opt_local.bufhidden = "wipe"
 	vim.opt_local.buflisted = false
@@ -298,7 +302,7 @@ local function highlight_outline()
 	local kind_name = 5
 	for line = 1, #presentings_line_lens do
 		local len = presentings_line_lens[line]
-		--indent
+		-- indent
 		vim.api.nvim_buf_add_highlight(0, -1, "SymbolIndent", line - 1, 0, len[indent_num] - 1)
 		-- kind
 		local hl_start_col = len[indent_num]
@@ -357,8 +361,13 @@ end
 
 -- refresh symbol outline
 local function refresh()
-	jump_buf_name = vim.t.jump_buf_name
-	local jump_win_handle = get_window_handle_by_buf_name(jump_buf_name)
+	local jump_win_handle = get_window_handle_by_buf_name(vim.t.jump_buf_name)
+	if jump_win_handle == -1 then
+		print(">> Corresponding Source File Win Not Exists!")
+		return
+	end
+	refresh_symbol_outline_win_handle = vim.api.nvim_get_current_win()
+	is_refresh = true
 	vim.api.nvim_set_current_win(jump_win_handle)
 	M.open()
 end
@@ -368,13 +377,15 @@ function M.open()
 	if vim.t.jump_buf_name ~= nil then
 		if vim.fn.bufnr(vim.t.jump_buf_name) == vim.api.nvim_get_current_buf() then
 			open_position = vim.api.nvim_win_get_cursor(0)[1]
-			local symbol_outline_tabpage_handle = vim.api.nvim_get_current_tabpage()
-			local symbol_outline_win_handle =
-				get_window_handle_by_buf_name("SymbolOutline" .. symbol_outline_tabpage_handle)
-			if symbol_outline_win_handle ~= -1 then
-				vim.api.nvim_set_current_win(symbol_outline_win_handle)
-				locate_open_symbol_position_in_symbol_outline()
-				return
+			if not is_refresh then
+				local symbol_outline_tabpage_handle = vim.api.nvim_get_current_tabpage()
+				local symbol_outline_win_handle =
+					get_window_handle_by_buf_name("SymbolOutline" .. symbol_outline_tabpage_handle)
+				if symbol_outline_win_handle ~= -1 then
+					vim.api.nvim_set_current_win(symbol_outline_win_handle)
+					locate_open_symbol_position_in_symbol_outline()
+					return
+				end
 			end
 		end
 	end
