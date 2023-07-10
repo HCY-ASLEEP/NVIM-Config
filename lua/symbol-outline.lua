@@ -1,5 +1,4 @@
 local vim = vim
-local unpack = unpack or table.unpack
 
 local M = {}
 
@@ -130,7 +129,12 @@ local indent_marker = {
 -- get window handle by buffer name in the current tabpage
 local function get_window_handle_by_buf_name(buf_name)
 	local bufnr = vim.fn.bufnr(buf_name)
-	for _, win in pairs(vim.api.nvim_tabpage_list_wins(0)) do
+	if bufnr == -1 then
+		return -1
+	end
+	local tabpage_list_wins = vim.api.nvim_tabpage_list_wins(0)
+	for i = 1, #tabpage_list_wins do
+		local win = tabpage_list_wins[i]
 		if vim.api.nvim_win_get_buf(win) == bufnr then
 			return win
 		end
@@ -150,34 +154,27 @@ end
 
 -- parse lsp response to get the symbol_infos
 local function parse(response, indent_num)
-	for key, value in pairs(response) do
-		local kind = value["kind"]
-		local name = value["name"]
-		local detail = value["detail"]
+	for i = 1, #response do
+		local symbol = response[i]
+		local kind = symbol["kind"]
+		local name = symbol["name"]
+		local detail = symbol["detail"]
 		if detail ~= nil then
 			-- Removing line breaks from details
 			detail = detail:gsub("\n", ""):gsub("%s+", " ")
 		else
 			detail = ""
 		end
-		local symbol_start = value["range"]["start"]
+		local symbol_start = symbol["range"]["start"]
 		local start_row = symbol_start["line"]
 		local start_column = symbol_start["character"]
 		local is_end = false
-		if next(response, key) == nil then
+		if next(response, i) == nil then
 			is_end = true
 		end
-		table.insert(symbol_infos, {
-			indent_num,
-			kind,
-			name,
-			detail,
-			start_row,
-			start_column,
-			is_end,
-		})
-		if value["children"] ~= nil then
-			parse(value["children"], indent_num + 1)
+		symbol_infos[#symbol_infos + 1] = { indent_num, kind, name, detail, start_row, start_column, is_end }
+		if symbol["children"] ~= nil then
+			parse(symbol["children"], indent_num + 1)
 		end
 	end
 end
@@ -199,7 +196,8 @@ local function splice()
 	local middle = 2
 	local vert = 3
 	local spaces = 4
-	for _, cur in pairs(symbol_infos) do
+	for i = 1, #symbol_infos do
+		local cur = symbol_infos[i]
 		local indent_splicing = " "
 		if cur[indent_num] ~= 0 then --如果不是第一列 indent
 			if prev[indent_num] == cur[indent_num] then --如果与上一个是处于同一个 indent
@@ -216,12 +214,15 @@ local function splice()
 						end
 					end
 					if cur[is_end] then --如果是这一个 indent 里面的最后一个
-						table.insert(indent_markers, bottem)
+						indent_markers[#indent_markers + 1] = bottem
 					else --如果不是这一个 indent 里面的最后一个
-						table.insert(indent_markers, middle)
+						indent_markers[#indent_markers + 1] = middle
 					end
-				else --如果不是上一个的孩子，而是上一个的长辈但是辈分不清楚
-					indent_markers = { unpack(indent_markers, 1, cur[indent_num]) }
+				else --如果不是上一个的孩子，而是上一个的长辈，但是辈分不清楚
+					--indent_markers = { unpack(indent_markers, 1, cur[indent_num]) }
+					for j = cur[indent_num] + 1, #indent_markers do
+						indent_markers[j] = nil
+					end
 					if cur[is_end] then --如果是这一个 indent 里面的最后一个
 						indent_markers[#indent_markers] = bottem
 					else --如果不是这一个 indent 里面的最后一个
@@ -229,33 +230,33 @@ local function splice()
 					end
 				end
 			end
-			for _, marker_kind in pairs(indent_markers) do
+			for k = 1, #indent_markers do
+				local marker_kind = indent_markers[k]
 				indent_splicing = indent_splicing .. indent_marker[marker_kind]
 			end
 		else --如果是第一列 indent
 			indent_markers = {}
 		end
-		table.insert(
-			presentings,
-			indent_splicing
-				.. icons[cur[kind]]
-				.. " "
-				.. cur[name]
-				.. " "
-				.. cur[detail]
-				.. " "
-				.. " ["
-				.. kind_names[cur[kind]]
-				.. "] "
-		)
-		table.insert(presentings_line_lens, {
+		presentings[#presentings + 1] = table.concat({
+			indent_splicing,
+			icons[cur[kind]],
+			" ",
+			cur[name],
+			" ",
+			cur[detail],
+			" ",
+			" [",
+			kind_names[cur[kind]],
+			"] ",
+		})
+		presentings_line_lens[#presentings_line_lens + 1] = {
 			string.len(indent_splicing),
 			string.len(icons[cur[kind]]),
 			string.len(cur[name]),
 			string.len(cur[detail]),
 			string.len(" [" .. kind_names[cur[kind]] .. "] "),
-		})
-		table.insert(jump_positions, { cur[start_row], cur[start_column] })
+		}
+		jump_positions[#jump_positions + 1] = { cur[start_row], cur[start_column] }
 		prev = cur
 	end
 	vim.t.jump_positions = jump_positions
@@ -274,7 +275,7 @@ local function open_symbol_outline_win()
 	if symbol_outline_win_handle ~= -1 then
 		vim.api.nvim_set_current_win(symbol_outline_win_handle)
 	else
-		vim.cmd.vsplit()
+		vim.cmd("topleft 45vs")
 	end
 	vim.cmd.edit("SymbolOutline" .. symbol_outline_tabpage_handle)
 	vim.opt_local.buftype = "nofile"
@@ -294,7 +295,8 @@ local function highlight_outline()
 	local name = 3
 	local detail = 4
 	local kind_name = 5
-	for line, len in pairs(presentings_line_lens) do
+	for line = 1, #presentings_line_lens do
+		local len = presentings_line_lens[line]
 		--indent
 		vim.api.nvim_buf_add_highlight(0, -1, "SymbolIndent", line - 1, 0, len[indent_num] - 1)
 		-- kind
@@ -320,9 +322,10 @@ end
 local function locate_open_symbol_position_in_symbol_outline()
 	jump_positions = vim.t.jump_positions
 	local open_symbol_position_in_symbol_outline = -1
-	for key, value in pairs(jump_positions) do
-		if value[1] == open_position - 1 then
-			open_symbol_position_in_symbol_outline = key
+	for i = 1, #jump_positions do
+		local jump_row = jump_positions[i][1]
+		if jump_row == open_position - 1 then
+			open_symbol_position_in_symbol_outline = i
 			break
 		end
 	end
@@ -341,8 +344,14 @@ local function jump()
 	local jump_row = tonumber(jump_position[1])
 	local jump_col = tonumber(jump_position[2])
 	local jump_win_handle = get_window_handle_by_buf_name(jump_buf_name)
-	vim.api.nvim_set_current_win(jump_win_handle)
-	vim.api.nvim_win_set_cursor(jump_win_handle, { jump_row + 1, jump_col })
+	if jump_win_handle ~= -1 then
+		vim.api.nvim_set_current_win(jump_win_handle)
+		vim.api.nvim_win_set_cursor(jump_win_handle, { jump_row + 1, jump_col })
+	else
+		vim.cmd.vsplit()
+		vim.cmd.edit(jump_buf_name)
+		vim.api.nvim_win_set_cursor(0, { jump_row + 1, jump_col })
+	end
 end
 
 -- refresh symbol outline
@@ -377,39 +386,39 @@ function M.open()
 	)
 end
 
-vim.cmd.highlight({ "SymbolIndent", "ctermfg=gray", "ctermbg=NONE", "cterm=bold" })
-vim.cmd.highlight({ "SymbolKind", "ctermfg=lightcyan", "ctermbg=NONE", "cterm=bold" })
-vim.cmd.highlight({ "SymbolName", "ctermfg=lightgray", "ctermbg=NONE", "cterm=bold" })
-vim.cmd.highlight({ "SymbolDetial", "ctermfg=darkmagenta", "ctermbg=NONE", "cterm=italic" })
-vim.cmd.highlight({ "SymbolKindName", "ctermfg=darkgray", "ctermbg=NONE", "cterm=NONE" })
-vim.cmd.highlight({ "SymbolPosition", "ctermfg=black", "ctermbg=NONE", "cterm=NONE" })
-vim.cmd.highlight({ "SymbolIcon_File", "ctermfg=cyan", "ctermbg=NONE", "cterm=bold" })
-vim.cmd.highlight({ "SymbolIcon_Module", "ctermfg=cyan", "ctermbg=NONE", "cterm=bold" })
-vim.cmd.highlight({ "SymbolIcon_Namespace", "ctermfg=cyan", "ctermbg=NONE", "cterm=bold" })
-vim.cmd.highlight({ "SymbolIcon_Package", "ctermfg=red", "ctermbg=NONE", "cterm=bold" })
-vim.cmd.highlight({ "SymbolIcon_Class", "ctermfg=yellow", "ctermbg=NONE", "cterm=bold" })
-vim.cmd.highlight({ "SymbolIcon_Method", "ctermfg=lightmagenta", "ctermbg=NONE", "cterm=bold" })
-vim.cmd.highlight({ "SymbolIcon_Property", "ctermfg=cyan", "ctermbg=NONE", "cterm=bold" })
-vim.cmd.highlight({ "SymbolIcon_Field", "ctermfg=lightblue", "ctermbg=NONE", "cterm=bold" })
-vim.cmd.highlight({ "SymbolIcon_Constructor", "ctermfg=lightmagenta", "ctermbg=NONE", "cterm=bold" })
-vim.cmd.highlight({ "SymbolIcon_Enum", "ctermfg=yellow", "ctermbg=NONE", "cterm=bold" })
-vim.cmd.highlight({ "SymbolIcon_Interface", "ctermfg=lightblue", "ctermbg=NONE", "cterm=bold" })
-vim.cmd.highlight({ "SymbolIcon_Function", "ctermfg=lightmagenta", "ctermbg=NONE", "cterm=bold" })
-vim.cmd.highlight({ "SymbolIcon_Variable", "ctermfg=lightblue", "ctermbg=NONE", "cterm=bold" })
-vim.cmd.highlight({ "SymbolIcon_Constant", "ctermfg=cyan", "ctermbg=NONE", "cterm=bold" })
-vim.cmd.highlight({ "SymbolIcon_String", "ctermfg=lightmagenta", "ctermbg=NONE", "cterm=bold" })
-vim.cmd.highlight({ "SymbolIcon_Number", "ctermfg=yellow", "ctermbg=NONE", "cterm=bold" })
-vim.cmd.highlight({ "SymbolIcon_Boolean", "ctermfg=cyan", "ctermbg=NONE", "cterm=bold" })
-vim.cmd.highlight({ "SymbolIcon_Array", "ctermfg=lightgreen", "ctermbg=NONE", "cterm=bold" })
-vim.cmd.highlight({ "SymbolIcon_Object", "ctermfg=cyan", "ctermbg=NONE", "cterm=bold" })
-vim.cmd.highlight({ "SymbolIcon_Key", "ctermfg=cyan", "ctermbg=NONE", "cterm=bold" })
-vim.cmd.highlight({ "SymbolIcon_Null", "ctermfg=cyan", "ctermbg=NONE", "cterm=bold" })
-vim.cmd.highlight({ "SymbolIcon_EnumMember", "ctermfg=yellow", "ctermbg=NONE", "cterm=bold" })
-vim.cmd.highlight({ "SymbolIcon_Struct", "ctermfg=cyan", "ctermbg=NONE", "cterm=bold" })
-vim.cmd.highlight({ "SymbolIcon_Event", "ctermfg=yellow", "ctermbg=NONE", "cterm=bold" })
-vim.cmd.highlight({ "SymbolIcon_Operator", "ctermfg=cyan", "ctermbg=NONE", "cterm=bold" })
-vim.cmd.highlight({ "SymbolIcon_TypeParameter", "ctermfg=cyan", "ctermbg=NONE", "cterm=bold" })
-vim.cmd.highlight({ "SymbolIcon_Component", "ctermfg=cyan", "ctermbg=NONE", "cterm=bold" })
-vim.cmd.highlight({ "SymbolIcon_Fragment", "ctermfg=cyan", "ctermbg=NONE", "cterm=bold" })
+vim.cmd([[
+    hi SymbolIndent ctermfg=gray ctermbg=NONE cterm=bold
+    hi SymbolName ctermfg=lightgray ctermbg=NONE cterm=bold
+    hi SymbolDetial ctermfg=darkmagenta ctermbg=NONE cterm=italic
+    hi SymbolKindName ctermfg=darkgray ctermbg=NONE cterm=NONE
+    hi SymbolIcon_File ctermfg=cyan ctermbg=NONE cterm=bold
+    hi SymbolIcon_Package ctermfg=red ctermbg=NONE cterm=bold
+    hi SymbolIcon_Class ctermfg=yellow ctermbg=NONE cterm=bold
+    hi SymbolIcon_Method ctermfg=lightmagenta ctermbg=NONE cterm=bold
+    hi SymbolIcon_Field ctermfg=lightblue ctermbg=NONE cterm=bold
+    hi SymbolIcon_Array ctermfg=lightgreen ctermbg=NONE cterm=bold
+    hi! link SymbolIcon_Module SymbolIcon_File
+    hi! link SymbolIcon_Namespace SymbolIcon_File
+    hi! link SymbolIcon_Property SymbolIcon_File
+    hi! link SymbolIcon_Constructor SymbolIcon_Method
+    hi! link SymbolIcon_Enum SymbolIcon_Class
+    hi! link SymbolIcon_Interface SymbolIcon_Field
+    hi! link SymbolIcon_Function SymbolIcon_Method
+    hi! link SymbolIcon_Variable SymbolIcon_Field
+    hi! link SymbolIcon_Constant SymbolIcon_File
+    hi! link SymbolIcon_String SymbolIcon_Method
+    hi! link SymbolIcon_Number SymbolIcon_Class
+    hi! link SymbolIcon_Boolean SymbolIcon_File
+    hi! link SymbolIcon_Object SymbolIcon_File
+    hi! link SymbolIcon_Key SymbolIcon_File
+    hi! link SymbolIcon_Null SymbolIcon_File
+    hi! link SymbolIcon_EnumMember SymbolIcon_Class
+    hi! link SymbolIcon_Struct SymbolIcon_File
+    hi! link SymbolIcon_Event SymbolIcon_Class
+    hi! link SymbolIcon_Operator SymbolIcon_File
+    hi! link SymbolIcon_TypeParameter SymbolIcon_File
+    hi! link SymbolIcon_Component SymbolIcon_File
+    hi! link SymbolIcon_Fragment SymbolIcon_File
+]])
 
 return M
