@@ -444,7 +444,7 @@ function M.open(source_win)
 end
 
 vim.cmd([[
-    hi FocusedSymbol ctermfg=lightcyan ctermbg=darkgray cterm=bold
+    hi FocusedSymbol ctermfg=black ctermbg=lightgray cterm=NONE
     hi SymbolIndent ctermfg=gray ctermbg=NONE cterm=bold
     hi SymbolName ctermfg=lightgray ctermbg=NONE cterm=bold
     hi SymbolDetial ctermfg=darkmagenta ctermbg=NONE cterm=italic
