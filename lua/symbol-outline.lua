@@ -14,13 +14,16 @@ local presentings = {}
 
 -- the length of each string element in each line of
 -- the final content to be written into the buffer
-local presentings_line_lens = {}
+local presentings_item_lens = {}
 
 -- refresh signal
 local is_refresh = false
 
 -- store the symbol outline win handle needed to be refreshed
 local refresh_outline_win = -1
+
+-- store the symbol outline buf handle needed to be refreshed
+local refresh_outline_buf = -1
 
 -- symbol kind names
 local kind_names = {
@@ -127,7 +130,7 @@ local indent_marker = {
 }
 
 -- get window handle by buffer name in the current tabpage
-local function buf_name_get_win(buf_name)
+local function get_win_buf_by(buf_name)
 	local buf = vim.fn.bufnr(buf_name)
 	if buf == -1 then
 		return -1, -1
@@ -146,7 +149,7 @@ end
 local function inits(source_buf)
 	symbol_infos = {}
 	presentings = {}
-	presentings_line_lens = {}
+	presentings_item_lens = {}
 	vim.t.jump_buf_name = vim.api.nvim_buf_get_name(source_buf)
 	local tabpage = vim.api.nvim_get_current_tabpage()
 	vim.t.focused_symbol_ns = vim.api.nvim_create_namespace("FocusedSymbol" .. tabpage)
@@ -250,7 +253,7 @@ local function splice()
 			kind_names[cur[kind]],
 			"] ",
 		})
-		presentings_line_lens[#presentings_line_lens + 1] = {
+		presentings_item_lens[#presentings_item_lens + 1] = {
 			string.len(indent_splicing),
 			string.len(icons[cur[kind]]),
 			string.len(cur[name]),
@@ -270,13 +273,26 @@ end
 
 -- open symbol outline win
 local function open_outline_win()
+	local outline_tabpage = -1
+	local outline_name = ""
+	local outline_win, outline_buf = -1, -1
 	if is_refresh then
 		is_refresh = false
 		vim.api.nvim_set_current_win(refresh_outline_win)
+		outline_win = refresh_outline_win
+		outline_buf = refresh_outline_buf
 	else
-		vim.cmd("topleft 45vs")
-		local outline_tabpage = vim.api.nvim_get_current_tabpage()
-		vim.cmd.edit("SymbolOutline" .. outline_tabpage)
+		outline_tabpage = vim.api.nvim_get_current_tabpage()
+		outline_name = "SymbolOutline" .. outline_tabpage
+		outline_win, outline_buf = get_win_buf_by(outline_name)
+		if outline_win == -1 then
+			vim.cmd("topleft 45vs")
+			vim.cmd.edit(outline_name)
+			outline_win = vim.api.nvim_get_current_win()
+			outline_buf = vim.api.nvim_get_current_buf()
+		else
+			vim.api.nvim_set_current_win(outline_win)
+		end
 	end
 	vim.opt_local.buftype = "nofile"
 	vim.opt_local.bufhidden = "wipe"
@@ -285,7 +301,7 @@ local function open_outline_win()
 	vim.opt_local.wrap = false
 	vim.opt_local.list = false
 	vim.opt_local.filetype = "SymbolOutline"
-	return vim.api.nvim_get_current_win(), vim.api.nvim_get_current_buf()
+	return outline_win, outline_buf
 end
 
 -- highlight the symbol outline
@@ -296,8 +312,8 @@ local function highlight(outline_buf)
 	local name = 3
 	local detail = 4
 	local kind_name = 5
-	for line = 1, #presentings_line_lens do
-		local len = presentings_line_lens[line]
+	for line = 1, #presentings_item_lens do
+		local len = presentings_item_lens[line]
 		-- indent
 		vim.api.nvim_buf_add_highlight(outline_buf, -1, "SymbolIndent", line - 1, 0, len[indent_num] - 1)
 		-- kind
@@ -347,11 +363,11 @@ end
 local function jump()
 	local jump_buf_name = vim.t.jump_buf_name
 	local jump_positions = vim.t.jump_positions
-	local cur_symbol_line = vim.api.nvim_win_get_cursor(0)[1]
-	local jump_position = jump_positions[cur_symbol_line]
+	local cur_symbol_row = vim.api.nvim_win_get_cursor(0)[1]
+	local jump_position = jump_positions[cur_symbol_row]
 	local jump_row = tonumber(jump_position[1])
 	local jump_col = tonumber(jump_position[2])
-	local jump_win, jump_buf = buf_name_get_win(jump_buf_name)
+	local jump_win, jump_buf = get_win_buf_by(jump_buf_name)
 	if jump_win == -1 then
 		local outline_win = vim.api.nvim_get_current_win()
 		vim.opt.splitright = true
@@ -373,12 +389,13 @@ end
 
 -- refresh symbol outline
 local function refresh()
-	local jump_win, _ = buf_name_get_win(vim.t.jump_buf_name)
+	local jump_win, _ = get_win_buf_by(vim.t.jump_buf_name)
 	if jump_win == -1 then
 		print(">> Corresponding Source File Win Not Exists!")
 		return
 	end
 	refresh_outline_win = vim.api.nvim_get_current_win()
+	refresh_outline_buf = vim.api.nvim_get_current_buf()
 	is_refresh = true
 	vim.api.nvim_win_call(jump_win, function()
 		M.open(jump_win)
@@ -393,10 +410,10 @@ function M.open(source_win)
 		if vim.fn.bufnr(vim.t.jump_buf_name) == vim.api.nvim_get_current_buf() then
 			if not is_refresh then
 				local outline_tabpage = vim.api.nvim_get_current_tabpage()
-				local outline_win, _ = buf_name_get_win("SymbolOutline" .. outline_tabpage)
+				local outline_win, _ = get_win_buf_by("SymbolOutline" .. outline_tabpage)
 				if outline_win ~= -1 then
 					vim.api.nvim_set_current_win(outline_win)
-					locate_open_position_in()
+					locate_open_position_in(outline_win)
 					return
 				end
 			end
@@ -425,7 +442,7 @@ function M.open(source_win)
 end
 
 vim.cmd([[
-    hi FocusedSymbol ctermfg=lightcyan ctermbg=darkgray cterm=bold,italic
+    hi FocusedSymbol ctermfg=lightcyan ctermbg=darkgray cterm=bold
     hi SymbolIndent ctermfg=gray ctermbg=NONE cterm=bold
     hi SymbolName ctermfg=lightgray ctermbg=NONE cterm=bold
     hi SymbolDetial ctermfg=darkmagenta ctermbg=NONE cterm=italic
@@ -462,11 +479,13 @@ vim.cmd([[
 
 local symbol_outline_augroup = vim.api.nvim_create_augroup("symbol_outline_augroup", { clear = true })
 vim.api.nvim_create_autocmd("BufWinLeave", {
-	pattern = { "SymbolOutline*\\C" },
+	pattern = { "*" },
 	callback = function()
-		local _, jump_buf = buf_name_get_win(vim.t.jump_buf_name)
-		if jump_buf ~= -1 then
-			vim.api.nvim_buf_clear_namespace(jump_buf, vim.t.focused_symbol_ns, 0, -1)
+		if vim.bo.filetype == "SymbolOutline" then
+			local _, jump_buf = get_win_buf_by(vim.t.jump_buf_name)
+			if jump_buf ~= -1 then
+				vim.api.nvim_buf_clear_namespace(jump_buf, vim.t.focused_symbol_ns, 0, -1)
+			end
 		end
 	end,
 	group = symbol_outline_augroup,
