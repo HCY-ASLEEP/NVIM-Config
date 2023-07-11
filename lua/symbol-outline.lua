@@ -266,11 +266,6 @@ local function splice()
 	vim.t.jump_positions = jump_positions
 end
 
--- write buffer
-local function write(outline_buf)
-	vim.api.nvim_buf_set_lines(outline_buf, 0, -1, false, presentings)
-end
-
 -- open symbol outline win
 local function open_outline_win()
 	local outline_tabpage = -1
@@ -302,6 +297,11 @@ local function open_outline_win()
 	vim.opt_local.list = false
 	vim.opt_local.filetype = "SymbolOutline"
 	return outline_win, outline_buf
+end
+
+-- write buffer
+local function write(outline_buf)
+	vim.api.nvim_buf_set_lines(outline_buf, 0, -1, false, presentings)
 end
 
 -- highlight the symbol outline
