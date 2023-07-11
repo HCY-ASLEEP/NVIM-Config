@@ -186,7 +186,7 @@ end
 local function splice()
 	local indent_markers = {}
 	local jump_positions = {}
-	local prev = nil
+	local prev = {}
 	-- symbol_infos indexes
 	local indent_num = 1
 	local kind = 2
@@ -195,72 +195,74 @@ local function splice()
 	local start_row = 5
 	local start_column = 6
 	local is_end = 7
-	-- indent_markers indexes
-	local bottem = 1
-	local middle = 2
-	local vert = 3
-	local spaces = 4
+	-- indent_markers
+	local bottem = indent_marker[1]
+	local middle = indent_marker[2]
+	local vert = indent_marker[3]
+	local spaces = indent_marker[4]
+	-- row-by-row traversal
 	for i = 1, #symbol_infos do
 		local cur = symbol_infos[i]
 		local indent_splicing = " "
-		if cur[indent_num] ~= 0 then -- 如果不是第一列 indent
-			if prev[indent_num] == cur[indent_num] then -- 如果与上一个是处于同一个 indent
-				if cur[is_end] then -- 如果是这一个 indent 里面的最后一个
-					indent_markers[#indent_markers] = bottem
+		local prev_indent = prev[indent_num]
+		local cur_indent = cur[indent_num]
+		local prev_is_end = prev[is_end]
+		local cur_is_end = cur[is_end]
+		if cur_indent ~= 0 then -- 如果不是第一列 indent
+			if prev_indent == cur_indent then -- 如果与上一个是处于同一个 indent
+				if cur_is_end then -- 如果是这一个 indent 里面的最后一个
+					indent_markers[cur_indent] = bottem
 				end
 			else -- 如果不是与上一个处于同一个 indent
-				if cur[indent_num] > prev[indent_num] then -- 如果是上一个的孩子
+				if cur_indent > prev_indent then -- 如果是上一个的孩子
 					if #indent_markers ~= 0 then
-						if prev[is_end] then -- 如果上一个是它那一层的最后一个
-							indent_markers[#indent_markers] = spaces
+						if prev_is_end then -- 如果上一个是它那一层的最后一个
+							indent_markers[prev_indent] = spaces
 						else -- 如果上一个不是它那一层的最后一个
-							indent_markers[#indent_markers] = vert
+							indent_markers[prev_indent] = vert
 						end
 					end
-					if cur[is_end] then -- 如果是这一个 indent 里面的最后一个
-						indent_markers[#indent_markers + 1] = bottem
+					if cur_is_end then -- 如果是这一个 indent 里面的最后一个
+						indent_markers[cur_indent] = bottem
 					else -- 如果不是这一个 indent 里面的最后一个
-						indent_markers[#indent_markers + 1] = middle
+						indent_markers[cur_indent] = middle
 					end
 				else -- 如果不是上一个的孩子，而是上一个的长辈，但是辈分不清楚
-					-- indent_markers = { unpack(indent_markers, 1, cur[indent_num]) }
-					for j = cur[indent_num] + 1, #indent_markers do
+					for j = cur_indent + 1, #indent_markers do
 						indent_markers[j] = nil
 					end
-					if cur[is_end] then -- 如果是这一个 indent 里面的最后一个
-						indent_markers[#indent_markers] = bottem
+					if cur_is_end then -- 如果是这一个 indent 里面的最后一个
+						indent_markers[cur_indent] = bottem
 					else -- 如果不是这一个 indent 里面的最后一个
-						indent_markers[#indent_markers] = middle
+						indent_markers[cur_indent] = middle
 					end
 				end
 			end
-			for k = 1, #indent_markers do
-				local marker_kind = indent_markers[k]
-				indent_splicing = indent_splicing .. indent_marker[marker_kind]
-			end
+			indent_splicing = table.concat(indent_markers)
 		else -- 如果是第一列 indent
 			indent_markers = {}
 		end
-		presentings[#presentings + 1] = table.concat({
+		local cur_kind = cur[kind]
+		presentings[i] = table.concat({
 			indent_splicing,
-			icons[cur[kind]],
+			icons[cur_kind],
 			" ",
 			cur[name],
 			" ",
 			cur[detail],
 			" ",
 			" [",
-			kind_names[cur[kind]],
+			kind_names[cur_kind],
 			"] ",
 		})
-		presentings_item_lens[#presentings_item_lens + 1] = {
+		presentings_item_lens[i] = {
 			string.len(indent_splicing),
-			string.len(icons[cur[kind]]),
+			string.len(icons[cur_kind]),
 			string.len(cur[name]),
 			string.len(cur[detail]),
-			string.len(" [" .. kind_names[cur[kind]] .. "] "),
+			string.len(" [" .. kind_names[cur_kind] .. "] "),
 		}
-		jump_positions[#jump_positions + 1] = { cur[start_row], cur[start_column] }
+		jump_positions[i] = { cur[start_row], cur[start_column] }
 		prev = cur
 	end
 	vim.t.jump_positions = jump_positions
