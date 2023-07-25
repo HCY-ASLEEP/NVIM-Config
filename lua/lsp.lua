@@ -136,10 +136,19 @@ vim.keymap.set("n", "<C-up>", vim.diagnostic.goto_prev, { noremap = true, silent
 vim.keymap.set("n", "<C-down>", vim.diagnostic.goto_next, { noremap = true, silent = true })
 
 -- symbol_outline
-local symbol_outline = require("symbol-outline")
+local symbol_outline = require("lsp.symbol-outline")
 vim.keymap.set("n", "gs", function()
-	symbol_outline.open()
+	symbol_outline.open(0)
 end, { noremap = true, silent = true })
 vim.api.nvim_create_user_command("OpenSymbolOutline", function()
-	symbol_outline.open()
+	symbol_outline.open(0)
 end, {})
+
+--log_file = io.open("/home/devenv/.config/nvim/log.log", "a")
+--
+--function log(message)
+--	local timestamp = os.date("%Y-%m-%d %H:%M:%S") -- 获取当前时间戳
+--	local log_message = string.format("[%s] %s", timestamp, message) -- 格式化日志消息
+--	log_file:write(log_message .. "\n") -- 写入日志文件
+--	log_file:flush() -- 刷新文件缓冲区
+--end

@@ -122,7 +122,7 @@ local icons = {
 }
 
 -- indent marker fonts
-local indent_marker = {
+local markers = {
 	" └ ",
 	" ├ ",
 	" │ ",
@@ -196,10 +196,10 @@ local function splice()
 	local start_column = 6
 	local is_end = 7
 	-- indent_markers
-	local bottem = indent_marker[1]
-	local middle = indent_marker[2]
-	local vert = indent_marker[3]
-	local spaces = indent_marker[4]
+	local bottem = markers[1]
+	local middle = markers[2]
+	local vert = markers[3]
+	local spaces = markers[4]
 	-- row-by-row traversal
 	for i = 1, #symbol_infos do
 		local cur = symbol_infos[i]
@@ -238,7 +238,8 @@ local function splice()
 					end
 				end
 			end
-			indent_splicing = table.concat(indent_markers)
+			indent_markers[0] = indent_splicing
+			indent_splicing = table.concat(indent_markers, "", 0)
 		else -- 如果是第一列 indent
 			indent_markers = {}
 		end
@@ -372,12 +373,10 @@ local function jump()
 	local jump_win, jump_buf = get_win_buf_by(jump_buf_name)
 	if jump_win == -1 then
 		local outline_win = vim.api.nvim_get_current_win()
-		vim.opt.splitright = true
-		vim.cmd.vsplit()
+		vim.cmd("rightbelow vsplit")
 		vim.cmd.edit(jump_buf_name)
 		jump_win = vim.api.nvim_get_current_win()
 		jump_buf = vim.api.nvim_get_current_buf()
-		vim.opt.splitright = false
 		vim.api.nvim_set_current_win(outline_win)
 	end
 	vim.api.nvim_win_call(jump_win, function()
