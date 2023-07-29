@@ -91,40 +91,40 @@ local icon_colors = {
 
 -- icon fonts corresponding to the name of the symbol kind
 local icons = {
-	" ",
-	" ",
-	" ",
-	" ",
-	" ",
-	" ",
-	" ",
-	" ",
-	" ",
-	" ",
-	" ",
-	" ",
-	" ",
-	" ",
-	" ",
-	" ",
-	" ",
-	" ",
-	" ",
-	" ",
-	" ",
-	" ",
-	" ",
-	" ",
-	" ",
-	" ",
-	" ",
-	" ",
+	" F ",
+	" M ",
+	" N ",
+	" P ",
+	" C ",
+	" M ",
+	" P ",
+	" F ",
+	" C ",
+	" E ",
+	" I ",
+	" F ",
+	" V ",
+	" C ",
+	" S ",
+	" N ",
+	" B ",
+	" A ",
+	" O ",
+	" K ",
+	" N ",
+	" E ",
+	" S ",
+	" E ",
+	" O ",
+	" T ",
+	" C ",
+	" F ",
 }
 
 -- indent marker fonts
 local markers = {
-	" └ ",
-	" ├ ",
+	" └─",
+	" ├─",
 	" │ ",
 	"   ",
 }
@@ -182,86 +182,86 @@ local function parse(response, indent_num)
 	end
 end
 
--- splicing of each line of symbol outline content
-local function splice()
-	local indent_markers = {}
-	local jump_positions = {}
-	local prev = {}
+local function get_indent_markers(cur, prev, indent_markers)
 	-- symbol_infos indexes
 	local indent_num = 1
-	local kind = 2
-	local name = 3
-	local detail = 4
-	local start_row = 5
-	local start_column = 6
 	local is_end = 7
 	-- indent_markers
 	local bottem = markers[1]
 	local middle = markers[2]
 	local vert = markers[3]
 	local spaces = markers[4]
-	-- row-by-row traversal
+	--local indent_splicing = ""
+	local prev_indent = prev[indent_num]
+	local cur_indent = cur[indent_num]
+	local prev_is_end = prev[is_end]
+	local cur_is_end = cur[is_end]
+	if cur_indent == 0 then -- 如果是第一列 indent
+		return {}
+	end
+	-- 如果不是第一列 indent
+	if prev_indent == cur_indent and cur_is_end then -- 如果与上一个是处于同一个 indent
+		--if cur_is_end then -- 如果是这一个 indent 里面的最后一个
+		indent_markers[cur_indent] = bottem
+		return indent_markers
+		--end
+	end
+	-- 如果不是与上一个处于同一个 indent
+	if cur_indent > prev_indent then -- 如果是上一个的孩子
+		if #indent_markers ~= 0 then
+			if prev_is_end then -- 如果上一个是它那一层的最后一个
+				indent_markers[prev_indent] = spaces
+			else -- 如果上一个不是它那一层的最后一个
+				indent_markers[prev_indent] = vert
+			end
+		end
+	else -- 如果不是上一个的孩子，而是上一个的长辈，但是辈分不清楚
+		for j = cur_indent + 1, #indent_markers do
+			indent_markers[j] = nil
+		end
+	end
+	if cur_is_end then -- 如果是这一个 indent 里面的最后一个
+		indent_markers[cur_indent] = bottem
+	else -- 如果不是这一个 indent 里面的最后一个
+		indent_markers[cur_indent] = middle
+	end
+	return indent_markers
+end
+
+-- splicing of each line of symbol outline content
+local function splice()
+	local indent_markers = {}
+	local jump_positions = {}
+	local prev = {}
+	-- symbol_infos indexes
+	local kind = 2
+	local name = 3
+	local detail = 4
+	local start_row = 5
+	local start_column = 6
+
 	for i = 1, #symbol_infos do
 		local cur = symbol_infos[i]
-		local indent_splicing = " "
-		local prev_indent = prev[indent_num]
-		local cur_indent = cur[indent_num]
-		local prev_is_end = prev[is_end]
-		local cur_is_end = cur[is_end]
-		if cur_indent ~= 0 then -- 如果不是第一列 indent
-			if prev_indent == cur_indent then -- 如果与上一个是处于同一个 indent
-				if cur_is_end then -- 如果是这一个 indent 里面的最后一个
-					indent_markers[cur_indent] = bottem
-				end
-			else -- 如果不是与上一个处于同一个 indent
-				if cur_indent > prev_indent then -- 如果是上一个的孩子
-					if #indent_markers ~= 0 then
-						if prev_is_end then -- 如果上一个是它那一层的最后一个
-							indent_markers[prev_indent] = spaces
-						else -- 如果上一个不是它那一层的最后一个
-							indent_markers[prev_indent] = vert
-						end
-					end
-					if cur_is_end then -- 如果是这一个 indent 里面的最后一个
-						indent_markers[cur_indent] = bottem
-					else -- 如果不是这一个 indent 里面的最后一个
-						indent_markers[cur_indent] = middle
-					end
-				else -- 如果不是上一个的孩子，而是上一个的长辈，但是辈分不清楚
-					for j = cur_indent + 1, #indent_markers do
-						indent_markers[j] = nil
-					end
-					if cur_is_end then -- 如果是这一个 indent 里面的最后一个
-						indent_markers[cur_indent] = bottem
-					else -- 如果不是这一个 indent 里面的最后一个
-						indent_markers[cur_indent] = middle
-					end
-				end
-			end
-			indent_markers[0] = indent_splicing
-			indent_splicing = table.concat(indent_markers, "", 0)
-		else -- 如果是第一列 indent
-			indent_markers = {}
-		end
+		indent_markers = get_indent_markers(cur, prev, indent_markers)
+		local indent_splicing = table.concat(indent_markers)
 		local cur_kind = cur[kind]
 		presentings[i] = table.concat({
 			indent_splicing,
 			icons[cur_kind],
 			" ",
 			cur[name],
-			" ",
+			"  ",
 			cur[detail],
-			" ",
-			" [",
+			"  [",
 			kind_names[cur_kind],
 			"] ",
 		})
 		presentings_item_lens[i] = {
 			string.len(indent_splicing),
 			string.len(icons[cur_kind]),
-			string.len(cur[name]),
+			string.len(cur[name]) + 1,
 			string.len(cur[detail]),
-			string.len(" [" .. kind_names[cur_kind] .. "] "),
+			string.len(kind_names[cur_kind]) + 4,
 		}
 		jump_positions[i] = { cur[start_row], cur[start_column] }
 		prev = cur
@@ -318,7 +318,10 @@ local function highlight(outline_buf)
 	for line = 1, #presentings_item_lens do
 		local len = presentings_item_lens[line]
 		-- indent
-		vim.api.nvim_buf_add_highlight(outline_buf, -1, "SymbolIndent", line - 1, 0, len[indent_num] - 1)
+		local indent_num_len = len[indent_num]
+		if indent_num_len ~= 0 then
+			vim.api.nvim_buf_add_highlight(outline_buf, -1, "SymbolIndent", line - 1, 0, indent_num_len)
+		end
 		-- kind
 		local hl_start_col = len[indent_num]
 		local hl_end_col = len[kind] + hl_start_col
@@ -444,16 +447,16 @@ end
 
 vim.cmd([[
     hi FocusedSymbol ctermfg=black ctermbg=lightgray cterm=NONE
-    hi SymbolIndent ctermfg=gray ctermbg=NONE cterm=bold
+    hi SymbolIndent ctermfg=darkgray ctermbg=NONE cterm=NONE
     hi SymbolName ctermfg=lightgray ctermbg=NONE cterm=bold
     hi SymbolDetial ctermfg=darkmagenta ctermbg=NONE cterm=italic
     hi SymbolKindName ctermfg=darkgray ctermbg=NONE cterm=NONE
-    hi SymbolIcon_File ctermfg=cyan ctermbg=NONE cterm=bold
-    hi SymbolIcon_Package ctermfg=red ctermbg=NONE cterm=bold
-    hi SymbolIcon_Class ctermfg=yellow ctermbg=NONE cterm=bold
-    hi SymbolIcon_Method ctermfg=lightmagenta ctermbg=NONE cterm=bold
-    hi SymbolIcon_Field ctermfg=lightblue ctermbg=NONE cterm=bold
-    hi SymbolIcon_Array ctermfg=lightgreen ctermbg=NONE cterm=bold
+    hi SymbolIcon_File ctermfg=cyan ctermbg=NONE cterm=bold,italic
+    hi SymbolIcon_Package ctermfg=red ctermbg=NONE cterm=bold,italic
+    hi SymbolIcon_Class ctermfg=yellow ctermbg=NONE cterm=bold,italic
+    hi SymbolIcon_Method ctermfg=lightmagenta ctermbg=NONE cterm=bold,italic
+    hi SymbolIcon_Field ctermfg=lightblue ctermbg=NONE cterm=bold,italic
+    hi SymbolIcon_Array ctermfg=lightgreen ctermbg=NONE cterm=bold,italic
     hi! link SymbolIcon_Module SymbolIcon_File
     hi! link SymbolIcon_Namespace SymbolIcon_File
     hi! link SymbolIcon_Property SymbolIcon_File
