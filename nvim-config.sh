@@ -10,9 +10,17 @@ echo "  lsp.lua download start"
 echo
 sh -c 'curl -fLo "${XDG_DATA_HOME:-$HOME/.config}"/nvim/lua/lsp.lua --create-dirs https://raw.githubusercontent.com/HCY-ASLEEP/NVIM-Config/main/lua/lsp.lua'
 echo
-echo "  symbol-outline.lua download start"
+echo "  symbol-outline-preload.lua download start"
 echo
-sh -c 'curl -fLo "${XDG_DATA_HOME:-$HOME/.config}"/nvim/lua/lsp/symbol-outline.lua --create-dirs https://raw.githubusercontent.com/HCY-ASLEEP/NVIM-Config/main/lua/lsp/symbol-outline.lua'
+sh -c 'curl -fLo "${XDG_DATA_HOME:-$HOME/.config}"/nvim/lua/lsp/symbol-outline-preload.lua --create-dirs https://raw.githubusercontent.com/HCY-ASLEEP/NVIM-Config/main/lua/lsp/symbol-outline-preload.lua'
+echo
+echo "  symbol-outline-nested.lua download start"
+echo
+sh -c 'curl -fLo "${XDG_DATA_HOME:-$HOME/.config}"/nvim/lua/lsp/symbol-outline-nested.lua --create-dirs https://raw.githubusercontent.com/HCY-ASLEEP/NVIM-Config/main/lua/lsp/symbol-outline-nested.lua'
+echo
+echo "  symbol-outline-sorted.lua download start"
+echo
+sh -c 'curl -fLo "${XDG_DATA_HOME:-$HOME/.config}"/nvim/lua/lsp/symbol-outline-sorted.lua --create-dirs https://raw.githubusercontent.com/HCY-ASLEEP/NVIM-Config/main/lua/lsp/symbol-outline-sorted.lua'
 echo
 echo "  autocomplete.vim download start"
 echo
