@@ -136,12 +136,17 @@ vim.keymap.set("n", "<C-up>", vim.diagnostic.goto_prev, { noremap = true, silent
 vim.keymap.set("n", "<C-down>", vim.diagnostic.goto_next, { noremap = true, silent = true })
 
 -- symbol_outline
-local symbol_outline = require("lsp.symbol-outline")
+require("lsp.symbol-outline-preload")
+local symbol_outline_nested = require("lsp.symbol-outline-nested")
+local symbol_outline_sorted = require("lsp.symbol-outline-sorted")
 vim.keymap.set("n", "gs", function()
-	symbol_outline.open(0)
+	symbol_outline_nested.open(0)
 end, { noremap = true, silent = true })
-vim.api.nvim_create_user_command("OpenSymbolOutline", function()
-	symbol_outline.open(0)
+vim.api.nvim_create_user_command("OpenSymbolOutlineNested", function()
+	symbol_outline_nested.open(0)
+end, {})
+vim.api.nvim_create_user_command("OpenSymbolOutlineSorted", function()
+	symbol_outline_sorted.open(0)
 end, {})
 
 --log_file = io.open("/home/devenv/.config/nvim/log.log", "a")
