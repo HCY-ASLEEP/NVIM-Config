@@ -16,6 +16,8 @@ local presentings = {}
 -- the final content to be written into the buffer
 local presentings_item_lens = {}
 
+local outline_type = "nested"
+
 -- refresh signal
 local is_refresh = false
 
@@ -319,9 +321,7 @@ local function highlight(outline_buf)
 		local len = presentings_item_lens[line]
 		-- indent
 		local indent_num_len = len[indent_num]
-		if indent_num_len ~= 0 then
-			vim.api.nvim_buf_add_highlight(outline_buf, -1, "SymbolIndent", line - 1, 0, indent_num_len)
-		end
+		vim.api.nvim_buf_add_highlight(outline_buf, -1, "SymbolIndent", line - 1, 0, indent_num_len)
 		-- kind
 		local hl_start_col = len[indent_num]
 		local hl_end_col = len[kind] + hl_start_col
@@ -406,29 +406,43 @@ local function refresh()
 	end)
 end
 
+local function return_immediately()
+	if vim.t.jump_buf_name == nil then
+		return false
+	end
+	if vim.fn.bufnr(vim.t.jump_buf_name) ~= vim.api.nvim_get_current_buf() then
+		return false
+	end
+	if is_refresh then
+		return false
+	end
+	local outline_tabpage = vim.api.nvim_get_current_tabpage()
+	local outline_win, _ = get_win_buf_by("SymbolOutline" .. outline_tabpage)
+	if outline_win == -1 then
+		return false
+	end
+	if vim.t.outline_type ~= outline_type then
+		return false
+	end
+	vim.api.nvim_set_current_win(outline_win)
+	locate_open_position_in(outline_win)
+	return true
+end
+
 -- open symbol outline
 function M.open(source_win)
 	local source_buf = vim.api.nvim_win_get_buf(source_win)
 	source_open_row = vim.api.nvim_win_get_cursor(source_win)[1]
-	if vim.t.jump_buf_name ~= nil then
-		if vim.fn.bufnr(vim.t.jump_buf_name) == vim.api.nvim_get_current_buf() then
-			if not is_refresh then
-				local outline_tabpage = vim.api.nvim_get_current_tabpage()
-				local outline_win, _ = get_win_buf_by("SymbolOutline" .. outline_tabpage)
-				if outline_win ~= -1 then
-					vim.api.nvim_set_current_win(outline_win)
-					locate_open_position_in(outline_win)
-					return
-				end
-			end
-		end
+	if return_immediately() then
+		return
 	end
+	vim.t.outline_type = outline_type
 	vim.lsp.buf_request(
 		source_buf,
 		"textDocument/documentSymbol",
 		{ textDocument = vim.lsp.util.make_text_document_params() },
 		function(_, response)
-			if next(response) == nil then
+			if response[1] == nil then
 				print(">> No Symbols But LSP Is Working!")
 				return
 			end
@@ -444,55 +458,5 @@ function M.open(source_win)
 		end
 	)
 end
-
-vim.cmd([[
-    hi FocusedSymbol ctermfg=black ctermbg=lightgray cterm=NONE
-    hi SymbolIndent ctermfg=darkgray ctermbg=NONE cterm=NONE
-    hi SymbolName ctermfg=lightgray ctermbg=NONE cterm=bold
-    hi SymbolDetial ctermfg=darkmagenta ctermbg=NONE cterm=italic
-    hi SymbolKindName ctermfg=darkgray ctermbg=NONE cterm=NONE
-    hi SymbolIcon_File ctermfg=cyan ctermbg=NONE cterm=bold,italic
-    hi SymbolIcon_Package ctermfg=red ctermbg=NONE cterm=bold,italic
-    hi SymbolIcon_Class ctermfg=yellow ctermbg=NONE cterm=bold,italic
-    hi SymbolIcon_Method ctermfg=lightmagenta ctermbg=NONE cterm=bold,italic
-    hi SymbolIcon_Field ctermfg=lightblue ctermbg=NONE cterm=bold,italic
-    hi SymbolIcon_Array ctermfg=lightgreen ctermbg=NONE cterm=bold,italic
-    hi! link SymbolIcon_Module SymbolIcon_File
-    hi! link SymbolIcon_Namespace SymbolIcon_File
-    hi! link SymbolIcon_Property SymbolIcon_File
-    hi! link SymbolIcon_Constructor SymbolIcon_Method
-    hi! link SymbolIcon_Enum SymbolIcon_Class
-    hi! link SymbolIcon_Interface SymbolIcon_Field
-    hi! link SymbolIcon_Function SymbolIcon_Method
-    hi! link SymbolIcon_Variable SymbolIcon_Field
-    hi! link SymbolIcon_Constant SymbolIcon_File
-    hi! link SymbolIcon_String SymbolIcon_Method
-    hi! link SymbolIcon_Number SymbolIcon_Class
-    hi! link SymbolIcon_Boolean SymbolIcon_File
-    hi! link SymbolIcon_Object SymbolIcon_File
-    hi! link SymbolIcon_Key SymbolIcon_File
-    hi! link SymbolIcon_Null SymbolIcon_File
-    hi! link SymbolIcon_EnumMember SymbolIcon_Class
-    hi! link SymbolIcon_Struct SymbolIcon_File
-    hi! link SymbolIcon_Event SymbolIcon_Class
-    hi! link SymbolIcon_Operator SymbolIcon_File
-    hi! link SymbolIcon_TypeParameter SymbolIcon_File
-    hi! link SymbolIcon_Component SymbolIcon_File
-    hi! link SymbolIcon_Fragment SymbolIcon_File
-]])
-
-local symbol_outline_augroup = vim.api.nvim_create_augroup("symbol_outline_augroup", { clear = true })
-vim.api.nvim_create_autocmd("BufWinLeave", {
-	pattern = { "*" },
-	callback = function()
-		if vim.bo.filetype == "SymbolOutline" then
-			local _, jump_buf = get_win_buf_by(vim.t.jump_buf_name)
-			if jump_buf ~= -1 then
-				vim.api.nvim_buf_clear_namespace(jump_buf, vim.t.focused_symbol_ns, 0, -1)
-			end
-		end
-	end,
-	group = symbol_outline_augroup,
-})
 
 return M
