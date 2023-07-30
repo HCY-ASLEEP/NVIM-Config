@@ -1,4 +1,8 @@
 " Global Fuzzy Match words -------------------------------------------------------------------------
+let t:rgFocusCurMatchId=-1
+
+hi RgFocusCurMatch ctermfg=lightgreen ctermbg=darkgray cterm=bold
+
 " Go to the file on line
 function! RgJump(location)
     exec "cd ".g:rootDir
@@ -7,7 +11,7 @@ function! RgJump(location)
     try
         exec "edit ".l:location[0]
         cal cursor(l:location[1], l:location[2])
-        call matchadd('FocusCurMatch', '\c\%#'.@/)
+        let t:rgFocusCurMatchId=matchadd('RgFocusCurMatch', '\c\%#'.t:rgrepSubStr)
     catch
         echo ">> File Not Exist!"
     endtry
@@ -78,6 +82,11 @@ endfunction
 function! RgPre()
     call RgShow("-")
 endfunction
+
+augroup ripgrepWordSearch
+    autocmd!
+    autocmd BufWinLeave RipgrepWordSearch* silent! call matchdelete(t:rgFocusCurMatchId)
+augroup END
 
 command! -nargs=1 -complete=command RgRedir silent! call RgRedir(<q-args>)
 
