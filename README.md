@@ -1,4 +1,4 @@
-## Welcome! This my neovim config without any plugins.
+## Welcome! This my neovim config without any plugins. ( NeoVIM >= 0.9 )
 
 ### Configuration presentations
 
