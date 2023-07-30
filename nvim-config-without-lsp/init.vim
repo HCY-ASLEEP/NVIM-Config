@@ -1,7 +1,3 @@
-" vim-plug(4) ---------------------------------------------------------------------------------------
-call plug#begin($HOME.'/.local/share/nvim/site/autoload')
-call plug#end()
-
 let g:config_path=expand("<sfile>:p:h")
 
 exec "source ".g:config_path."/vim/autocomplete.vim"
