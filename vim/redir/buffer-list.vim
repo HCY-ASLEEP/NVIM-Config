@@ -37,8 +37,6 @@ function! BufferListRedir()
     endwhile
 endfunction
 
-nnoremap <silent><space>l <cmd>call BufferListRedir()<CR>
-
 " To show the buffer selected, underlying of BufferListNext, imitate 'cNext' command
 function! BufferListShow(direction)
     let l:bufferListWinNum=bufwinnr(bufnr('^BufferList'.tabpagenr()))
@@ -65,4 +63,6 @@ endfunction
 function! BufferListPre()
     call BufferListShow("-")
 endfunction
+
+nnoremap <silent><space>l <cmd>call BufferListRedir()<CR>
 

@@ -1,9 +1,40 @@
-This my neovim config.
+## Welcome! This my neovim config without any plugins.
 
+### Configuration presentations
+
+- **Autocomplete with the build-in omnifunc**
+    
+    ![](./doc/pictures/omni-autocomplete.png)
+
+- **Folding according to after the pattern match, toggled by `<SPACE>z`**
+
+    ![](./doc/pictures/folding-according-to-search-pattern.png)
+
+- **Focus on the cur word after the pattern match**
+
+    ![](./doc/pictures/focus-cur-word-after-word-match.png)
+
+- **A symbol outline in nested view, opened by `OpenSymbolOutlineNested` command**
+
+    ![](./doc/pictures/symbol-outline-nested.png)
+    
+- **A symbol outline in sorted view, opened by `OpenSymbolOutlineSorted` command**
+
+    ![](./doc/pictures/symbol-outline-sorted.png)
+
+- **A fuzzy file search without gitignore, opened by `Fs` command, or use `Fg` to search with gitignore, powered by ripgrep** 
+
+    ![](./doc/pictures/file-search-without-gitignore.png)
+    
+- **A fuzzy word search with gitignore, opened by `Wg` command, or use `Ws` to search without gitignore, powered by ripgrep**
+    
+    ![](./doc/pictures/word-search-with-gitignore.png)
+
+- **When quit the netrw and reopen it, its states will lose, so I wrote a script to keep its state, make it to hide on the right side instead of closing it, toggled by `<SPACE>e`**
+
+### Install
 
 [国内 Gitee 加速 (并不是单纯的仓库克隆，而是把所有需要的源都换成了国内的)](https://gitee.com/mygiteehcy/NVIM-Config/tree/main/)
-
-
 
 To use neovim config with lsp, you can download files to your customized path or run the following one-line command:
 

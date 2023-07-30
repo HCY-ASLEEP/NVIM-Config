@@ -16,8 +16,6 @@ function! ChangeDir(path)
     endif
 endfunction
 
-command! -nargs=1 -complete=command C call ChangeDir(<f-args>)
-
 let t:redirPreviewWinnr = 1
 
 function! OpenRedirWindow()
@@ -55,6 +53,8 @@ function! QuitRedirWindow()
 endfunction
 
 nnoremap <silent><space>q <cmd>call QuitRedirWindow()<CR>
+
+command! -nargs=1 -complete=command C call ChangeDir(<f-args>)
 
 exec "source ".g:config_path."/vim/redir/buffer-list.vim"
 exec "source ".g:config_path."/vim/redir/file-search.vim"

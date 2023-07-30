@@ -32,8 +32,6 @@ function! RgRedir(cmd)
     setlocal buftype=nofile bufhidden=wipe nobuflisted noswapfile cursorline filetype=RipgrepWordSearch
 endfunction
 
-command! -nargs=1 -complete=command RgRedir silent! call RgRedir(<q-args>)
-
 " Show Words fuzzily searched with git
 function! RgWithGit(substr)
     let t:rgrepSubStr=a:substr
@@ -53,12 +51,6 @@ function! RgWithoutGit(substr)
         exec "normal! dd"
     endif
 endfunction
-
-" Wg means 'word git', search file fuzzily names with git
-command! -nargs=1 -complete=command Wg silent! call RgWithGit(<q-args>)
-
-" Ws means 'word search', search file fuzzily names without git
-command! -nargs=1 -complete=command Ws silent! call RgWithoutGit(<q-args>)
 
 " To show file preview, underlying of RgNext, imitate 'cNext' command
 function! RgShow(direction)
@@ -86,4 +78,12 @@ endfunction
 function! RgPre()
     call RgShow("-")
 endfunction
+
+command! -nargs=1 -complete=command RgRedir silent! call RgRedir(<q-args>)
+
+" Wg means 'word git', search file fuzzily names with git
+command! -nargs=1 -complete=command Wg silent! call RgWithGit(<q-args>)
+
+" Ws means 'word search', search file fuzzily names without git
+command! -nargs=1 -complete=command Ws silent! call RgWithoutGit(<q-args>)
 

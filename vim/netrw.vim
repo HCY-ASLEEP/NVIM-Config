@@ -64,8 +64,6 @@ function! ToggleExplorer()
     endif
 endfunction
 
-nnoremap <silent><SPACE>e <cmd>call ToggleExplorer()<CR>
-
 function! ExploreWhenEnter()
     if exists('#skipNetrwWin#BufEnter')
         autocmd! skipNetrwWin
@@ -100,4 +98,6 @@ augroup initExplore
     autocmd!
     autocmd TabEnter,VimEnter * call ExploreWhenEnter()
 augroup END
+
+nnoremap <silent><SPACE>e <cmd>call ToggleExplorer()<CR>
 

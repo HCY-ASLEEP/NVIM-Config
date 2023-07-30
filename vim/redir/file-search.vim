@@ -30,8 +30,6 @@ function! FindRedir(cmd)
     setlocal buftype=nofile bufhidden=wipe nobuflisted noswapfile cursorline filetype=FuzzyFilenameSearch
 endfunction
 
-command! -nargs=1 -complete=command FindRedir silent! call FindRedir(<q-args>)
-
 " Show Files fuzzily searched with git
 function! FindWithGit(substr)
     let t:findSubStr=a:substr
@@ -51,12 +49,6 @@ function! FindWithoutGit(substr)
         exec "normal! dd"
     endif
 endfunction
-
-" Fg means 'file git', search file names fuzzily with git
-command! -nargs=1 -complete=command Fg silent! call FindWithGit(<q-args>)
-
-" Fs means 'file search', search file names fuzzily
-command! -nargs=1 -complete=command Fs silent! call FindWithoutGit(<q-args>)
 
 " To show file preview, underlying of FindNext, imitate 'cNext' command
 function! FindShow(direction)
@@ -84,4 +76,13 @@ endfunction
 function! FindPre()
     call FindShow("-")
 endfunction
+
+command! -nargs=1 -complete=command FindRedir silent! call FindRedir(<q-args>)
+
+" Fg means 'file git', search file names fuzzily with git
+command! -nargs=1 -complete=command Fg silent! call FindWithGit(<q-args>)
+
+" Fs means 'file search', search file names fuzzily
+command! -nargs=1 -complete=command Fs silent! call FindWithoutGit(<q-args>)
+
 
