@@ -2,18 +2,18 @@
 let g:rootDir=getcwd()
 
 function! ChangeDir(path)
-    if isdirectory(expand(a:path))
-        if a:path=="."
-            let g:rootDir=expand("%:p:h")
-            exec "cd ".g:rootDir
-        else
-            let g:rootDir=a:path
-            exec "cd ".g:rootDir
-        endif
-        echo getcwd()
-    else
+    if !isdirectory(expand(a:path))
         echo ">> Error Path!"
+        return
     endif
+    if a:path=="."
+        let g:rootDir=expand("%:p:h")
+        exec "cd ".g:rootDir
+    else
+        let g:rootDir=a:path
+        exec "cd ".g:rootDir
+    endif
+    echo getcwd()
 endfunction
 
 let t:redirPreviewWinnr = 1

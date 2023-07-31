@@ -3,28 +3,24 @@ let t:rgFocusCurMatchId=-1
 
 hi RgFocusCurMatch ctermfg=lightgreen ctermbg=darkgray cterm=bold
 
-" Go to the file on line
-function! RgJump(location)
-    exec "cd ".g:rootDir
-    let l:location = split(a:location, ":")
-    exec t:redirPreviewWinnr."wincmd w"
+function! RgLocateTarget()
+    let l:location = split(t:rgLocateTarget, ":")
     try
         exec "edit ".l:location[0]
         cal cursor(l:location[1], l:location[2])
         let t:rgFocusCurMatchId=matchadd('RgFocusCurMatch', '\c\%#'.t:rgrepSubStr)
+        normal! zz
     catch
         echo ">> File Not Exist!"
     endtry
 endfunction
 
-" autocmd to jump to file with CR only in RipgrepWordSearch buffer
-function! RgJumpMap()
-    augroup rgJumpMap
-        autocmd!
-        autocmd FileType RipgrepWordSearch nnoremap <buffer><silent><CR> <cmd>call RgJump(getline('.'))<CR>
-    augroup END
-    nnoremap <silent><S-down> <cmd>call RgNext()<CR>
-    nnoremap <silent><S-up> <cmd>call RgPre()<CR>
+" Go to the file on line
+function! RgJump(location)
+    exec "cd ".g:rootDir
+    exec t:redirPreviewWinnr."wincmd w"
+    let t:rgLocateTarget=a:location
+    call RgLocateTarget()
 endfunction
 
 " redirect the command output to a buffer
@@ -61,16 +57,14 @@ function! RgShow(direction)
     let l:rgWinNum=bufwinnr(bufnr('^RipgrepWordSearch'.tabpagenr()))
     if l:rgWinNum == -1
         echo ">> No RipgrepWordSearch Buffer!"
-    else
-        if l:rgWinNum != t:redirPreviewWinnr
-            let l:rgWinId=win_getid(l:rgWinNum)
-            call win_execute(l:rgWinId, "normal! ".a:direction)
-            call win_execute(l:rgWinId, "let t:rgPreviewLocation=getline('.')")
-            call RgJump(t:rgPreviewLocation)
-        else
-            call RgJump(getline('.'))
-        endif
+        return
     endif
+    exec l:rgWinNum."wincmd w"
+    exec "cd ".g:rootDir
+    exec "normal! ".a:direction
+    let l:redirPreviewWinId=win_getid(t:redirPreviewWinnr)
+    let t:rgLocateTarget=getline('.')
+    call win_execute(l:redirPreviewWinId, "call RgLocateTarget()")
 endfunction
 
 " imitate 'cNext'
@@ -81,6 +75,16 @@ endfunction
 " imitate 'cprevious'
 function! RgPre()
     call RgShow("-")
+endfunction
+
+" autocmd to jump to file with CR only in RipgrepWordSearch buffer
+function! RgJumpMap()
+    augroup rgJumpMap
+        autocmd!
+        autocmd FileType RipgrepWordSearch nnoremap <buffer><silent><CR> <cmd>call RgJump(getline('.'))<CR>
+        autocmd FileType RipgrepWordSearch nnoremap <buffer><silent>j <cmd>call RgNext()<CR>
+        autocmd FileType RipgrepWordSearch nnoremap <buffer><silent>k <cmd>call RgPre()<CR>
+    augroup END
 endfunction
 
 augroup ripgrepWordSearch

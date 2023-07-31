@@ -1,24 +1,18 @@
 " Fuzzy Match filenames -----------------------------------------------------------------------------
-" Go to the file on line
-function! FindJump(path)
-    exec "cd ".g:rootDir
-    let l:path=a:path
-    exec t:redirPreviewWinnr."wincmd w"
-    if filereadable(expand(l:path))
-        exec "edit ".l:path
+function! FindLocateTarget()
+    if filereadable(expand(t:findLocateTarget))
+        exec "edit ".t:findLocateTarget
     else
         echo ">> File Not Exist!"
     endif
 endfunction
 
-" autocmd to jump to file with CR only in FuzzyFilenameSearch buffer
-function! FindJumpMap()
-    augroup findJumpMap
-        autocmd!
-        autocmd FileType FuzzyFilenameSearch nnoremap <buffer><silent><CR> <cmd>call FindJump(getline('.'))<CR>
-    augroup END
-    nnoremap <silent><S-down> <cmd>call FindNext()<CR>
-    nnoremap <silent><S-up> <cmd>call FindPre()<CR>
+" Go to the file on line
+function! FindJump(path)
+    exec "cd ".g:rootDir
+    exec t:redirPreviewWinnr."wincmd w"
+    let t:findLocateTarget=a:path
+    call FindLocateTarget()
 endfunction
 
 " redirect the command output to a buffer
@@ -55,16 +49,14 @@ function! FindShow(direction)
     let l:findWinNum=bufwinnr(bufnr('^FuzzyFilenameSearch'.tabpagenr()))
     if l:findWinNum == -1
         echo ">> No FuzzyFilenameSearch Buffer!"
-    else
-        if l:findWinNum != t:redirPreviewWinnr
-            let l:findWinId=win_getid(l:findWinNum)
-            call win_execute(l:findWinId, "normal! ".a:direction)
-            call win_execute(l:findWinId, "let t:findPreviewPath=getline('.')")
-            call FindJump(t:findPreviewPath)
-        else
-            call FindJump(getline('.'))
-        endif
+        return
     endif
+    exec l:findWinNum."wincmd w"
+    exec "cd ".g:rootDir
+    exec "normal!".a:direction
+    let l:redirPreviewWinId=win_getid(t:redirPreviewWinnr)
+    let t:findLocateTarget=getline('.')
+    call win_execute(l:redirPreviewWinId,"call FindLocateTarget()")
 endfunction
 
 " imitate 'cNext'
@@ -75,6 +67,16 @@ endfunction
 " imitate 'cprevious'
 function! FindPre()
     call FindShow("-")
+endfunction
+
+" autocmd to jump to file with CR only in FuzzyFilenameSearch buffer
+function! FindJumpMap()
+    augroup findJumpMap
+        autocmd!
+        autocmd FileType FuzzyFilenameSearch nnoremap <buffer><silent><CR> <cmd>call FindJump(getline('.'))<CR>
+        autocmd FileType FuzzyFilenameSearch nnoremap <buffer><silent>j <cmd>call FindNext()<CR>
+        autocmd FileType FuzzyFilenameSearch nnoremap <buffer><silent>k <cmd>call FindPre()<CR>
+    augroup END
 endfunction
 
 command! -nargs=1 -complete=command FindRedir silent! call FindRedir(<q-args>)

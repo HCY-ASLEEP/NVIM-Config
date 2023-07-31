@@ -35,33 +35,33 @@ function! ToggleExplorer()
         enew
         let l:expl_win_num = -1
     endif
-    " if expl_win_num exists
-    if l:expl_win_num != -1
-        " if cursor is not in explorer
-        if l:expl_win_num != winnr()
-            let t:cur_work_win_num = winnr()
-        endif
-        " if explorer is not hidden
-        if winwidth(l:expl_win_num)!=0
-            let t:win_width=0
-            exec t:cur_work_win_num."wincmd w"
-            call SkipNetrwWin()
-        else
-            let t:win_width=g:max_explore_win_width
-            " disable skip netrw win
-            if exists('#skipNetrwWin#BufEnter')
-                autocmd! skipNetrwWin
-            endif
-            exec l:expl_win_num."wincmd w"
-        endif
-        exec "vertical ".l:expl_win_num."resize ".t:win_width
-    else
+    if l:expl_win_num==-1
         let t:cur_work_win_num = winnr()
         call OpenExplorerOnSize(g:max_explore_win_width)
         if exists('#skipNetrwWin#BufEnter')
             autocmd! skipNetrwWin
         endif
+        return
     endif
+    " if expl_win_num exists
+    " if cursor is not in explorer
+    if l:expl_win_num != winnr()
+        let t:cur_work_win_num = winnr()
+    endif
+    " if explorer is not hidden
+    if winwidth(l:expl_win_num)!=0
+        let t:win_width=0
+        exec t:cur_work_win_num."wincmd w"
+        call SkipNetrwWin()
+    else
+        let t:win_width=g:max_explore_win_width
+        " disable skip netrw win
+        if exists('#skipNetrwWin#BufEnter')
+            autocmd! skipNetrwWin
+        endif
+        exec l:expl_win_num."wincmd w"
+    endif
+    exec "vertical ".l:expl_win_num."resize ".t:win_width
 endfunction
 
 function! ExploreWhenEnter()
@@ -83,14 +83,15 @@ function! ExploreWhenEnter()
         " hide the explorer
         exec "vertical ".l:expl_win_num."resize 0"
         call SkipNetrwWin()
-    else
-        if winwidth(l:expl_win_num)!=0
-            if exists('#skipNetrwWin#BufEnter')
-                autocmd! skipNetrwWin
-            endif
-        else
-            call SkipNetrwWin()
-        endif
+        return
+    endif
+    if winwidth(l:expl_win_num)==0
+        call SkipNetrwWin()
+        return
+    endif
+    if exists('#skipNetrwWin#BufEnter')
+        autocmd! skipNetrwWin
+        return
     endif
 endfunction
 
