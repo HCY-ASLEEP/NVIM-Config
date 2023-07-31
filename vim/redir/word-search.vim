@@ -1,14 +1,10 @@
 " Global Fuzzy Match words -------------------------------------------------------------------------
-let t:rgFocusCurMatchId=-1
-
-hi RgFocusCurMatch ctermfg=lightgreen ctermbg=darkgray cterm=bold
-
 function! RgLocateTarget()
     let l:location = split(t:rgLocateTarget, ":")
     try
         exec "edit ".l:location[0]
         cal cursor(l:location[1], l:location[2])
-        let t:rgFocusCurMatchId=matchadd('RgFocusCurMatch', '\c\%#'.t:rgrepSubStr)
+        call matchadd('RgFocusCurMatch', '\c\%#'.t:rgrepSubStr)
         normal! zz
     catch
         echo ">> File Not Exist!"
@@ -89,7 +85,8 @@ endfunction
 
 augroup ripgrepWordSearch
     autocmd!
-    autocmd BufWinLeave RipgrepWordSearch* silent! call matchdelete(t:rgFocusCurMatchId)
+    autocmd BufLeave RipgrepWordSearch* silent! hi clear RgFocusCurMatch 
+    autocmd BufEnter RipgrepWordSearch* silent! hi RgFocusCurMatch ctermfg=lightgreen ctermbg=darkgray cterm=bold
 augroup END
 
 command! -nargs=1 -complete=command RgRedir silent! call RgRedir(<q-args>)
