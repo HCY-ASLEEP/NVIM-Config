@@ -1,6 +1,14 @@
-## Welcome! This my neovim config without any plugins. ( NeoVIM >= 0.9 )
+## Welcome to my neovim config without any plugins! ( NeoVIM >= 0.9 )
 
-### Configuration presentations
+## Configuration presentations
+
+- **A symbol outline in nested view, opened by `OpenSymbolOutlineNested` command**
+
+    ![](./doc/pictures/symbol-outline-nested.png)
+    
+- **A symbol outline in sorted view, opened by `OpenSymbolOutlineSorted` command**
+
+    ![](./doc/pictures/symbol-outline-sorted.png)
 
 - **Autocomplete with the build-in omnifunc**
     
@@ -14,14 +22,6 @@
 
     ![](./doc/pictures/focus-cur-word-after-word-match.png)
 
-- **A symbol outline in nested view, opened by `OpenSymbolOutlineNested` command**
-
-    ![](./doc/pictures/symbol-outline-nested.png)
-    
-- **A symbol outline in sorted view, opened by `OpenSymbolOutlineSorted` command**
-
-    ![](./doc/pictures/symbol-outline-sorted.png)
-
 - **A fuzzy file search without gitignore, opened by `Fs` command, or use `Fg` to search with gitignore, powered by ripgrep** 
 
     ![](./doc/pictures/file-search-without-gitignore.png)
@@ -32,7 +32,9 @@
 
 - **When quit the netrw and reopen it, its states will lose, so I wrote a script to keep its state, make it to hide on the right side instead of closing it, toggled by `<SPACE>e`**
 
-### Install
+    ![](./doc/pictures/netrw.png)
+
+## Install
 
 [国内 Gitee 加速 (并不是单纯的仓库克隆，而是把所有需要的源都换成了国内的)](https://gitee.com/mygiteehcy/NVIM-Config/tree/main/)
 
