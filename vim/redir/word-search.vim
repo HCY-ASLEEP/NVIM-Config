@@ -31,6 +31,7 @@ endfunction
 " Show Words fuzzily searched with git
 function! RgWithGit(substr)
     let t:rgrepSubStr=a:substr
+    exec "cd ".t:rootDir
     exec "RgRedir !rg '".a:substr."' ".getcwd()." --ignore-case --vimgrep --no-heading"
     exec "normal! gg"
     if getline('.') == ""
@@ -41,6 +42,7 @@ endfunction
 " Show Files fuzzily searched without git
 function! RgWithoutGit(substr)
     let t:rgrepSubStr=a:substr
+    exec "cd ".t:rootDir
     exec "RgRedir !rg '".a:substr."' ".getcwd()." --ignore-case --vimgrep --no-heading --no-ignore"
     exec "normal! gg"
     if getline('.') == ""

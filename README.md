@@ -41,6 +41,7 @@
     - Powered by ripgrep.
     - Case insensitive search.
     - When cursor in the file search result win, press `j` or `k` to quickly preview the contents, `<CR>` to jump to the file.
+    - `<SPACE>q` to quit it anywhere.
 
     ![](./doc/pictures/file-search-without-gitignore.png)
     
@@ -51,8 +52,17 @@
     - Powered by ripgrep.
     - Case insensitive search.
     - When cursor in the file search result win, press `j` or `k` to quickly preview the contents, `<CR>` to jump to the file.
+    - `<SPACE>q` to quit it anywhere.
     
     ![](./doc/pictures/word-search-with-gitignore.png)
+
+- **A simple buffer switching that lists all buffers**
+    
+    - Opened by `<SPACE>l`.
+    - When cursor in the file search result win, press `j` or `k` to quickly preview the contents, `<CR>` to jump to the file.
+    - `<SPACE>q` to quit it anywhere.
+    
+    ![](./doc/pictures/buffer-list.png)
 
 - **When quit the netrw and reopen it, its states will lose, so I wrote a script to keep its state, make it to hide on the right side instead of closing it, toggled by `<SPACE>e`**
 
