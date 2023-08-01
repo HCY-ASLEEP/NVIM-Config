@@ -9,7 +9,7 @@ endfunction
 
 " Go to the file on line
 function! FindJump(path)
-    exec "cd ".g:rootDir
+    exec "cd ".t:rootDir
     exec t:redirPreviewWinnr."wincmd w"
     let t:findLocateTarget=a:path
     call FindLocateTarget()
@@ -52,7 +52,7 @@ function! FindShow(direction)
         return
     endif
     exec l:findWinNum."wincmd w"
-    exec "cd ".g:rootDir
+    exec "cd ".t:rootDir
     exec "normal!".a:direction
     let l:redirPreviewWinId=win_getid(t:redirPreviewWinnr)
     let t:findLocateTarget=getline('.')

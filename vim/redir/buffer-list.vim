@@ -10,7 +10,7 @@ function! BufferListLocateTarget()
 endfunction
 
 function! BufferListJump(bufInfo)
-    exec "cd ".g:rootDir
+    exec "cd ".t:rootDir
     exec t:redirPreviewWinnr."wincmd w"
     let t:bufferListLocateTarget=a:bufInfo
     call BufferListLocateTarget()
@@ -41,7 +41,7 @@ function! BufferListShow(direction)
         return
     endif
     exec l:bufferListWinNum."wincmd w"   
-    exec "cd ".g:rootDir
+    exec "cd ".t:rootDir
     exec "normal! ".a:direction
     let l:redirPreviewWinId=win_getid(t:redirPreviewWinnr)
     let t:bufferListLocateTarget=getline('.')

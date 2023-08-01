@@ -13,7 +13,7 @@ endfunction
 
 " Go to the file on line
 function! RgJump(location)
-    exec "cd ".g:rootDir
+    exec "cd ".t:rootDir
     exec t:redirPreviewWinnr."wincmd w"
     let t:rgLocateTarget=a:location
     call RgLocateTarget()
@@ -56,7 +56,7 @@ function! RgShow(direction)
         return
     endif
     exec l:rgWinNum."wincmd w"
-    exec "cd ".g:rootDir
+    exec "cd ".t:rootDir
     exec "normal! ".a:direction
     let l:redirPreviewWinId=win_getid(t:redirPreviewWinnr)
     let t:rgLocateTarget=getline('.')
@@ -73,6 +73,14 @@ function! RgPre()
     call RgShow("-")
 endfunction
 
+function! RgClearFocusCurMatchWhenTabEnter()
+    if bufwinnr(bufnr('^RipgrepWordSearch'.tabpagenr()))==-1
+        hi clear RgFocusCurMatch
+    else
+        hi RgFocusCurMatch ctermfg=lightgreen ctermbg=darkgray cterm=bold
+    endif
+endfunction
+
 " autocmd to jump to file with CR only in RipgrepWordSearch buffer
 function! RgJumpMap()
     augroup rgJumpMap
@@ -85,8 +93,9 @@ endfunction
 
 augroup ripgrepWordSearch
     autocmd!
-    autocmd BufLeave RipgrepWordSearch* silent! hi clear RgFocusCurMatch 
+    autocmd BufWinLeave RipgrepWordSearch* silent! hi clear RgFocusCurMatch 
     autocmd BufEnter RipgrepWordSearch* silent! hi RgFocusCurMatch ctermfg=lightgreen ctermbg=darkgray cterm=bold
+    autocmd TabEnter * call RgClearFocusCurMatchWhenTabEnter()
 augroup END
 
 command! -nargs=1 -complete=command RgRedir silent! call RgRedir(<q-args>)

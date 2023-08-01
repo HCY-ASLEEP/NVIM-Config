@@ -1,5 +1,5 @@
 " set ripgrep root dir
-let g:rootDir=getcwd()
+let t:rootDir=getcwd()
 
 function! ChangeDir(path)
     if !isdirectory(expand(a:path))
@@ -7,11 +7,11 @@ function! ChangeDir(path)
         return
     endif
     if a:path=="."
-        let g:rootDir=expand("%:p:h")
-        exec "cd ".g:rootDir
+        let t:rootDir=expand("%:p:h")
+        exec "cd ".t:rootDir
     else
-        let g:rootDir=a:path
-        exec "cd ".g:rootDir
+        let t:rootDir=a:path
+        exec "cd ".t:rootDir
     endif
     echo getcwd()
 endfunction
@@ -55,6 +55,11 @@ endfunction
 nnoremap <silent><space>q <cmd>call QuitRedirWindow()<CR>
 
 command! -nargs=1 -complete=command C call ChangeDir(<f-args>)
+
+augroup getRootDirWhenTabNew
+    autocmd!
+    autocmd TabNew * let t:rootDir=getcwd()
+augroup END
 
 exec "source ".g:config_path."/vim/redir/buffer-list.vim"
 exec "source ".g:config_path."/vim/redir/file-search.vim"

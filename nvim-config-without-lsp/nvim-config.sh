@@ -4,7 +4,7 @@ sh -c 'curl -fLo "${XDG_DATA_HOME:-$HOME/.config}"/nvim/init.vim --create-dirs h
 echo
 echo "  autocomplete.vim download start"
 echo
-sh -c 'curl -fLo "${XDG_DATA_HOME:-$HOME/.config}"/nvim/vim/autocomplete.vim --create-dirs https://raw.githubusercontent.com/HCY-ASLEEP/NVIM-Config/main/vim/autocomplete.vim'
+sh -c 'curl -fLo "${XDG_DATA_HOME:-$HOME/.config}"/nvim/vim/autocomplete.vim --create-dirs https://raw.githubusercontent.com/HCY-ASLEEP/NVIM-Config/main/nvim-config-without-lsp/autocomplete.vim'
 echo
 echo "  format.vim download start"
 echo
