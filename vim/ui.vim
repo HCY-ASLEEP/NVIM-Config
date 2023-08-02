@@ -49,7 +49,7 @@ set statusline+=%{&ff}[%{&fenc}]\ \          " show encoding type of file
 set statusline+=%{strftime('%H:%M')}\ \      " show current time
 set statusline+=%{winnr()}                   " show winNum of current
 hi Statusline ctermfg=lightyellow ctermbg=darkgray cterm=bold
-hi StatuslineNC ctermfg=white ctermbg=darkgray cterm=bold
+hi StatuslineNC ctermfg=lightmagenta ctermbg=darkgray cterm=bold
 
 
 set list
@@ -89,7 +89,7 @@ endfunction
 set tabline=%!Tabline()
 
 " tabline colorscheme
-hi TabLine ctermfg=white ctermbg=darkgray cterm=bold
+hi TabLine ctermfg=lightmagenta ctermbg=darkgray cterm=bold
 hi TabLineFill ctermfg=NONE ctermbg=darkgray cterm=bold
 hi TabLineSel ctermfg=lightyellow ctermbg=darkgray cterm=bold
 
