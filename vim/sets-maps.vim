@@ -1,6 +1,6 @@
 " hovel settings -----------------------------------------------------------------------------------
 " share system clipboard
-set clipboard+=unnamedplus
+set clipboard+=unnamedplus,unnamed
 
 " show line number
 set number
@@ -41,6 +41,11 @@ set noswapfile
 
 " When scrolling vertically, the cursor is kept 5 rows away from the top/bottom
 set scrolloff=5
+
+" Break line at predefined characters
+set linebreak
+" Character to show before the lines that have been soft-wrapped
+set showbreak=↪\ 
 
 " jump to the last position when reopening a file
 " ! You must mkdir viewdir first !
