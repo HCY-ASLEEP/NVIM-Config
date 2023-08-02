@@ -42,14 +42,14 @@ set fillchars+=eob:\
 
 
 " bottem statusline settings -----------------------------------------------------------------------
-set statusline=%*\ %.50F\ %m\               " show filename and filepath
-set statusline+=%=%l/%L:%c\ \ %*            " show the column and raw num where cursor in
-set statusline+=%3p%%\ \                    " show proportion of the text in front of the cursor to the total text
-set statusline+=%{&ff}\[%{&fenc}]\ %*       " show encoding type of file
-set statusline+=\ %{strftime('%H:%M')}\ \   " show current time
-set statusline+=[%{winnr()}]                " show winNum of current
+set statusline=%*\ %.50F\ %m\                " show filename and filepath
+set statusline+=%=%l/%L\ \ %c\ \             " show the column and raw num where cursor in
+set statusline+=%p%%\ \                      " show proportion of the text in front of the cursor to the total text
+set statusline+=%{&ff}[%{&fenc}]\ \          " show encoding type of file
+set statusline+=%{strftime('%H:%M')}\ \      " show current time
+set statusline+=%{winnr()}                   " show winNum of current
 hi Statusline ctermfg=lightyellow ctermbg=darkgray cterm=bold
-hi StatuslineNC ctermfg=lightmagenta ctermbg=darkgray cterm=bold
+hi StatuslineNC ctermfg=white ctermbg=darkgray cterm=bold
 
 
 set list
@@ -89,7 +89,7 @@ endfunction
 set tabline=%!Tabline()
 
 " tabline colorscheme
-hi TabLine ctermfg=lightmagenta ctermbg=darkgray cterm=bold
+hi TabLine ctermfg=white ctermbg=darkgray cterm=bold
 hi TabLineFill ctermfg=NONE ctermbg=darkgray cterm=bold
 hi TabLineSel ctermfg=lightyellow ctermbg=darkgray cterm=bold
 
