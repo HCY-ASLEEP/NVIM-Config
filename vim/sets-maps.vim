@@ -39,6 +39,9 @@ set timeoutlen=200
 " set no swap file
 set noswapfile
 
+" When scrolling vertically, the cursor is kept 5 rows away from the top/bottom
+set scrolloff=5
+
 " jump to the last position when reopening a file
 " ! You must mkdir viewdir first !
 set viewdir=~/.vimviews/
