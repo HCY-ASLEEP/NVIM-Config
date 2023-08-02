@@ -14,7 +14,17 @@ function! OpenNoLSPCompletion()
     endif
 endfunction
 
+function! OpenFilePathCompletion()
+    if v:char =~ '[/]' && !pumvisible()
+        call feedkeys("\<C-x>\<C-f>", "n")
+    endif
+endfunction
+
 function! AutoComplete()
+    augroup openFilePathCompletion
+        autocmd!
+        autocmd InsertCharPre * silent! call OpenFilePathCompletion()
+    augroup END
     if &filetype =~# 'python\|lua\|cpp\|c\|java'
         if exists('#openNoLSPCompletion#InsertCharPre')
             autocmd! openNoLSPCompletion
