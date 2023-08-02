@@ -2,6 +2,12 @@ set completeopt=menuone,noselect
 " hide commplete info under the statusline
 set shortmess+=c
 
+function! OpenFilePathCompletion()
+    if v:char =~ '[/]' && !pumvisible()
+        call feedkeys("\<C-x>\<C-f>", "n")
+    endif
+endfunction
+
 function! OpenNoLSPCompletion()
     if v:char =~ '[A-Za-z_]' && !pumvisible() 
         call feedkeys("\<C-n>", "n")
@@ -9,6 +15,10 @@ function! OpenNoLSPCompletion()
 endfunction
 
 function! AutoComplete()
+    augroup openFilePathCompletion
+        autocmd!
+        autocmd InsertCharPre * silent! call OpenFilePathCompletion()
+    augroup END
     augroup openNoLSPCompletion
         autocmd!
         autocmd InsertCharPre * silent! call OpenNoLSPCompletion()
