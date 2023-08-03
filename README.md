@@ -114,24 +114,6 @@ apt update;\
 
 </br>
 
-To config all what lsp need of the docker ubuntu in one step:
-
-```bash
-apt update;\
-    apt upgrade -y;\
-    apt install neovim xz-utils curl sudo git apt-transport-https ca-certificates ripgrep -y;\
-    useradd -m devenv;\
-    usermod -s /bin/bash devenv;\
-    sudo sh -c 'echo "devenv ALL=(ALL) NOPASSWD:ALL" >> /etc/sudoers';\
-    sudo chown devenv /home/devenv/;\
-    sudo chgrp devenv /home/devenv/;\
-    su -c 'curl -sL https://raw.githubusercontent.com/HCY-ASLEEP/NVIM-Config/main/nvim-config.sh | sh' devenv;\
-    su -c 'curl -sL https://raw.githubusercontent.com/HCY-ASLEEP/NVIM-Config/main/nodejs-installer.sh | bash' devenv;\
-    su devenv
-```
-
-</br>
-
 To edit nvim config easily, you can:
 
 ```bash
