@@ -1,5 +1,8 @@
 " markdown settings --------------------------------------------------------------------------------
 
+" snippets
+" See https://hcy-asleep.github.io/Redis-%E5%9F%BA%E7%A1%80-%E9%97%B2%E8%81%8A/ for more infos
+
 function! INSERT_A_PICTURE()
   call feedkeys("\<BS>\<img src\=\"\"\/\>\<LEFT>\<LEFT>\<LEFT>",'n')  
 endfunction
@@ -27,9 +30,6 @@ inoremap <expr> <c-k> RIGHT_TEXT_DIALOUGE()
 inoremap <expr> <c-h> LEFT_PICTURE_DIALOUGE()
 inoremap <expr> <c-l> RIGHT_PICTURE_DIALOUGE()
 inoremap <expr> <c-p> INSERT_A_PICTURE()
-
-
-cnoreabbrev mp CocCommand markdown-preview-enhanced.openPreview
 
 
 
