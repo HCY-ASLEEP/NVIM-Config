@@ -201,31 +201,26 @@ local function get_indent_markers(cur, prev, indent_markers)
 	if cur_indent == 0 then -- 如果是第一列 indent
 		return {}
 	end
-	-- 如果不是第一列 indent
-	if prev_indent == cur_indent and cur_is_end then -- 如果与上一个是处于同一个 indent
-		--if cur_is_end then -- 如果是这一个 indent 里面的最后一个
-		indent_markers[cur_indent] = bottem
-		return indent_markers
-		--end
-	end
-	-- 如果不是与上一个处于同一个 indent
-	if cur_indent > prev_indent then -- 如果是上一个的孩子
-		if #indent_markers ~= 0 then
-			if prev_is_end then -- 如果上一个是它那一层的最后一个
-				indent_markers[prev_indent] = spaces
-			else -- 如果上一个不是它那一层的最后一个
-				indent_markers[prev_indent] = vert
-			end
-		end
-	else -- 如果不是上一个的孩子，而是上一个的长辈，但是辈分不清楚
-		for j = cur_indent + 1, #indent_markers do
-			indent_markers[j] = nil
-		end
-	end
 	if cur_is_end then -- 如果是这一个 indent 里面的最后一个
 		indent_markers[cur_indent] = bottem
 	else -- 如果不是这一个 indent 里面的最后一个
 		indent_markers[cur_indent] = middle
+	end
+	-- 如果与上一个是处于同一个 indent
+	if prev_indent == cur_indent then
+		return indent_markers
+	end
+	if cur_indent < prev_indent then -- 如果不是上一个的孩子，而是上一个的长辈，但是辈分不清楚
+		for i = cur_indent + 1, #indent_markers do
+			indent_markers[i] = nil
+		end
+		return indent_markers
+	end
+	-- 如果不是与上一个处于同一个 indent
+	if prev_is_end then -- 如果上一个是它那一层的最后一个
+		indent_markers[prev_indent] = spaces
+	else -- 如果上一个不是它那一层的最后一个
+		indent_markers[prev_indent] = vert
 	end
 	return indent_markers
 end
@@ -241,7 +236,6 @@ local function splice()
 	local detail = 4
 	local start_row = 5
 	local start_column = 6
-
 	for i = 1, #symbol_infos do
 		local cur = symbol_infos[i]
 		indent_markers = get_indent_markers(cur, prev, indent_markers)
