@@ -1,4 +1,3 @@
- 
 local vim = vim
 
 local M = {}
@@ -19,7 +18,11 @@ local presentings_item_lens = {}
 
 local presentings_line_kinds = {}
 
+local jump_positions = {}
+
 local outline_type = "sorted"
+
+--local vim.t.jump_positions = {}
 
 -- refresh signal
 local is_refresh = false
@@ -157,6 +160,7 @@ local function inits(source_buf)
 	end
 	presentings = {}
 	presentings_item_lens = {}
+	jump_positions = {}
 	vim.t.jump_buf_name = vim.api.nvim_buf_get_name(source_buf)
 	local tabpage = vim.api.nvim_get_current_tabpage()
 	vim.t.focused_symbol_ns = vim.api.nvim_create_namespace("FocusedSymbol" .. tabpage)
@@ -190,9 +194,7 @@ local function parse(response, indent_num)
 	end
 end
 
--- splicing of each line of symbol outline content
-local function splice()
-	local jump_positions = {}
+local function merge_same_kind(kind_index, cur_sequence)
 	local bottem = markers[1]
 	local middle = markers[2]
 	-- symbol_infos indexes
@@ -201,51 +203,57 @@ local function splice()
 	local detail = 4
 	local start_row = 5
 	local start_column = 6
+	if symbol_infos[kind_index][1] == nil then
+		return cur_sequence
+	end
+	local kind_title = " " .. kind_names[kind_index] .. " ::"
+	presentings[cur_sequence] = kind_title
+	presentings_item_lens[cur_sequence] = { 0, string.len(kind_title), 0, 0, 0 }
+	presentings_line_kinds[cur_sequence] = kind_index
+	jump_positions[cur_sequence] = {}
+	cur_sequence = cur_sequence + 1
+	for i = 1, #symbol_infos[kind_index] do
+		local cur = symbol_infos[kind_index][i]
+		local cur_kind = cur[kind]
+		local indent = middle
+		if symbol_infos[kind_index][i + 1] == nil then
+			indent = bottem
+		end
+		presentings[cur_sequence] = table.concat({
+			indent,
+			icons[cur_kind],
+			" ",
+			cur[name],
+			"  ",
+			cur[detail],
+			"  [",
+			kind_names[cur_kind],
+			"] ",
+		})
+		presentings_item_lens[cur_sequence] = {
+			string.len(indent),
+			string.len(icons[cur_kind]),
+			string.len(cur[name]) + 1,
+			string.len(cur[detail]),
+			string.len(kind_names[cur_kind]) + 4,
+		}
+		presentings_line_kinds[cur_sequence] = kind_index
+		jump_positions[cur_sequence] = { cur[start_row], cur[start_column] }
+		cur_sequence = cur_sequence + 1
+	end
+	presentings[cur_sequence] = ""
+	presentings_item_lens[cur_sequence] = { 0, 0, 0, 0, 0 }
+	presentings_line_kinds[cur_sequence] = kind_index
+	jump_positions[cur_sequence] = {}
+	cur_sequence = cur_sequence + 1
+	return cur_sequence
+end
 
+-- splicing of each line of symbol outline content
+local function splice()
 	local cur_sequence = 1
 	for i = 1, #kind_names do
-		if symbol_infos[i][1] ~= nil then
-			local kind_title = " " .. kind_names[i] .. " ::"
-			presentings[cur_sequence] = kind_title
-			presentings_item_lens[cur_sequence] = { 0, string.len(kind_title), 0, 0, 0 }
-			presentings_line_kinds[cur_sequence] = i
-			jump_positions[cur_sequence] = {}
-			cur_sequence = cur_sequence + 1
-			for j = 1, #symbol_infos[i] do
-				local cur = symbol_infos[i][j]
-				local cur_kind = cur[kind]
-				local indent = middle
-				if symbol_infos[i][j + 1] == nil then
-					indent = bottem
-				end
-				presentings[cur_sequence] = table.concat({
-					indent,
-					icons[cur_kind],
-					" ",
-					cur[name],
-					"  ",
-					cur[detail],
-					"  [",
-					kind_names[cur_kind],
-					"] ",
-				})
-				presentings_item_lens[cur_sequence] = {
-					string.len(indent),
-					string.len(icons[cur_kind]),
-					string.len(cur[name]) + 1,
-					string.len(cur[detail]),
-					string.len(kind_names[cur_kind]) + 4,
-				}
-				presentings_line_kinds[cur_sequence] = i
-				jump_positions[cur_sequence] = { cur[start_row], cur[start_column] }
-				cur_sequence = cur_sequence + 1
-			end
-			presentings[cur_sequence] = ""
-			presentings_item_lens[cur_sequence] = { 0, 0, 0, 0, 0 }
-			presentings_line_kinds[cur_sequence] = i
-			jump_positions[cur_sequence] = {}
-			cur_sequence = cur_sequence + 1
-		end
+		cur_sequence = merge_same_kind(i, cur_sequence)
 	end
 	vim.t.jump_positions = jump_positions
 end
@@ -329,10 +337,10 @@ end
 
 -- depend on open_position
 local function locate_open_position_in(outline_win)
-	local jump_positions = vim.t.jump_positions
+	--jump_positions = vim.t.jump_positions
 	local open_position_in_outline = -1
-	for i = 1, #jump_positions do
-		local jump_row = jump_positions[i][1]
+	for i = 1, #vim.t.jump_positions do
+		local jump_row = vim.t.jump_positions[i][1]
 		if jump_row == source_open_row - 1 then
 			open_position_in_outline = i
 			break
@@ -347,9 +355,8 @@ end
 -- jump to the symbol in the source file
 local function jump()
 	local jump_buf_name = vim.t.jump_buf_name
-	local jump_positions = vim.t.jump_positions
 	local cur_symbol_row = vim.api.nvim_win_get_cursor(0)[1]
-	local jump_position = jump_positions[cur_symbol_row]
+	local jump_position = vim.t.jump_positions[cur_symbol_row]
 	if jump_position[1] == nil then
 		return
 	end
