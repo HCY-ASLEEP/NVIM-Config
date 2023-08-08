@@ -1,6 +1,3 @@
-" set ripgrep root dir
-let t:rootDir=getcwd()
-
 function! ChangeDir(path)
     if !isdirectory(expand(a:path))
         echo ">> Error Path!"
