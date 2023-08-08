@@ -19,46 +19,33 @@ endfunction
 let t:redirPreviewWinnr = 1
 
 function! OpenRedirWindow()
-    let l:findWinNum=bufwinnr(bufnr('^FuzzyFilenameSearch'.tabpagenr()))
-    let l:rgWinNum=bufwinnr(bufnr('^RipgrepWordSearch'.tabpagenr()))
-    let l:bufferListWinNum=bufwinnr(bufnr('^BufferList'.tabpagenr()))
-    if l:findWinNum != -1
-        exec l:findWinNum."wincmd w"
-        enew
-    elseif l:rgWinNum != -1
-        exec l:rgWinNum."wincmd w"
-        enew
-    elseif l:bufferListWinNum !=-1
-        exec l:bufferListWinNum."wincmd w"
-        enew
-    else
-        let t:redirPreviewWinnr = winnr()
-        botright 10new
+    if t:isRedirWinAlive 
+        exec t:redirWinnr."wincmd w"
+        return
     endif
+    let t:isRedirWinAlive=1
+    let t:redirPreviewWinnr = winnr()
+    botright 10new
+    let t:redirWinnr = winnr()
 endfunction
 
 function! QuitRedirWindow()
-    let l:findWinNum=bufwinnr(bufnr('^FuzzyFilenameSearch'.tabpagenr()))
-    let l:rgWinNum=bufwinnr(bufnr('^RipgrepWordSearch'.tabpagenr()))
-    let l:bufferListWinNum=bufwinnr(bufnr('^BufferList'.tabpagenr()))
-    if l:findWinNum != -1
-        exec l:findWinNum."close"
-    elseif l:rgWinNum != -1
-        exec l:rgWinNum."close"
-    elseif l:bufferListWinNum !=-1
-        exec l:bufferListWinNum."close"
-    else
+    if !t:isRedirWinAlive
         echo ">> No OpenRedirWindow!"
+        return
     endif
+    let t:isRedirWinAlive=0
+    exec t:redirWinnr."close"
 endfunction
 
 nnoremap <silent><space>q <cmd>call QuitRedirWindow()<CR>
 
 command! -nargs=1 -complete=command C call ChangeDir(<f-args>)
 
-augroup getRootDirWhenTabNew
+augroup redirWhenTabNew
     autocmd!
     autocmd TabNew * let t:rootDir=getcwd()
+    autocmd TabNew * let t:isRedirWinAlive=0
 augroup END
 
 exec "source ".g:config_path."/vim/redir/buffer-list.vim"
