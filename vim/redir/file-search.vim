@@ -48,12 +48,6 @@ endfunction
 
 " To show file preview, underlying of FindNext, imitate 'cNext' command
 function! FindShow(direction)
-    let l:findWinNum=bufwinnr(bufnr('^FuzzyFilenameSearch'.tabpagenr()))
-    if l:findWinNum == -1
-        echo ">> No FuzzyFilenameSearch Buffer!"
-        return
-    endif
-    exec l:findWinNum."wincmd w"
     exec "cd ".t:rootDir
     exec "normal!".a:direction
     let l:redirPreviewWinId=win_getid(t:redirPreviewWinnr)
