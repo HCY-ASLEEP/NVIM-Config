@@ -54,12 +54,6 @@ endfunction
 
 " To show file preview, underlying of RgNext, imitate 'cNext' command
 function! RgShow(direction)
-    let l:rgWinNum=bufwinnr(bufnr('^RipgrepWordSearch'.tabpagenr()))
-    if l:rgWinNum == -1
-        echo ">> No RipgrepWordSearch Buffer!"
-        return
-    endif
-    exec l:rgWinNum."wincmd w"
     exec "cd ".t:rootDir
     exec "normal! ".a:direction
     let l:redirPreviewWinId=win_getid(t:redirPreviewWinnr)
@@ -77,7 +71,7 @@ function! RgPre()
     call RgShow("-")
 endfunction
 
-function! RgClearFocusCurMatchWhenTabEnter()
+function! RgFocusCurMatchWhenTabEnter()
     if bufwinnr(bufnr('^RipgrepWordSearch'.tabpagenr()))==-1
         hi clear RgFocusCurMatch
     else
@@ -99,7 +93,7 @@ augroup ripgrepWordSearch
     autocmd!
     autocmd BufWinLeave RipgrepWordSearch* silent! hi clear RgFocusCurMatch 
     autocmd BufEnter RipgrepWordSearch* silent! hi RgFocusCurMatch ctermfg=lightgreen ctermbg=darkgray cterm=bold
-    autocmd TabEnter * call RgClearFocusCurMatchWhenTabEnter()
+    autocmd TabEnter * call RgFocusCurMatchWhenTabEnter()
 augroup END
 
 command! -nargs=1 -complete=command RgRedir silent! call RgRedir(<q-args>)
