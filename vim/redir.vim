@@ -41,8 +41,8 @@ command! -nargs=1 -complete=command C call ChangeDir(<f-args>)
 
 augroup redirWhenTabNew
     autocmd!
-    autocmd TabNew * let t:rootDir=getcwd()
-    autocmd TabNew * let t:isRedirWinAlive=0
+    autocmd VimEnter,TabNew * let t:rootDir=getcwd()
+    autocmd VimEnter,TabNew * let t:isRedirWinAlive=0
 augroup END
 
 exec "source ".g:config_path."/vim/redir/buffer-list.vim"
