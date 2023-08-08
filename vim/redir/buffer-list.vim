@@ -35,12 +35,6 @@ endfunction
 
 " To show the buffer selected, underlying of BufferListNext, imitate 'cNext' command
 function! BufferListShow(direction)
-    let l:bufferListWinNum=bufwinnr(bufnr('^BufferList'.tabpagenr()))
-    if l:bufferListWinNum==-1
-        echo ">> No BufferList Buffer!"
-        return
-    endif
-    exec l:bufferListWinNum."wincmd w"   
     exec "cd ".t:rootDir
     exec "normal! ".a:direction
     let l:redirPreviewWinId=win_getid(t:redirPreviewWinnr)
