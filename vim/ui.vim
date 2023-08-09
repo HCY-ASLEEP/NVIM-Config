@@ -39,6 +39,7 @@ hi PmenuSel ctermfg=black ctermbg=lightred cterm=NONE
 hi Pmenu ctermfg=black ctermbg=gray cterm=NONE
 hi Identifier ctermfg=lightgray ctermbg=NONE cterm=bold
 set fillchars+=eob:\ 
+set fillchars+=vert:\│
 
 
 " bottem statusline settings -----------------------------------------------------------------------
