@@ -55,7 +55,7 @@ set scrolloff=5
 "   Ps = 4  -> steady underline.
 "   Ps = 5  -> blinking bar (xterm).
 "   Ps = 6  -> steady bar (xterm).
-let &t_SI = "\e[5 q"
+let &t_SI = "\e[6 q"
 let &t_EI = "\e[2 q"
 
 " Break line at predefined characters
