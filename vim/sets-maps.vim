@@ -1,3 +1,5 @@
+syntax on
+
 " hovel settings -----------------------------------------------------------------------------------
 " share system clipboard
 set clipboard+=unnamedplus,unnamed
@@ -41,6 +43,21 @@ set noswapfile
 
 " When scrolling vertically, the cursor is kept 5 rows away from the top/bottom
 set scrolloff=5
+
+if !has('nvim')
+    " Use a line cursor within insert mode and a block cursor everywhere else.
+    "
+    " Reference chart of values:
+    "   Ps = 0  -> blinking block.
+    "   Ps = 1  -> blinking block (default).
+    "   Ps = 2  -> steady block.
+    "   Ps = 3  -> blinking underline.
+    "   Ps = 4  -> steady underline.
+    "   Ps = 5  -> blinking bar (xterm).
+    "   Ps = 6  -> steady bar (xterm).
+    let &t_SI = "\e[5 q"
+    let &t_EI = "\e[2 q"
+endif
 
 " Break line at predefined characters
 set linebreak
@@ -110,22 +127,32 @@ onoremap ;; <C-c>
 " exit windows
 tnoremap ;; <C-\><C-n>
 
-" internal terminal settings
-augroup internal_terminal
-    autocmd!
-    autocmd TermOpen * set nonumber norelativenumber
-augroup END
-
+if has('nvim')
+    " internal terminal settings
+    augroup internal_terminal
+        autocmd!
+        autocmd TermOpen * set nonumber norelativenumber
+    augroup END
+else
+    augroup internal_terminal
+        autocmd!
+        autocmd TerminalOpen * set nonumber norelativenumber
+    augroup END
+endif
 " switch windows -----------------------------------------------------------------------------------
 nnoremap <silent><TAB> <cmd>wincmd w<CR>
 
 
 " wild* settings -----------------------------------------------------------------------------------
+set wildmenu
+set wildoptions=pum
 set wildcharm=<TAB>
-cnoremap <expr> <up> wildmenumode() ? "\<left>" : "\<up>"
-cnoremap <expr> <down> wildmenumode() ? "\<right>" : "\<down>"
-cnoremap <expr> <left> wildmenumode() ? "\<SPACE>\<BS>" : "\<left>"
-cnoremap <expr> <right> wildmenumode() ? "\<SPACE>\<BS>" : "\<right>"
+if has('nvim')
+    cnoremap <expr> <up> wildmenumode() ? "\<left>" : "\<up>"
+    cnoremap <expr> <down> wildmenumode() ? "\<right>" : "\<down>"
+    cnoremap <expr> <left> wildmenumode() ? "\<SPACE>\<BS>" : "\<left>"
+    cnoremap <expr> <right> wildmenumode() ? "\<SPACE>\<BS>" : "\<right>"
+endif
 
 
 " quick action to move the cursor to the begin or end of the line
