@@ -22,7 +22,7 @@ function! BufferListRedir()
     call OpenRedirWindow()
     exec "edit BufferList".tabpagenr()
     setlocal buftype=nofile bufhidden=wipe nobuflisted noswapfile cursorline filetype=BufferList
-    put = execute('buffers')
+    silent! put = execute('buffers')
     exec "normal! gg"
     let l:empty=2
     while empty > 0
