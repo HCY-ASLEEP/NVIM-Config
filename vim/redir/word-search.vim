@@ -1,9 +1,32 @@
+function! LegalLocationsInUnix()
+    let l:location = split(t:rgLocateTarget, ":")
+    " return path, row, column
+    return [l:location[0], l:location[1], l:location[2]]
+endfunction
+
+function! LegalLocationsInWindows()
+    let l:location = split(t:rgLocateTarget, ":")
+    " return path, row, column
+    let l:path = substitute(l:location[0].":".l:location[1], '\\\\', '/', 'g')
+    let l:path = substitute(l:path, '\\', '/', 'g')
+    return [l:path, l:location[2], l:location[3]]
+endfunction
+
+if has('win32') || has('win64') || has('win32unix')
+    let s:LegalLocations=function('LegalLocationsInWindows')
+else
+    let s:LegalLocations=function('LegalLocationsInUnix')
+endif
+
 " Global Fuzzy Match words -------------------------------------------------------------------------
 function! RgLocateTarget()
-    let l:location = split(t:rgLocateTarget, ":")
     try
-        exec "edit ".l:location[0]
-        cal cursor(l:location[1], l:location[2])
+        let l:location=s:LegalLocations()
+        let l:path=l:location[0]
+        let l:row=l:location[1]
+        let l:column=l:location[2]
+        exec "edit ".l:path
+        cal cursor(l:row, l:column)
         call matchadd('RgFocusCurMatch', '\c\%#'.t:rgrepSubStr)
         normal! zz
     catch
@@ -33,7 +56,7 @@ function! RgWithGit(substr)
     let t:rgrepSubStr=a:substr
     let l:rgArgs="--ignore-case --vimgrep --no-heading"
     exec "cd ".t:rootDir
-    exec "RgRedir !rg ".l:rgArgs." '".a:substr."' ".t:rootDir
+    exec "RgRedir !rg ".l:rgArgs." ".a:substr." ".t:rootDir
     exec "normal! gg"
     if getline('.') == ""
         exec "normal! dd"
@@ -45,7 +68,7 @@ function! RgWithoutGit(substr)
     let t:rgrepSubStr=a:substr
     let l:rgArgs="--ignore-case --vimgrep --no-heading --no-ignore"
     exec "cd ".t:rootDir
-    exec "RgRedir !rg ".l:rgArgs." '".a:substr."' ".t:rootDir
+    exec "RgRedir !rg ".l:rgArgs." ".a:substr." ".t:rootDir
     exec "normal! gg"
     if getline('.') == ""
         exec "normal! dd"
