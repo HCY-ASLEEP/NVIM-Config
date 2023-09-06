@@ -11,7 +11,9 @@ set number
 set ignorecase
 
 " only support command mode, no click
-set mouse=c
+set mouse=a
+
+let $LANG = 'en_US'
 
 " tab settings
 set tabstop=4

@@ -22,8 +22,8 @@ endfunction
 " open explorer by specific size
 function! OpenExplorerOnSize(size)
     let t:win_width=a:size
-    exec "botright "t:win_width."vsplit"
-    exec "Explore"
+    exec "Vexplore!"
+    exec "vertical resize ".a:size
     setlocal winfixwidth
     return winnr()
 endfunction
@@ -101,4 +101,3 @@ augroup initExplore
 augroup END
 
 nnoremap <silent><SPACE>e <cmd>call ToggleExplorer()<CR>
-
