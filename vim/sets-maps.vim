@@ -65,14 +65,14 @@ set linebreak
 " Character to show before the lines that have been soft-wrapped
 set showbreak=↪\ 
 
+
 " jump to the last position when reopening a file
-" ! You must mkdir viewdir first !
-set viewdir=~/.vimviews/
-augroup keepBufView
-    autocmd!
-    autocmd BufWinLeave * silent! mkview
-    autocmd BufWinEnter * silent! loadview 
+augroup resCur
+  autocmd!
+  autocmd BufReadPost * call setpos(".", getpos("'\""))
 augroup END
+
+set incsearch
 
 " visual block short-cut
 nnoremap vv <C-v>
@@ -180,3 +180,4 @@ augroup quickFixMaps
     autocmd FileType qf nnoremap <buffer> j j<CR>zz<C-w>p
     autocmd FileType qf nnoremap <buffer> k k<CR>zz<C-w>p
 augroup END
+
