@@ -1,123 +1,131 @@
 local vim = vim
 
-local clangd_lsp = vim.api.nvim_create_augroup("clangd_lsp", { clear = true })
-vim.api.nvim_create_autocmd("FileType", {
-	pattern = { "c", "cpp", "objc", "objcpp", "cuda", "proto" },
-	callback = function()
-		local root_dir = vim.fs.dirname(vim.fs.find({
-			".clangd",
-			".clang-tidy",
-			".clang-format",
-			"compile_commands.json",
-			"compile_flags.txt",
-			"configure.ac",
-			".git",
-		}, { upward = true })[1])
-		local client = vim.lsp.start({
-			name = "clangd",
-			cmd = { "clangd" },
-			root_dir = root_dir,
-			capabilities = {
-				textDocument = {
-					completion = {
-						editsNearCursor = true,
-					},
-				},
-				offsetEncoding = { "utf-8", "utf-16" },
-			},
-		})
-		vim.lsp.buf_attach_client(0, client)
-	end,
-	group = clangd_lsp,
-})
+if vim.fn.executable('clangd')==1 then
+    local clangd_lsp = vim.api.nvim_create_augroup("clangd_lsp", { clear = true })
+    vim.api.nvim_create_autocmd("FileType", {
+    	pattern = { "c", "cpp", "objc", "objcpp", "cuda", "proto" },
+    	callback = function()
+    		local root_dir = vim.fs.dirname(vim.fs.find({
+    			".clangd",
+    			".clang-tidy",
+    			".clang-format",
+    			"compile_commands.json",
+    			"compile_flags.txt",
+    			"configure.ac",
+    			".git",
+    		}, { upward = true })[1])
+    		local client = vim.lsp.start({
+    			name = "clangd",
+    			cmd = { "clangd" },
+    			root_dir = root_dir,
+    			capabilities = {
+    				textDocument = {
+    					completion = {
+    						editsNearCursor = true,
+    					},
+    				},
+    				offsetEncoding = { "utf-8", "utf-16" },
+    			},
+    		})
+    		vim.lsp.buf_attach_client(0, client)
+    	end,
+    	group = clangd_lsp,
+    })
+end
 
-local pyright_lsp = vim.api.nvim_create_augroup("pyright_lsp", { clear = true })
-vim.api.nvim_create_autocmd("FileType", {
-	pattern = { "python" },
-	callback = function()
-		local root_dir = vim.fs.dirname(vim.fs.find({
-			"pyproject.toml",
-			"setup.py",
-			"setup.cfg",
-			"requirements.txt",
-			"Pipfile",
-			"pyrightconfig.json",
-			".git",
-		}, { upward = true })[1])
-		local client = vim.lsp.start({
-			name = "pyright",
-			cmd = { "pyright-langserver", "--stdio" },
-			root_dir = root_dir,
-			settings = {
-				python = {
-					analysis = {
-						autoSearchPaths = true,
-						useLibraryCodeForTypes = true,
-						diagnosticMode = "workspace",
-					},
-				},
-			},
-		})
-		vim.lsp.buf_attach_client(0, client)
-	end,
-	group = pyright_lsp,
-})
+if vim.fn.executable("pyright-langserver")==1 then
+    local pyright_lsp = vim.api.nvim_create_augroup("pyright_lsp", { clear = true })
+    vim.api.nvim_create_autocmd("FileType", {
+    	pattern = { "python" },
+    	callback = function()
+    		local root_dir = vim.fs.dirname(vim.fs.find({
+    			"pyproject.toml",
+    			"setup.py",
+    			"setup.cfg",
+    			"requirements.txt",
+    			"Pipfile",
+    			"pyrightconfig.json",
+    			".git",
+    		}, { upward = true })[1])
+    		local client = vim.lsp.start({
+    			name = "pyright",
+    			cmd = { "pyright-langserver", "--stdio" },
+    			root_dir = root_dir,
+    			settings = {
+    				python = {
+    					analysis = {
+    						autoSearchPaths = true,
+    						useLibraryCodeForTypes = true,
+    						diagnosticMode = "workspace",
+    					},
+    				},
+    			},
+    		})
+    		vim.lsp.buf_attach_client(0, client)
+    	end,
+    	group = pyright_lsp,
+    })
+end
 
-local vimls_lsp = vim.api.nvim_create_augroup("vimls_lsp", { clear = true })
-vim.api.nvim_create_autocmd("FileType", {
-	pattern = { "vim" },
-	callback = function()
-		local root_dir = vim.fs.dirname(vim.fs.find({
-			".git",
-		}, { upward = true })[1])
-		local client = vim.lsp.start({
-			name = "vimls",
-			cmd = { "vim-language-server", "--stdio" },
-			root_dir = root_dir,
-			init_options = {
-				isNeovim = true,
-				iskeyword = "@,48-57,_,192-255,-#",
-				vimruntime = "",
-				runtimepath = "",
-				diagnostic = { enable = true },
-				indexes = {
-					runtimepath = true,
-					gap = 100,
-					count = 3,
-					projectRootPatterns = { "runtime", "nvim", ".git", "autoload", "plugin" },
-				},
-				suggest = { fromVimruntime = true, fromRuntimepath = true },
-			},
-		})
-		vim.lsp.buf_attach_client(0, client)
-	end,
-	group = vimls_lsp,
-})
+if vim.fn.executable("vim-language-server")==1 then
+    local vimls_lsp = vim.api.nvim_create_augroup("vimls_lsp", { clear = true })
+    vim.api.nvim_create_autocmd("FileType", {
+    	pattern = { "vim" },
+    	callback = function()
+    		local root_dir = vim.fs.dirname(vim.fs.find({
+    			".git",
+    		}, { upward = true })[1])
+    		local client = vim.lsp.start({
+    			name = "vimls",
+    			cmd = { "vim-language-server", "--stdio" },
+    			root_dir = root_dir,
+    			init_options = {
+    				isNeovim = true,
+    				iskeyword = "@,48-57,_,192-255,-#",
+    				vimruntime = "",
+    				runtimepath = "",
+    				diagnostic = { enable = true },
+    				indexes = {
+    					runtimepath = true,
+    					gap = 100,
+    					count = 3,
+    					projectRootPatterns = { "runtime", "nvim", ".git", "autoload", "plugin" },
+    				},
+    				suggest = { fromVimruntime = true, fromRuntimepath = true },
+    			},
+    		})
+    		vim.lsp.buf_attach_client(0, client)
+    	end,
+    	group = vimls_lsp,
+    })
+end
 
-local luals_lsp = vim.api.nvim_create_augroup("luals_lsp", { clear = true })
-vim.api.nvim_create_autocmd("FileType", {
-	pattern = { "lua" },
-	callback = function()
-		local root_dir = vim.fs.dirname(vim.fs.find({
-			".luarc.json",
-			".luarc.jsonc",
-			".luacheckrc",
-			".stylua.toml",
-			"stylua.toml",
-			"selene.toml",
-			"selene.yml",
-			".git",
-		}, { upward = true })[1])
-		local client = vim.lsp.start({
-			name = "luals",
-			cmd = { "lua-language-server" },
-			root_dir = root_dir,
-			settings = { Lua = { telemetry = { enable = false } } },
-		})
-		vim.lsp.buf_attach_client(0, client)
-	end,
-	group = luals_lsp,
-})
+if vim.fn.executable("lua-language-server")==1 then
+    local luals_lsp = vim.api.nvim_create_augroup("luals_lsp", { clear = true })
+    vim.api.nvim_create_autocmd("FileType", {
+    	pattern = { "lua" },
+    	callback = function()
+    		local root_dir = vim.fs.dirname(vim.fs.find({
+    			".luarc.json",
+    			".luarc.jsonc",
+    			".luacheckrc",
+    			".stylua.toml",
+    			"stylua.toml",
+    			"selene.toml",
+    			"selene.yml",
+    			".git",
+    		}, { upward = true })[1])
+    		local client = vim.lsp.start({
+    			name = "luals",
+    			cmd = { "lua-language-server" },
+    			root_dir = root_dir,
+    			settings = { Lua = { telemetry = { enable = false } } },
+    		})
+    		vim.lsp.buf_attach_client(0, client)
+    	end,
+    	group = luals_lsp,
+    })
+end
 
 vim.api.nvim_command("highlight NormalFloat ctermbg=darkgray")
 
