@@ -14,23 +14,16 @@ function! OpenNoLSPCompletion()
     endif
 endfunction
 
-function! AutoComplete()
-    augroup openFilePathCompletion
-        autocmd!
-        autocmd InsertCharPre * silent! call OpenFilePathCompletion()
-    augroup END
-    augroup openNoLSPCompletion
-        autocmd!
-        autocmd InsertCharPre * silent! call OpenNoLSPCompletion()
-    augroup END
-endfunction
-
-augroup initAutoComplete
+augroup openFilePathCompletion
     autocmd!
-    autocmd BufWinEnter * call AutoComplete()
+    autocmd InsertCharPre * silent! call OpenFilePathCompletion()
 augroup END
 
-" use tab for navigating the autocomplete menu
+augroup openNoLSPCompletion
+    autocmd!
+    autocmd InsertCharPre * silent! call OpenNoLSPCompletion()
+augroup END
+
 inoremap <expr> <TAB> pumvisible() ? "\<C-n>" : "\<TAB>"
 inoremap <expr> <S-TAB> pumvisible() ? "\<C-p>" : "\<S-TAB>"
 
