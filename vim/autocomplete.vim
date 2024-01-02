@@ -21,11 +21,7 @@ function! OpenFilePathCompletion()
 endfunction
 
 function! AutoComplete()
-    augroup openFilePathCompletion
-        autocmd!
-        autocmd InsertCharPre * silent! call OpenFilePathCompletion()
-    augroup END
-    if &filetype =~# 'python\|lua\|cpp\|c\|java'
+    if luaeval('#vim.lsp.buf_get_clients()') != 0
         if exists('#openNoLSPCompletion#InsertCharPre')
             autocmd! openNoLSPCompletion
         endif
@@ -46,7 +42,12 @@ endfunction
 
 augroup initAutoComplete
     autocmd!
-    autocmd BufWinEnter * call AutoComplete()
+    autocmd BufWinEnter,LspAttach * call AutoComplete()
+augroup END
+
+augroup openFilePathCompletion
+    autocmd!
+    autocmd InsertCharPre * silent! call OpenFilePathCompletion()
 augroup END
 
 " use tab for navigating the autocomplete menu
@@ -56,5 +57,3 @@ inoremap <expr> <S-TAB> pumvisible() ? "\<C-p>" : "\<S-TAB>"
 " use up and down keys for navigating the autocomplete menu
 inoremap <expr> <down> pumvisible() ? "\<C-n>" : "\<down>"
 inoremap <expr> <up> pumvisible() ? "\<C-p>" : "\<up>"
-
-
