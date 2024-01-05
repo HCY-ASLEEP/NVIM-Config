@@ -42,7 +42,7 @@ endfunction
 
 augroup initAutoComplete
     autocmd!
-    autocmd WinEnter,LspAttach * call AutoComplete()
+    autocmd VimEnter,WinEnter,LspAttach * call AutoComplete()
 augroup END
 
 augroup openFilePathCompletion
