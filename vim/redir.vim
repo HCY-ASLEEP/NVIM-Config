@@ -13,26 +13,41 @@ function! ChangeDir(path)
     echo getcwd()
 endfunction
 
-let t:redirPreviewWinnr = 1
+function! GetBufNameBy(winid)
+    let l:bufnr = winbufnr(a:winid)
+    return bufname(l:bufnr)
+endfunction
+
+function! GetFiletypeBy(winid)
+    let l:bufnr = winbufnr(a:winid)
+    return getbufvar(l:bufnr, '&filetype')
+endfunction
+
+let t:redirPreviewWinid = win_getid()
 
 function! OpenRedirWindow()
-    if t:isRedirWinAlive 
-        exec t:redirWinnr."wincmd w"
-        return
-    endif
-    let t:isRedirWinAlive=1
-    let t:redirPreviewWinnr = winnr()
-    botright 10new
-    let t:redirWinnr = winnr()
+    let l:tabWinidList = gettabinfo(tabpagenr())[0]['windows']
+    for l:winid in l:tabWinidList
+        let l:winFileType=GetFiletypeBy(l:winid)
+        if l:winFileType == 'redirWindows' || l:winFileType == 'qf'
+            exec win_id2tabwin(l:winid)[1]."wincmd w"
+            return
+        endif
+    endfor
+    let t:redirPreviewWinid = win_getid()
+    bot 10new
 endfunction
 
 function! QuitRedirWindow()
-    if !t:isRedirWinAlive
-        echo ">> No OpenRedirWindow!"
-        return
-    endif
-    let t:isRedirWinAlive=0
-    exec t:redirWinnr."close"
+    let l:tabWinidList = gettabinfo(tabpagenr())[0]['windows']
+    for l:winid in l:tabWinidList
+        let l:winFileType=GetFiletypeBy(l:winid)
+        if l:winFileType == 'redirWindows' || l:winFileType == 'qf'
+            exec win_id2tabwin(l:winid)[1]."close"
+            return
+        endif
+    endfor
+    echo ">> No OpenRedirWindow!"
 endfunction
 
 nnoremap <silent><space>q <cmd>call QuitRedirWindow()<CR>
@@ -42,7 +57,6 @@ command! -nargs=1 -complete=command C call ChangeDir(<f-args>)
 augroup redirWhenTabNew
     autocmd!
     autocmd VimEnter,TabNew * let t:rootDir=getcwd()
-    autocmd VimEnter,TabNew * let t:isRedirWinAlive=0
 augroup END
 
 exec "source ".g:config_path."/vim/redir/buffer-list.vim"
