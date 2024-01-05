@@ -10,18 +10,24 @@ endfunction
 " Go to the file on line
 function! FindJump(path)
     exec "cd ".t:rootDir
-    exec t:redirPreviewWinnr."wincmd w"
+    let l:redirPreviewWinnr = win_id2tabwin(t:redirPreviewWinid)[1]
+    if l:redirPreviewWinnr <= 0
+        new
+        let t:redirPreviewWinid = win_getid()
+    else
+        exec l:redirPreviewWinnr."wincmd w"
+    endif
     let t:findLocateTarget=a:path
     call FindLocateTarget()
 endfunction
 
 " redirect the command output to a buffer
 function! FindRedir(cmd)
-    call FindJumpMap()
     call OpenRedirWindow()
     exec "edit FuzzyFilenameSearch".tabpagenr()."\ ->\ ".t:findSubStr
     exec "read ".a:cmd
-    setlocal buftype=nofile bufhidden=wipe nobuflisted noswapfile cursorline filetype=FuzzyFilenameSearch
+    setlocal buftype=nofile bufhidden=wipe nobuflisted noswapfile cursorline filetype=redirWindows
+    call FindJumpMap()
 endfunction
 
 " Show Files fuzzily searched with git
@@ -50,9 +56,14 @@ endfunction
 function! FindShow(direction)
     exec "cd ".t:rootDir
     exec "normal!".a:direction
-    let l:redirPreviewWinId=win_getid(t:redirPreviewWinnr)
     let t:findLocateTarget=getline('.')
-    call win_execute(l:redirPreviewWinId,"call FindLocateTarget()")
+    let l:redirPreviewWinnr = win_id2tabwin(t:redirPreviewWinid)[1]
+    if l:redirPreviewWinnr <= 0
+        top new
+        let t:redirPreviewWinid = win_getid()
+        wincmd p
+    endif
+    call win_execute(t:redirPreviewWinid,"call FindLocateTarget()")
 endfunction
 
 " imitate 'cNext'
@@ -67,12 +78,9 @@ endfunction
 
 " autocmd to jump to file with CR only in FuzzyFilenameSearch buffer
 function! FindJumpMap()
-    augroup findJumpMap
-        autocmd!
-        autocmd FileType FuzzyFilenameSearch nnoremap <buffer><silent><CR> <cmd>call FindJump(getline('.'))<CR>
-        autocmd FileType FuzzyFilenameSearch nnoremap <buffer><silent>j <cmd>call FindNext()<CR>
-        autocmd FileType FuzzyFilenameSearch nnoremap <buffer><silent>k <cmd>call FindPre()<CR>
-    augroup END
+    nnoremap <buffer><silent><CR> <cmd>call FindJump(getline('.'))<CR>
+    nnoremap <buffer><silent>j <cmd>call FindNext()<CR>
+    nnoremap <buffer><silent>k <cmd>call FindPre()<CR>
 endfunction
 
 command! -nargs=1 -complete=command FindRedir silent! call FindRedir(<q-args>)
