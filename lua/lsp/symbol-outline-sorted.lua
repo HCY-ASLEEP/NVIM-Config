@@ -180,9 +180,9 @@ local function parse(response, indent_num)
 			detail = ""
 		end
 		local symbol_range = symbol["range"]
-        if symbol_range == nil then
-            symbol_range = symbol["location"]["range"]
-        end
+        	if symbol_range == nil then
+            		symbol_range = symbol["location"]["range"]
+        	end
 		local symbol_start = symbol_range["start"]
 		local start_row = symbol_start["line"]
 		local start_column = symbol_start["character"]
