@@ -37,18 +37,24 @@ endfunction
 " Go to the file on line
 function! RgJump(location)
     exec "cd ".t:rootDir
-    exec t:redirPreviewWinnr."wincmd w"
+    let l:redirPreviewWinnr = win_id2tabwin(t:redirPreviewWinid)[1]
+    if l:redirPreviewWinnr <= 0
+        new
+        let t:redirPreviewWinid = win_getid()
+    else
+        exec l:redirPreviewWinnr."wincmd w"
+    endif
     let t:rgLocateTarget=a:location
     call RgLocateTarget()
 endfunction
 
 " redirect the command output to a buffer
 function! RgRedir(cmd)
-    call RgJumpMap()
     call OpenRedirWindow()
     exec "edit RipgrepWordSearch".tabpagenr()."\ ->\ ".t:rgrepSubStr
     exec "read "a:cmd
-    setlocal buftype=nofile bufhidden=wipe nobuflisted noswapfile cursorline filetype=RipgrepWordSearch
+    setlocal buftype=nofile bufhidden=wipe nobuflisted noswapfile cursorline filetype=redirWindows
+    call RgJumpMap()
 endfunction
 
 " Show Words fuzzily searched with git
@@ -79,9 +85,14 @@ endfunction
 function! RgShow(direction)
     exec "cd ".t:rootDir
     exec "normal! ".a:direction
-    let l:redirPreviewWinId=win_getid(t:redirPreviewWinnr)
     let t:rgLocateTarget=getline('.')
-    call win_execute(l:redirPreviewWinId, "call RgLocateTarget()")
+    let l:redirPreviewWinnr = win_id2tabwin(t:redirPreviewWinid)[1]
+    if l:redirPreviewWinnr <= 0
+        top new
+        let t:redirPreviewWinid = win_getid()
+        wincmd p
+    endif
+    call win_execute(t:redirPreviewWinid, "call RgLocateTarget()")
 endfunction
 
 " imitate 'cNext'
@@ -104,12 +115,9 @@ endfunction
 
 " autocmd to jump to file with CR only in RipgrepWordSearch buffer
 function! RgJumpMap()
-    augroup rgJumpMap
-        autocmd!
-        autocmd FileType RipgrepWordSearch nnoremap <buffer><silent><CR> <cmd>call RgJump(getline('.'))<CR>
-        autocmd FileType RipgrepWordSearch nnoremap <buffer><silent>j <cmd>call RgNext()<CR>
-        autocmd FileType RipgrepWordSearch nnoremap <buffer><silent>k <cmd>call RgPre()<CR>
-    augroup END
+    nnoremap <buffer><silent><CR> <cmd>call RgJump(getline('.'))<CR>
+    nnoremap <buffer><silent>j <cmd>call RgNext()<CR>
+    nnoremap <buffer><silent>k <cmd>call RgPre()<CR>
 endfunction
 
 augroup ripgrepWordSearch
