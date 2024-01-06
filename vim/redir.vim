@@ -50,6 +50,32 @@ function! QuitRedirWindow()
     echo ">> No OpenRedirWindow!"
 endfunction
 
+function! JumpWhenPressEnter(locateTargetFunctionName)
+    exec "cd ".t:rootDir
+    let t:redirLocateTarget=getline('.')
+    let l:redirPreviewWinnr = win_id2tabwin(t:redirPreviewWinid)[1]
+    if l:redirPreviewWinnr <= 0
+        new
+        let t:redirPreviewWinid = win_getid()
+    else
+        exec l:redirPreviewWinnr."wincmd w"
+    endif
+    call function(a:locateTargetFunctionName)()
+endfunction
+
+function! JumpWhenPressJOrK(direction,locateTargetFunctionName)
+    exec "cd ".t:rootDir
+    exec "normal! ".a:direction
+    let t:redirLocateTarget=getline('.')
+    let l:redirPreviewWinnr = win_id2tabwin(t:redirPreviewWinid)[1]
+    if l:redirPreviewWinnr <= 0
+        top new
+        let t:redirPreviewWinid = win_getid()
+        wincmd p
+    endif
+    call win_execute(t:redirPreviewWinid, "call ".a:locateTargetFunctionName."()")
+endfunction
+
 nnoremap <silent><space>q <cmd>call QuitRedirWindow()<CR>
 
 command! -nargs=1 -complete=command C call ChangeDir(<f-args>)
