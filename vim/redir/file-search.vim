@@ -1,5 +1,5 @@
 " Fuzzy Match filenames -----------------------------------------------------------------------------
-function! FileLocateTarget()
+function! FileSearchLocateTarget()
     if filereadable(expand(t:redirLocateTarget))
         exec "edit ".t:redirLocateTarget
     else
@@ -8,19 +8,19 @@ function! FileLocateTarget()
 endfunction
 
 " redirect the command output to a buffer
-function! FileRedir(cmd)
+function! FileSearchRedir(cmd)
     call OpenRedirWindow()
     exec "edit FuzzyFilenameSearch".tabpagenr()."\ ->\ ".t:fileSubStr
     exec "read ".a:cmd
     setlocal buftype=nofile bufhidden=wipe nobuflisted noswapfile cursorline filetype=redirWindows
-    call FileJumpMap()
+    call FileSearchJumpMap()
 endfunction
 
 " Show Files fuzzily searched with git
-function! FileWithGit(substr)
+function! FileSearchWithGit(substr)
     let t:fileSubStr=a:substr
     exec "cd ".t:rootDir
-    exec "FileRedir !rg --files \| rg --ignore-case ".a:substr
+    exec "FileSearchRedir !rg --files \| rg --ignore-case ".a:substr
     exec "normal! gg"
     if getline('.') == ""
         exec "normal! dd"
@@ -28,10 +28,10 @@ function! FileWithGit(substr)
 endfunction
 
 " Show Files searched fuzzily without git
-function! FileWithoutGit(substr)
+function! FileSearchWithoutGit(substr)
     let t:fileSubStr=a:substr
     exec "cd ".t:rootDir
-    exec "FileRedir !rg --no-ignore --files \| rg --ignore-case ".a:substr
+    exec "FileSearchRedir !rg --no-ignore --files \| rg --ignore-case ".a:substr
     exec "normal! gg"
     if getline('.') == ""
         exec "normal! dd"
@@ -39,17 +39,17 @@ function! FileWithoutGit(substr)
 endfunction
 
 " autocmd to jump to file with CR only in FuzzyFilenameSearch buffer
-function! FileJumpMap()
-    nnoremap <buffer><silent><CR> <cmd>call JumpWhenPressEnter(function('FileLocateTarget'))<CR>
-    nnoremap <buffer><silent>j <cmd>call JumpWhenPressJOrK('+', 'FileLocateTarget')<CR>
-    nnoremap <buffer><silent>k <cmd>call JumpWhenPressJOrK('-', 'FileLocateTarget')<CR>
+function! FileSearchJumpMap()
+    nnoremap <buffer><silent><CR> <cmd>call JumpWhenPressEnter('FileSearchLocateTarget')<CR>
+    nnoremap <buffer><silent>j <cmd>call JumpWhenPressJOrK('+', 'FileSearchLocateTarget')<CR>
+    nnoremap <buffer><silent>k <cmd>call JumpWhenPressJOrK('-', 'FileSearchLocateTarget')<CR>
 endfunction
 
-command! -nargs=1 -complete=command FileRedir silent! call FileRedir(<q-args>)
+command! -nargs=1 -complete=command FileSearchRedir silent! call FileSearchRedir(<q-args>)
 
 " Fg means 'file git', search file names fuzzily with git
-command! -nargs=1 -complete=command Fg silent! call FileWithGit(<q-args>)
+command! -nargs=1 -complete=command Fg silent! call FileSearchWithGit(<q-args>)
 
 " Fs means 'file search', search file names fuzzily
-command! -nargs=1 -complete=command Fs silent! call FileWithoutGit(<q-args>)
+command! -nargs=1 -complete=command Fs silent! call FileSearchWithoutGit(<q-args>)
 
