@@ -19,7 +19,7 @@ else
 endif
 
 " Global Fuzzy Match words -------------------------------------------------------------------------
-function! WordLocateTarget()
+function! WordSearchLocateTarget()
     try
         let l:location=s:LegalLocations()
         let l:path=l:location[0]
@@ -27,7 +27,7 @@ function! WordLocateTarget()
         let l:column=l:location[2]
         exec "edit ".l:path
         cal cursor(l:row, l:column)
-        call matchadd('WordFocusCurMatch', '\c\%#'.t:rgrepSubStr)
+        call matchadd('WordSearchFocusCurMatch', '\c\%#'.t:rgrepSubStr)
         normal! zz
     catch
         echo ">> File Not Exist!"
@@ -35,20 +35,20 @@ function! WordLocateTarget()
 endfunction
 
 " redirect the command output to a buffer
-function! WordRedir(cmd)
+function! WordSearchRedir(cmd)
     call OpenRedirWindow()
     exec "edit RipgrepWordSearch".tabpagenr()."\ ->\ ".t:rgrepSubStr
     exec "read "a:cmd
     setlocal buftype=nofile bufhidden=wipe nobuflisted noswapfile cursorline filetype=redirWindows
-    call WordJumpMap()
+    call WordSearchJumpMap()
 endfunction
 
 " Show Words fuzzily searched with git
-function! WordWithGit(substr)
+function! WordSearchWithGit(substr)
     let t:rgrepSubStr=a:substr
     let l:rgArgs="--ignore-case --vimgrep --no-heading"
     exec "cd ".t:rootDir
-    exec "WordRedir !rg ".l:rgArgs." ".a:substr." ".t:rootDir
+    exec "WordSearchRedir !rg ".l:rgArgs." ".a:substr." ".t:rootDir
     exec "normal! gg"
     if getline('.') == ""
         exec "normal! dd"
@@ -56,43 +56,43 @@ function! WordWithGit(substr)
 endfunction
 
 " Show Files fuzzily searched without git
-function! WordWithoutGit(substr)
+function! WordSearchWithoutGit(substr)
     let t:rgrepSubStr=a:substr
     let l:rgArgs="--ignore-case --vimgrep --no-heading --no-ignore"
     exec "cd ".t:rootDir
-    exec "WordRedir !rg ".l:rgArgs." ".a:substr." ".t:rootDir
+    exec "WordSearchRedir !rg ".l:rgArgs." ".a:substr." ".t:rootDir
     exec "normal! gg"
     if getline('.') == ""
         exec "normal! dd"
     endif
 endfunction
 
-function! WordFocusCurMatchWhenTabEnter()
+function! WordSearchFocusCurMatchWhenTabEnter()
     if bufwinnr(bufnr('^RipgrepWordSearch'.tabpagenr()))==-1
-        hi clear WordFocusCurMatch
+        hi clear WordSearchFocusCurMatch
     else
-        hi WordFocusCurMatch ctermfg=lightgreen ctermbg=darkgray cterm=bold
+        hi WordSearchFocusCurMatch ctermfg=lightgreen ctermbg=darkgray cterm=bold
     endif
 endfunction
 
 " autocmd to jump to file with CR only in RipgrepWordSearch buffer
-function! WordJumpMap()
-    nnoremap <buffer><silent><CR> <cmd>call JumpWhenPressEnter(function('WordLocateTarget'))<CR>
-    nnoremap <buffer><silent>j <cmd>call JumpWhenPressJOrK('+', 'WordLocateTarget')<CR>
-    nnoremap <buffer><silent>k <cmd>call JumpWhenPressJOrK('-', 'WordLocateTarget')<CR>
+function! WordSearchJumpMap()
+    nnoremap <buffer><silent><CR> <cmd>call JumpWhenPressEnter('WordSearchLocateTarget')<CR>
+    nnoremap <buffer><silent>j <cmd>call JumpWhenPressJOrK('+', 'WordSearchLocateTarget')<CR>
+    nnoremap <buffer><silent>k <cmd>call JumpWhenPressJOrK('-', 'WordSearchLocateTarget')<CR>
 endfunction
 
 augroup ripgrepWordSearch
     autocmd!
-    autocmd BufWinLeave RipgrepWordSearch* silent! hi clear WordFocusCurMatch 
-    autocmd BufEnter RipgrepWordSearch* silent! hi WordFocusCurMatch ctermfg=lightgreen ctermbg=darkgray cterm=bold
-    autocmd TabEnter * call WordFocusCurMatchWhenTabEnter()
+    autocmd BufWinLeave RipgrepWordSearch* silent! hi clear WordSearchFocusCurMatch 
+    autocmd BufEnter RipgrepWordSearch* silent! hi WordSearchFocusCurMatch ctermfg=lightgreen ctermbg=darkgray cterm=bold
+    autocmd TabEnter * call WordSearchFocusCurMatchWhenTabEnter()
 augroup END
 
-command! -nargs=1 -complete=command WordRedir silent! call WordRedir(<q-args>)
+command! -nargs=1 -complete=command WordSearchRedir silent! call WordSearchRedir(<q-args>)
 
 " Wg means 'word git', search file fuzzily names with git
-command! -nargs=1 -complete=command Wg silent! call WordWithGit(<q-args>)
+command! -nargs=1 -complete=command Wg silent! call WordSearchWithGit(<q-args>)
 
 " Ws means 'word search', search file fuzzily names without git
-command! -nargs=1 -complete=command Ws silent! call WordWithoutGit(<q-args>)
+command! -nargs=1 -complete=command Ws silent! call WordSearchWithoutGit(<q-args>)
