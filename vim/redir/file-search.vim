@@ -1,40 +1,26 @@
 " Fuzzy Match filenames -----------------------------------------------------------------------------
-function! FindLocateTarget()
-    if filereadable(expand(t:findLocateTarget))
-        exec "edit ".t:findLocateTarget
+function! FileLocateTarget()
+    if filereadable(expand(t:redirLocateTarget))
+        exec "edit ".t:redirLocateTarget
     else
         echo ">> File Not Exist!"
     endif
 endfunction
 
-" Go to the file on line
-function! FindJump(path)
-    exec "cd ".t:rootDir
-    let l:redirPreviewWinnr = win_id2tabwin(t:redirPreviewWinid)[1]
-    if l:redirPreviewWinnr <= 0
-        new
-        let t:redirPreviewWinid = win_getid()
-    else
-        exec l:redirPreviewWinnr."wincmd w"
-    endif
-    let t:findLocateTarget=a:path
-    call FindLocateTarget()
-endfunction
-
 " redirect the command output to a buffer
-function! FindRedir(cmd)
+function! FileRedir(cmd)
     call OpenRedirWindow()
-    exec "edit FuzzyFilenameSearch".tabpagenr()."\ ->\ ".t:findSubStr
+    exec "edit FuzzyFilenameSearch".tabpagenr()."\ ->\ ".t:fileSubStr
     exec "read ".a:cmd
     setlocal buftype=nofile bufhidden=wipe nobuflisted noswapfile cursorline filetype=redirWindows
-    call FindJumpMap()
+    call FileJumpMap()
 endfunction
 
 " Show Files fuzzily searched with git
-function! FindWithGit(substr)
-    let t:findSubStr=a:substr
+function! FileWithGit(substr)
+    let t:fileSubStr=a:substr
     exec "cd ".t:rootDir
-    exec "FindRedir !rg --files \| rg --ignore-case ".a:substr
+    exec "FileRedir !rg --files \| rg --ignore-case ".a:substr
     exec "normal! gg"
     if getline('.') == ""
         exec "normal! dd"
@@ -42,53 +28,28 @@ function! FindWithGit(substr)
 endfunction
 
 " Show Files searched fuzzily without git
-function! FindWithoutGit(substr)
-    let t:findSubStr=a:substr
+function! FileWithoutGit(substr)
+    let t:fileSubStr=a:substr
     exec "cd ".t:rootDir
-    exec "FindRedir !rg --no-ignore --files \| rg --ignore-case ".a:substr
+    exec "FileRedir !rg --no-ignore --files \| rg --ignore-case ".a:substr
     exec "normal! gg"
     if getline('.') == ""
         exec "normal! dd"
     endif
 endfunction
 
-" To show file preview, underlying of FindNext, imitate 'cNext' command
-function! FindShow(direction)
-    exec "cd ".t:rootDir
-    exec "normal!".a:direction
-    let t:findLocateTarget=getline('.')
-    let l:redirPreviewWinnr = win_id2tabwin(t:redirPreviewWinid)[1]
-    if l:redirPreviewWinnr <= 0
-        top new
-        let t:redirPreviewWinid = win_getid()
-        wincmd p
-    endif
-    call win_execute(t:redirPreviewWinid,"call FindLocateTarget()")
-endfunction
-
-" imitate 'cNext'
-function! FindNext()
-    call FindShow("+")
-endfunction
-
-" imitate 'cprevious'
-function! FindPre()
-    call FindShow("-")
-endfunction
-
 " autocmd to jump to file with CR only in FuzzyFilenameSearch buffer
-function! FindJumpMap()
-    nnoremap <buffer><silent><CR> <cmd>call FindJump(getline('.'))<CR>
-    nnoremap <buffer><silent>j <cmd>call FindNext()<CR>
-    nnoremap <buffer><silent>k <cmd>call FindPre()<CR>
+function! FileJumpMap()
+    nnoremap <buffer><silent><CR> <cmd>call JumpWhenPressEnter(function('FileLocateTarget'))<CR>
+    nnoremap <buffer><silent>j <cmd>call JumpWhenPressJOrK('+', 'FileLocateTarget')<CR>
+    nnoremap <buffer><silent>k <cmd>call JumpWhenPressJOrK('-', 'FileLocateTarget')<CR>
 endfunction
 
-command! -nargs=1 -complete=command FindRedir silent! call FindRedir(<q-args>)
+command! -nargs=1 -complete=command FileRedir silent! call FileRedir(<q-args>)
 
 " Fg means 'file git', search file names fuzzily with git
-command! -nargs=1 -complete=command Fg silent! call FindWithGit(<q-args>)
+command! -nargs=1 -complete=command Fg silent! call FileWithGit(<q-args>)
 
 " Fs means 'file search', search file names fuzzily
-command! -nargs=1 -complete=command Fs silent! call FindWithoutGit(<q-args>)
-
+command! -nargs=1 -complete=command Fs silent! call FileWithoutGit(<q-args>)
 
