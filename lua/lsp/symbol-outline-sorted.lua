@@ -400,6 +400,9 @@ local function refresh()
 end
 
 local function return_immediately()
+    if #vim.lsp.buf_get_clients() <= 0 then
+        return true
+    end
 	if vim.t.jump_buf_name == nil then
 		return false
 	end
