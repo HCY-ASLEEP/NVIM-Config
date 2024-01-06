@@ -8,8 +8,3 @@ exec "source ".g:config_path."/vim/redir.vim"
 exec "source ".g:config_path."/vim/search-folding.vim"
 exec "source ".g:config_path."/vim/sets-maps.vim"
 exec "source ".g:config_path."/vim/ui.vim"
-
-augroup MarkdownPreview
-    auto Filetype markdown exec "source ".g:config_path."/vim/markdown.vim"
-    autocmd!
-augroup END
