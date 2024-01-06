@@ -26,10 +26,6 @@ echo "  format.vim download start"
 echo
 sh -c 'curl -fLo "${XDG_DATA_HOME:-$HOME/.config}"/nvim/vim/format.vim --create-dirs https://raw.githubusercontent.com/HCY-ASLEEP/NVIM-Config/main/vim/format.vim'
 echo
-echo "  markdown.vim download start"
-echo
-sh -c 'curl -fLo "${XDG_DATA_HOME:-$HOME/.config}"/nvim/vim/markdown.vim --create-dirs https://raw.githubusercontent.com/HCY-ASLEEP/NVIM-Config/main/vim/markdown.vim'
-echo
 echo "  netrw.vim download start"
 echo
 sh -c 'curl -fLo "${XDG_DATA_HOME:-$HOME/.config}"/nvim/vim/netrw.vim --create-dirs https://raw.githubusercontent.com/HCY-ASLEEP/NVIM-Config/main/vim/netrw.vim'
