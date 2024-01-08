@@ -44,7 +44,7 @@ set timeoutlen=200
 set noswapfile
 
 " When scrolling vertically, the cursor is kept 5 rows away from the top/bottom
-set scrolloff=5
+""set scrolloff=5
 
 " Notice : nvim has remove these features
 " Use a line cursor within insert mode and a block cursor everywhere else.
@@ -142,6 +142,27 @@ else
 endif
 " switch windows -----------------------------------------------------------------------------------
 nnoremap <silent><TAB> <cmd>wincmd w<CR>
+
+
+" Search only in displayed scope -------------------------------------------------------------------
+function! QuickMovement()
+    let l:top = line('w0')
+    let l:bottom = line('w$')
+    let l:toLefts=""
+    for i in range(1,strlen("/ | :call LimitSearchScope()"))
+        let l:toLefts = l:toLefts."\<LEFT>"
+    endfor
+    call feedkeys(":silent! ".l:top.",".l:bottom."g// | :call LimitSearchScope()".l:toLefts)
+endfunction
+
+function! LimitSearchScope()
+    let l:top = line('w0') - 1
+    let l:bottom = line('w$') + 1
+    call feedkeys("H^")
+    call feedkeys("/\\%>".l:top."l".@/."\\%<".l:bottom."l\<CR>")
+endfunction
+
+nnoremap <silent> s :call QuickMovement()<CR>
 
 
 " wild* settings -----------------------------------------------------------------------------------
