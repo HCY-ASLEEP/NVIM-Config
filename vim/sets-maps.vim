@@ -165,6 +165,33 @@ endfunction
 nnoremap <silent> s :call QuickMovement()<CR>
 
 
+" highlight settings -------------------------------------------------------------------------------
+function! StressCurMatch()
+    let l:target = '\c\%#'.@/
+    call matchadd('FocusCurMatch', l:target)
+endfunction
+
+" centre the screen on the current search result
+nnoremap <silent> n n:call StressCurMatch()<CR>
+nnoremap <silent> N N:call StressCurMatch()<CR>
+cnoremap <silent><expr> <CR> getcmdtype() =~ '[/?]' ? '<CR>:call StressCurMatch()<CR>' : '<CR>'
+
+hi FocusCurMatch ctermfg=white ctermbg=red cterm=bold
+
+function! ToggleHlsearch()
+    if &hlsearch
+        set nohlsearch
+        hi clear FocusCurMatch
+    else
+        set hlsearch
+        hi FocusCurMatch ctermfg=white ctermbg=red cterm=bold
+    end
+endfunction
+
+" highlight search
+nnoremap <silent><space><space> <cmd>call ToggleHlsearch()<CR>
+
+
 " wild* settings -----------------------------------------------------------------------------------
 set wildmenu
 set wildoptions=pum
