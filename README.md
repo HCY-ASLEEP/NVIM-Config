@@ -1,40 +1,54 @@
 ## Welcome to my neovim config without any plugins! ( NeoVIM >= 0.9 )
 
+## Table of contents
+- [Configuration presentations](#configuration-presentations)
+    - [A symbol outline in nested view](#a-symbol-outline-in-nested-view)
+    - [A symbol outline in sorted view](#a-symbol-outline-in-sorted-view)
+    - [Autocomplete with the build-in omnifunc](#autocomplete-with-the-build-in-omnifunc)
+    - [Folding according to after the pattern match](#folding-according-to-after-the-pattern-match)
+    - [Focus on the cur word after the pattern match](#focus-on-the-cur-word-after-the-pattern-match)
+    - [A fuzzy file search without gitignore](#a-fuzzy-file-search-without-gitignore)
+    - [A fuzzy file word with gitignore](#a-fuzzy-word-search-with-gitignore)
+    - [A simple buffer switching that lists all buffers](#a-simple-buffer-switching-that-lists-all-buffers)
+    - [Keep netrw state](#keep-netrw-state)
+    - [LSP config](#lsp-config)
+- [Install](#install)
+
 ## Configuration presentations
 
-- **A symbol outline in nested view**
-    
+- #### A symbol outline in nested view
+
     - Opened by `OpenSymbolOutlineNested` command.
     - When firstly opened, match the symbol under the cursor in the source file, with the symbol in symbol-outline if it could.
     - When cursor in then symbol-outline win, press `r` to refresh the symbol-outline.
     - When cursor in then symbol-outline win, press `<CR>` to locate the symbol under the cursor in the source file.
 
     ![](./doc/pictures/symbol-outline-nested.png)
-    
-- **A symbol outline in sorted view**
-    
+
+- #### A symbol outline in sorted view
+
     - Opened by `OpenSymbolOutlineSorted` command
     - Others same as the symbol-outline sorted view.
 
     ![](./doc/pictures/symbol-outline-sorted.png)
 
-- **Autocomplete with the build-in omnifunc**
-    
-    - Use the `<TAB>`, `<S-TAB>` or `<UP>` and `<DOWN>` to select a complementary item. 
-    
+- #### Autocomplete with the build-in omnifunc
+
+    - Use the `<TAB>`, `<S-TAB>` or `<UP>` and `<DOWN>` to select a complementary item.
+
     ![](./doc/pictures/omni-autocomplete.png)
 
-- **Folding according to after the pattern match**
-    
+- #### Folding according to after the pattern match
+
     - Toggled by `<SPACE>z`.
 
     ![](./doc/pictures/folding-according-to-search-pattern.png)
 
-- **Focus on the cur word after the pattern match**
+- #### Focus on the cur word after the pattern match
 
     ![](./doc/pictures/focus-cur-word-after-word-match.png)
 
-- **A fuzzy file search without gitignore**
+- #### A fuzzy file search without gitignore
 
     - Opened by `Fs` command.
     - Or use `Fg` to search with gitignore.
@@ -44,37 +58,39 @@
     - `<SPACE>q` to quit it anywhere.
 
     ![](./doc/pictures/file-search-without-gitignore.png)
-    
-- **A fuzzy word search with gitignore**
-  
+
+- #### A fuzzy word search with gitignore
+
     - Opened by `Wg` command.
     - Or use `Ws` to search without gitignore.
     - Powered by ripgrep.
     - Case insensitive search.
     - When cursor in the file search result win, press `j` or `k` to quickly preview the contents, `<CR>` to jump to the file.
     - `<SPACE>q` to quit it anywhere.
-    
+
     ![](./doc/pictures/word-search-with-gitignore.png)
 
-- **A simple buffer switching that lists all buffers**
-    
+- #### A simple buffer switching that lists all buffers
+
     - Opened by `<SPACE>l`.
     - When cursor in the file search result win, press `j` or `k` to quickly preview the contents, `<CR>` to jump to the file.
     - `<SPACE>q` to quit it anywhere.
-    
+
     ![](./doc/pictures/buffer-list.png)
 
-- **When quit the netrw and reopen it, its states will lose, so I wrote a script to keep its state, make it to hide on the right side instead of closing it, toggled by `<SPACE>e`**
+- #### Keep netrw state
+    - When quit the netrw and reopen it, its states will lose, so I wrote a script to keep its state, make it to hide on the right side instead of closing it, toggled by `<SPACE>e`
 
     ![](./doc/pictures/netrw.png)
 
-- **LSP config can be found at `/lua/lsp.lua`, see the [nvim-lspconfig sever configuration codes](https://github.com/neovim/nvim-lspconfig/tree/master/lua/lspconfig/server_configurations) for more languages sever that you need**
+- #### LSP config
+    - LSP config can be found at `/lua/lsp.lua`, see the [nvim-lspconfig sever configuration codes](https://github.com/neovim/nvim-lspconfig/tree/master/lua/lspconfig/server_configurations) for more languages sever that you need
 
-- **If you have better ideas on my config without any plugins, please let me know! I think we can discuss happily!**
+***
+
+- #### If you have better ideas on my config without any plugins, please let me know! I think we can discuss happily!
 
 ## Install
-
-[国内 Gitee 加速 (并不是单纯的仓库克隆，而是把所有需要的源都换成了国内的)](https://gitee.com/mygiteehcy/NVIM-Config/tree/main/)
 
 To use neovim config with lsp, you can download files to your customized path or run the following one-line command:
 
@@ -127,7 +143,7 @@ echo "alias v = 'nvim" >> ~/.bashrc
 
 </br>
 
-To install miniconda of docker ubuntu in China, you must 'su devenv' first!!! Then exec follows: 
+To install miniconda of docker ubuntu in China, you must 'su devenv' first!!! Then exec follows:
 ```bash
 curl https://mirrors.tuna.tsinghua.edu.cn/anaconda/miniconda/Miniconda3-latest-Linux-x86_64.sh -o ~/miniconda.sh;\
     sh ~/miniconda.sh -b;\
