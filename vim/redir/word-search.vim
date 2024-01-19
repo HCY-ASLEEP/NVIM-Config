@@ -25,7 +25,9 @@ function! WordSearchLocateTarget()
         let l:path=l:location[0]
         let l:row=l:location[1]
         let l:column=l:location[2]
-        exec "edit ".l:path
+        if expand("%:p")!=#l:path
+            exec "edit ".l:path
+        endif
         cal cursor(l:row, l:column)
         call matchadd('WordSearchFocusCurMatch', '\c\%#'.t:rgrepSubStr)
         normal! zz
