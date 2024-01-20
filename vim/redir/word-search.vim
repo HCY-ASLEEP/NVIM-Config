@@ -29,8 +29,8 @@ function! WordSearchLocateTarget()
             exec "edit ".l:path
         endif
         cal cursor(l:row, l:column)
-        call matchadd('WordSearchFocusCurMatch', '\c\%#'.t:rgrepSubStr)
         normal! zz
+        call matchadd('RedirFocusCurMatch', '\c\%#'.t:rgrepSubStr)
     catch
         echo ">> File Not Exist!"
     endtry
@@ -69,27 +69,12 @@ function! WordSearchWithoutGit(substr)
     endif
 endfunction
 
-function! WordSearchFocusCurMatchWhenTabEnter()
-    if bufwinnr(bufnr('^RipgrepWordSearch'.tabpagenr()))==-1
-        hi clear WordSearchFocusCurMatch
-    else
-        hi WordSearchFocusCurMatch ctermfg=lightgreen ctermbg=darkgray cterm=bold
-    endif
-endfunction
-
 " autocmd to jump to file with CR only in RipgrepWordSearch buffer
 function! WordSearchJumpMap()
     nnoremap <buffer><silent><CR> <cmd>call JumpWhenPressEnter('WordSearchLocateTarget')<CR>
     nnoremap <buffer><silent>j <cmd>call JumpWhenPressJOrK('+', 'WordSearchLocateTarget')<CR>
     nnoremap <buffer><silent>k <cmd>call JumpWhenPressJOrK('-', 'WordSearchLocateTarget')<CR>
 endfunction
-
-augroup ripgrepWordSearch
-    autocmd!
-    autocmd BufWinLeave RipgrepWordSearch* silent! hi clear WordSearchFocusCurMatch 
-    autocmd BufEnter RipgrepWordSearch* silent! hi WordSearchFocusCurMatch ctermfg=lightgreen ctermbg=darkgray cterm=bold
-    autocmd TabEnter * call WordSearchFocusCurMatchWhenTabEnter()
-augroup END
 
 command! -nargs=1 -complete=command WordSearchRedir silent! call WordSearchRedir(<q-args>)
 
