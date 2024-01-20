@@ -58,4 +58,8 @@ echo "  word-search.vim download start"
 echo
 sh -c 'curl -fLo "${XDG_DATA_HOME:-$HOME/.config}"/nvim/vim/redir/word-search.vim --create-dirs https://raw.githubusercontent.com/HCY-ASLEEP/NVIM-Config/main/vim/redir/word-search.vim'
 echo
+echo "  quickfix.vim download start"
+echo
+sh -c 'curl -fLo "${XDG_DATA_HOME:-$HOME/.config}"/nvim/vim/redir/quickfix.vim --create-dirs https://raw.githubusercontent.com/HCY-ASLEEP/NVIM-Config/main/vim/redir/quickfix.vim'
+echo
 
