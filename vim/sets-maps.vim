@@ -223,9 +223,3 @@ command! RmTrailingSpace call RmTrailingSpace()
 
 nnoremap <silent><S-TAB> <cmd>tabnext<CR>
 
-augroup quickFixMaps
-    autocmd!
-    autocmd FileType qf nnoremap <buffer> j j<CR>zz<C-w>p
-    autocmd FileType qf nnoremap <buffer> k k<CR>zz<C-w>p
-augroup END
-
