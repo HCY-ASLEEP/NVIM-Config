@@ -22,27 +22,21 @@ endfunction
 
 function! AutoComplete()
     if luaeval('#vim.lsp.buf_get_clients()') != 0
-        if exists('#openNoLSPCompletion#InsertCharPre')
-            autocmd! openNoLSPCompletion
-        endif
-        augroup openLSPCompletion
-            autocmd!
-            autocmd InsertCharPre * silent! call OpenLSPCompletion()
+        augroup openCompletion
+            autocmd! * <buffer>
+            autocmd InsertCharPre <buffer> silent! call OpenLSPCompletion()
         augroup END
     else
-        if exists('#openLSPCompletion#InsertCharPre')
-            autocmd! openLSPCompletion
-        endif
-        augroup openNoLSPCompletion
-            autocmd!
-            autocmd InsertCharPre * silent! call OpenNoLSPCompletion()
+        augroup openCompletion
+            autocmd! * <buffer>
+            autocmd InsertCharPre <buffer> silent! call OpenNoLSPCompletion()
         augroup END
     endif
 endfunction
 
 augroup initAutoComplete
     autocmd!
-    autocmd VimEnter,WinEnter,LspAttach * call AutoComplete()
+    autocmd BufEnter,LspAttach * call AutoComplete()
 augroup END
 
 augroup openFilePathCompletion
