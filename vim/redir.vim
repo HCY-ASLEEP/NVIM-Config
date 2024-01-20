@@ -14,21 +14,21 @@ function! ChangeDir(path)
 endfunction
 
 let t:redirPreviewWinid = win_getid()
-let t:redirOrQuickfixWinid = 0
+let t:redirWinid = 0
 
 function! OpenRedirWindow()
-    if win_id2tabwin(t:redirOrQuickfixWinid)[1] != 0
-        call win_gotoid(t:redirOrQuickfixWinid)
+    if win_id2tabwin(t:redirWinid)[1] != 0
+        call win_gotoid(t:redirWinid)
         return
     end
     let t:redirPreviewWinid = win_getid()
     bot 10new
-    let t:redirOrQuickfixWinid = win_getid()
+    let t:redirWinid = win_getid()
 endfunction
 
 function! QuitRedirWindow()
-    if win_id2tabwin(t:redirOrQuickfixWinid)[1] != 0
-        call win_execute(t:redirOrQuickfixWinid, 'close')
+    if win_id2tabwin(t:redirWinid)[1] != 0
+        call win_execute(t:redirWinid, 'close')
         return
     end
     echo ">> No OpenRedirWindow!"
@@ -67,11 +67,14 @@ augroup redirWhenTabNew
     autocmd VimEnter,TabNew * let t:rootDir=getcwd()
 augroup END
 
-augroup quickFixWithRedir
+augroup redirBufWinLeave
     autocmd!
-    autocmd FileType qf let t:redirOrQuickfixWinid = win_getid()
+    autocmd BufWinLeave * silent! call clearmatches(t:redirPreviewWinid)
 augroup END
+
+hi RedirFocusCurMatch ctermfg=lightgreen ctermbg=darkgray cterm=bold
 
 exec "source ".g:config_path."/vim/redir/buffer-list.vim"
 exec "source ".g:config_path."/vim/redir/file-search.vim"
 exec "source ".g:config_path."/vim/redir/word-search.vim"
+exec "source ".g:config_path."/vim/redir/quickfix.vim"
