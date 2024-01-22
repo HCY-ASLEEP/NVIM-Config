@@ -9,7 +9,9 @@ let g:netrw_liststyle = 3
 let g:netrw_browse_split = 4
 
 " explorer vertical split max win width
-let g:max_explore_win_width=25
+let g:max_explore_win_width=35
+
+let g:netrw_bufsettings = 'noma nomod nu nobl nowrap ro'
 
 " skip the netrw win when the netrw hidden
 function! SkipNetrwWin()
