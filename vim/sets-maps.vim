@@ -43,6 +43,8 @@ set timeoutlen=200
 " set no swap file
 set noswapfile
 
+set cursorline
+
 " When scrolling vertically, the cursor is kept 5 rows away from the top/bottom
 ""set scrolloff=5
 
@@ -57,8 +59,8 @@ set noswapfile
 "   Ps = 4  -> steady underline.
 "   Ps = 5  -> blinking bar (xterm).
 "   Ps = 6  -> steady bar (xterm).
-let &t_SI = "\e[6 q"
-let &t_EI = "\e[2 q"
+""let &t_SI = "\e[6 q"
+""let &t_EI = "\e[2 q"
 
 " Break line at predefined characters
 set linebreak
