@@ -1,16 +1,13 @@
 " colorscheme settings ------------------------------------------------------------------------------
-hi Normal ctermfg=white ctermbg=NONE cterm=NONE
 hi Error ctermfg=darkyellow ctermbg=NONE cterm=NONE
-hi Folded ctermfg=yellow ctermbg=darkgray cterm=NONE
 hi LineNr ctermfg=darkgray ctermbg=NONE cterm=NONE
 hi Comment ctermfg=darkgray ctermbg=NONE cterm=italic
 hi Visual ctermfg=lightred ctermbg=darkgray cterm=NONE
 hi VertSplit ctermfg=darkgray ctermbg=NONE cterm=NONE
-hi CursorLine ctermfg=white ctermbg=darkgray cterm=bold
-hi CursorLineNr ctermfg=darkyellow ctermbg=NONE cterm=NONE
+hi CursorLine cterm=NONE
+hi CursorLineNr ctermfg=black ctermbg=lightcyan cterm=bold
 hi PmenuSel ctermfg=black ctermbg=lightred cterm=NONE
 hi Pmenu ctermfg=black ctermbg=gray cterm=NONE
-hi Identifier ctermfg=lightgray ctermbg=NONE cterm=bold
 set fillchars+=eob:\ 
 set fillchars+=vert:\│
 
