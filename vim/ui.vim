@@ -5,7 +5,7 @@ hi Comment ctermfg=darkgray ctermbg=NONE cterm=italic
 hi Visual ctermfg=lightred ctermbg=darkgray cterm=NONE
 hi VertSplit ctermfg=darkgray ctermbg=NONE cterm=NONE
 hi CursorLine cterm=NONE
-hi CursorLineNr ctermfg=black ctermbg=lightcyan cterm=bold
+hi CursorLineNr ctermfg=black ctermbg=lightcyan cterm=bold,italic
 hi PmenuSel ctermfg=black ctermbg=lightred cterm=NONE
 hi Pmenu ctermfg=black ctermbg=gray cterm=NONE
 set fillchars+=eob:\ 
