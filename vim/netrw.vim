@@ -71,9 +71,6 @@ function! ExploreWhenEnter()
     if !exists('t:netrw_winid')
         let t:netrw_winid=0
     endif
-    if exists('#skipNetrwWin#BufEnter')
-        autocmd! skipNetrwWin
-    endif
     let l:expl_win_num = win_id2tabwin(t:netrw_winid)[1]
     " handling the case where explorer takes up the entire window
     if l:expl_win_num == 1 
