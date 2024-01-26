@@ -13,6 +13,8 @@ let g:max_explore_win_width=35
 
 let g:netrw_bufsettings = 'noma nomod nu nobl nowrap ro'
 
+let t:netrw_winid=0
+
 " skip the netrw win when the netrw hidden
 function! SkipNetrwWin()
     augroup skipNetrwWin
@@ -27,17 +29,18 @@ function! OpenExplorerOnSize(size)
     exec "Vexplore!"
     exec "vertical resize ".a:size
     setlocal winfixwidth
+    let t:netrw_winid = win_getid()
     return winnr()
 endfunction
 
 function! ToggleExplorer()
-    let l:expl_win_num = bufwinnr(bufnr('NetrwTreeListing'))
+    let l:expl_win_num = win_id2tabwin(t:netrw_winid)[1]
     " handling the case where explorer takes up the entire window
-    if l:expl_win_num == 1
+    if l:expl_win_num == 1 && substitute(win_execute(t:netrw_winid, 'echo &filetype'), '\n', '', '') ==# 'netrw'
         enew
-        let l:expl_win_num = -1
+        let l:expl_win_num = 0
     endif
-    if l:expl_win_num==-1
+    if l:expl_win_num==0
         let t:cur_work_win_num = winnr()
         call OpenExplorerOnSize(g:max_explore_win_width)
         if exists('#skipNetrwWin#BufEnter')
@@ -74,7 +77,7 @@ function! ExploreWhenEnter()
     " if expl_win_num not exists
     if l:expl_win_num == -1 || l:expl_win_num == 1
         " handling the case where explorer takes up the entire window
-        if l:expl_win_num == 1
+        if l:expl_win_num == 1 
             enew
         endif
         " record the win num of workspace except explorer where cursor in
