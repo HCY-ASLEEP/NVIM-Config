@@ -70,7 +70,7 @@ command! -nargs=1 -complete=command C call ChangeDir(<f-args>)
 
 augroup redirWhenTabNew
     autocmd!
-    autocmd VimEnter,TabNew * let t:rootDir=getcwd()
+    autocmd VimEnter,TabNew * let t:rootDir=getcwd() | let t:redirWinid=0
 augroup END
 
 augroup redirBufWinLeave
