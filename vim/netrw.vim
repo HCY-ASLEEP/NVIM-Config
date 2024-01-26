@@ -36,7 +36,7 @@ endfunction
 function! ToggleExplorer()
     let l:expl_win_num = win_id2tabwin(t:netrw_winid)[1]
     " handling the case where explorer takes up the entire window
-    if l:expl_win_num == 1 && substitute(win_execute(t:netrw_winid, 'echo &filetype'), '\n', '', '') ==# 'netrw'
+    if l:expl_win_num == 1 
         enew
         let l:expl_win_num = 0
     endif
