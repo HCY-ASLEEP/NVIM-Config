@@ -13,9 +13,6 @@ function! ChangeDir(path)
     echo getcwd()
 endfunction
 
-let t:redirPreviewWinid = win_getid()
-let t:redirWinid = 0
-
 function! OpenRedirWindow()
     if win_id2tabwin(t:redirWinid)[1] != 0
         call win_gotoid(t:redirWinid)
