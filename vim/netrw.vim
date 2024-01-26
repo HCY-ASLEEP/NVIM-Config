@@ -13,7 +13,7 @@ let g:max_explore_win_width=35
 
 let g:netrw_bufsettings = 'noma nomod nu nobl nowrap ro'
 
-let t:netrw_winid=0
+let t:netrw_winid = 0
 
 " skip the netrw win when the netrw hidden
 function! SkipNetrwWin()
