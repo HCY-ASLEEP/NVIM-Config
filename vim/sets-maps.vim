@@ -44,6 +44,7 @@ set timeoutlen=200
 set noswapfile
 
 set cursorline
+set cursorlineopt=number
 
 " When scrolling vertically, the cursor is kept 5 rows away from the top/bottom
 ""set scrolloff=5
