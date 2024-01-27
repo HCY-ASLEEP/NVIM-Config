@@ -1,9 +1,10 @@
 function! PrepareForQuickfix()
-    if win_id2tabwin(t:redirWinid)[1] != 0
+    let l:cur_win_id=win_getid()
+    if win_id2tabwin(t:redirWinid)[1] != 0 && t:redirWinid != l:cur_win_id
         call win_execute(t:redirWinid, 'close')
     end
     let t:redirPreviewWinid=win_getid(winnr('#'),tabpagenr())
-    let t:redirWinid = win_getid()
+    let t:redirWinid = l:cur_win_id
     resize 10
     setlocal bufhidden=wipe nobuflisted noswapfile nocursorline
 endfunction
