@@ -86,8 +86,13 @@ cnoremap <C-v> <C-r>"
 " show current buffer path
 cnoreabbrev fd echo expand("%:p:h")
 
-cnoreabbrev vt vs \| term
-cnoreabbrev st sp \| term
+if has('nvim')
+    cnoreabbrev vt vs \| term
+    cnoreabbrev st sp \| term
+else
+    cnoreabbrev vt vert term
+    cnoreabbrev st term
+endif
 
 
 " auto pair ---------------------------------------------------------------------------------------
@@ -225,4 +230,3 @@ endfunction
 command! RmTrailingSpace call RmTrailingSpace()
 
 nnoremap <silent><S-TAB> <cmd>tabnext<CR>
-
