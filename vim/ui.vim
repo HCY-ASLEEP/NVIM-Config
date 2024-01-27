@@ -63,9 +63,3 @@ set tabline=%!Tabline()
 hi TabLine ctermfg=lightmagenta ctermbg=darkgray cterm=bold
 hi TabLineFill ctermfg=NONE ctermbg=darkgray cterm=bold
 hi TabLineSel ctermfg=lightyellow ctermbg=darkgray cterm=bold
-
-hi FocusReturn ctermfg=lightblue ctermbg=NONE cterm=italic,bold
-augroup focusReturn
-    autocmd!
-    autocmd BufEnter * call matchadd("FocusReturn",'\<return\>')
-augroup END
