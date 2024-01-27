@@ -3,7 +3,7 @@ if [ -d "$dir_path" ]; then
   echo ""
   echo "Directory $dir_path exists"
   echo "----- ABORT -----"
-  echo "You can backup $dir_path and mv $ then try again"
+  echo "You can backup $dir_path and remove $dir_path , then try again"
   echo ""
   exit 0
 fi
