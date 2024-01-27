@@ -13,8 +13,9 @@
     - [Keep netrw state](#keep-netrw-state)
     - [LSP config](#lsp-config)
 - [Install](#install)
-    - [With LSP](#with-lsp)
-    - [Without LSP](#without-lsp)
+    - [Nvim With LSP](#nvim-with-lsp)
+    - [Nvim Without LSP](#nvim-without-lsp)
+    - [Vim Without LSP](#vim-without-lsp)
     - [Nodejs](#nodejs)
     - [In ubuntu docker](#in-ubuntu-docker)
     - [Quickly edit config](#quickly-edit-config)
@@ -100,7 +101,7 @@
 
 ## Install
 
-### With LSP
+### Nvim With LSP
 To use neovim config with lsp, you can download files to your customized path or run the following one-line command:
 
 ```bash
@@ -108,12 +109,22 @@ curl -sL https://raw.githubusercontent.com/HCY-ASLEEP/NVIM-Config/main/nvim-conf
 ```
 </br>
 
-### Without LSP
-To use neovim config without lsp but with self-contained auto completion of vim, and can also edit markdown at the same time, you can download files to your customized path or run the following one-line command:
+### Nvim Without LSP
+To use neovim config without lsp but with self-contained auto completion of neovim, you can download files to your customized path or run the following one-line command:
 
 ```bash
 curl -sL https://raw.githubusercontent.com/HCY-ASLEEP/NVIM-Config/main/nvim-config-without-lsp/nvim-config.sh | sh
 ```
+</br>
+
+### Vim Without LSP
+To use vim config without lsp but with self-contained auto completion of vim, you can download files to your customized path or run the following one-line command:
+
+```bash
+curl -sL https://raw.githubusercontent.com/HCY-ASLEEP/NVIM-Config/main/vim-config-without-lsp.sh | sh
+```
+**WARNING** : Please carefully notice the content of vim-config-without-lsp.sh, this will damage the content of ~/.config/nvim/ !!!!!!
+
 </br>
 
 ### Nodejs
