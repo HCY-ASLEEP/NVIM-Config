@@ -55,12 +55,6 @@ function! JumpWhenPressJOrK(direction,locateTargetFunctionName)
     call win_execute(t:redirPreviewWinid, "call ".a:locateTargetFunctionName."()")
 endfunction
 
-function! NvimRedirCursorLine()
-    if has('nvim')
-        setlocal winhl=CursorLine:RedirCursorLine
-    endif
-endfunction
-
 nnoremap <silent><space>q <cmd>call QuitRedirWindow()<CR>
 
 command! -nargs=1 -complete=command C call ChangeDir(<f-args>)
@@ -77,11 +71,10 @@ augroup END
 
 augroup redirCursorLine
     autocmd! 
-    autocmd Filetype redirWindows call NvimRedirCursorLine()
+    autocmd Filetype redirWindows setlocal cursorlineopt=line
 augroup END
 
 hi RedirFocusCurMatch ctermfg=lightgreen ctermbg=darkgray cterm=bold
-hi RedirCursorLine ctermfg=black ctermbg=lightgray cterm=bold
 
 exec "source ".g:config_path."/vim/redir/buffer-list.vim"
 exec "source ".g:config_path."/vim/redir/file-search.vim"
