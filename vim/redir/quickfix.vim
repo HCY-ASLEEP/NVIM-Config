@@ -5,8 +5,7 @@ function! PrepareForQuickfix()
     let t:redirPreviewWinid=win_getid(winnr('#'),tabpagenr())
     let t:redirWinid = win_getid()
     resize 10
-    setlocal bufhidden=wipe nobuflisted noswapfile 
-    call win_execute(t:redirPreviewWinid,'setlocal cursorline')
+    setlocal bufhidden=wipe nobuflisted noswapfile nocursorline
 endfunction
 
 augroup quickFixPreparation
