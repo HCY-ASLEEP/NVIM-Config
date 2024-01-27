@@ -140,12 +140,12 @@ if has('nvim')
     " internal terminal settings
     augroup internal_terminal
         autocmd!
-        autocmd TermOpen * set nonumber norelativenumber
+        autocmd TermOpen * setlocal nonumber norelativenumber
     augroup END
 else
     augroup internal_terminal
         autocmd!
-        autocmd TerminalOpen * set nonumber norelativenumber
+        autocmd TerminalOpen * setlocal nonumber norelativenumber
     augroup END
 endif
 " switch windows -----------------------------------------------------------------------------------
