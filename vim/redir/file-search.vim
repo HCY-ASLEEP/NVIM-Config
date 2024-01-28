@@ -19,7 +19,7 @@ endfunction
 " Show Files fuzzily searched with git
 function! FileSearchWithGit(substr)
     let t:fileSubStr=a:substr
-    exec "cd ".t:rootDir
+    exec "tc ".t:rootDir
     exec "FileSearchRedir !rg --files \| rg --ignore-case ".a:substr
     exec "normal! gg"
     if getline('.') == ""
@@ -30,7 +30,7 @@ endfunction
 " Show Files searched fuzzily without git
 function! FileSearchWithoutGit(substr)
     let t:fileSubStr=a:substr
-    exec "cd ".t:rootDir
+    exec "tc ".t:rootDir
     exec "FileSearchRedir !rg --no-ignore --files \| rg --ignore-case ".a:substr
     exec "normal! gg"
     if getline('.') == ""
