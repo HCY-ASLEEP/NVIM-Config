@@ -1,7 +1,6 @@
 " colorscheme settings ------------------------------------------------------------------------------
 hi Error ctermfg=darkyellow ctermbg=NONE cterm=NONE
 hi LineNr ctermfg=darkgray ctermbg=NONE cterm=NONE
-hi Comment ctermfg=darkgray ctermbg=NONE cterm=italic
 hi Visual ctermfg=lightred ctermbg=darkgray cterm=NONE
 hi VertSplit ctermfg=darkgray ctermbg=NONE cterm=NONE
 hi CursorLine ctermfg=black ctermbg=lightgray cterm=bold
@@ -11,6 +10,10 @@ hi Pmenu ctermfg=black ctermbg=gray cterm=NONE
 set fillchars+=eob:\ 
 set fillchars+=vert:\│
 
+augroup LazyLoadUI
+    autocmd!
+    autocmd Syntax * hi Comment ctermfg=darkgray ctermbg=NONE cterm=italic
+augroup END
 
 " bottem statusline settings -----------------------------------------------------------------------
 set statusline=%*\ %.50F\ %m\                " show filename and filepath
