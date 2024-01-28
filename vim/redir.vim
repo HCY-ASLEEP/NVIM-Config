@@ -5,10 +5,10 @@ function! ChangeDir(path)
     endif
     if a:path=="."
         let t:rootDir=expand("%:p:h")
-        exec "cd ".t:rootDir
+        exec "tc ".t:rootDir
     else
         let t:rootDir=a:path
-        exec "cd ".t:rootDir
+        exec "tc ".t:rootDir
     endif
     echo getcwd()
 endfunction
@@ -32,7 +32,7 @@ function! QuitRedirWindow()
 endfunction
 
 function! JumpWhenPressEnter(locateTargetFunctionName)
-    exec "cd ".t:rootDir
+    exec "tc ".t:rootDir
     let t:redirLocateTarget=getline('.')
     if win_id2tabwin(t:redirPreviewWinid)[1] == 0
         top new
@@ -44,7 +44,7 @@ function! JumpWhenPressEnter(locateTargetFunctionName)
 endfunction
 
 function! JumpWhenPressJOrK(direction,locateTargetFunctionName)
-    exec "cd ".t:rootDir
+    exec "tc ".t:rootDir
     exec "normal! ".a:direction
     let t:redirLocateTarget=getline('.')
     if win_id2tabwin(t:redirPreviewWinid)[1] == 0
