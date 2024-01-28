@@ -76,6 +76,7 @@ augroup resCur
 augroup END
 
 set incsearch
+set hlsearch
 
 " visual block short-cut
 nnoremap vv <C-v>
