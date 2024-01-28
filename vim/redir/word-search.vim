@@ -49,7 +49,7 @@ endfunction
 function! WordSearchWithGit(substr)
     let t:rgrepSubStr=a:substr
     let l:rgArgs="--ignore-case --vimgrep --no-heading"
-    exec "cd ".t:rootDir
+    exec "tc ".t:rootDir
     exec "WordSearchRedir !rg ".l:rgArgs." ".a:substr." ".t:rootDir
     exec "normal! gg"
     if getline('.') == ""
@@ -61,7 +61,7 @@ endfunction
 function! WordSearchWithoutGit(substr)
     let t:rgrepSubStr=a:substr
     let l:rgArgs="--ignore-case --vimgrep --no-heading --no-ignore"
-    exec "cd ".t:rootDir
+    exec "tc ".t:rootDir
     exec "WordSearchRedir !rg ".l:rgArgs." ".a:substr." ".t:rootDir
     exec "normal! gg"
     if getline('.') == ""
