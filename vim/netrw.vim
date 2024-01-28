@@ -21,6 +21,18 @@ function! SkipNetrwWin()
     augroup END
 endfunction
 
+function! GetExploreWinnr()
+    let l:expl_win_num = win_id2tabwin(t:netrw_winid)[1]
+    if l:expl_win_num <= 1
+        return l:expl_win_num
+    endif
+    let l:filetype = win_execute(t:netrw_winid, 'echo &filetype')
+    if substitute(l:filetype, '\n', '', '') !=# 'netrw'
+        return 0
+    endif
+    return l:expl_win_num
+endfunction
+
 " open explorer by specific size
 function! OpenExplorerOnSize(size)
     let t:win_width=a:size
@@ -32,7 +44,7 @@ function! OpenExplorerOnSize(size)
 endfunction
 
 function! ToggleExplorer()
-    let l:expl_win_num = win_id2tabwin(t:netrw_winid)[1]
+    let l:expl_win_num = GetExploreWinnr()
     " handling the case where explorer takes up the entire window
     if l:expl_win_num == 1 
         enew
@@ -71,7 +83,7 @@ function! ExploreWhenEnter()
     if !exists('t:netrw_winid')
         let t:netrw_winid=0
     endif
-    let l:expl_win_num = win_id2tabwin(t:netrw_winid)[1]
+    let l:expl_win_num = GetExploreWinnr()
     " handling the case where explorer takes up the entire window
     if l:expl_win_num == 1 
         enew
