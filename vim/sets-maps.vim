@@ -78,6 +78,8 @@ augroup END
 set incsearch
 set hlsearch
 
+vnoremap y "+y
+
 " visual block short-cut
 nnoremap vv <C-v>
 
