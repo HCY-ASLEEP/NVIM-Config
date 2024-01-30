@@ -25,3 +25,6 @@ colors:
         magenta: "#ff79c6"
         cyan: "#8be9fd"
         white: "#ffffff"
+key_bindings:
+    - { key: T, mods: Control, action: SpawnNewInstance }
+    # - { key: Space, mods: Control, action: ToggleViMode }
