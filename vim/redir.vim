@@ -1,4 +1,4 @@
-function! ChangeDir(path)
+function! ChangeRedirDir(path)
     if !isdirectory(expand(a:path))
         echo ">> Error Path!"
         return
@@ -11,6 +11,20 @@ function! ChangeDir(path)
         exec "tc ".t:rootDir
     endif
     echo getcwd()
+endfunction
+
+function! ChangeRootDirWithNetrw()
+    if &filetype !=# 'netrw'
+        echo ">> Not in netrw window!"
+        return
+    endif
+    let t:rootDir=netrw#Call('NetrwTreePath', w:netrw_treetop)
+    exec 'tc '.t:rootDir
+    echo t:rootDir
+endfunction
+
+function! ShowRootDir()
+    echo t:rootDir
 endfunction
 
 function! OpenRedirWindow()
@@ -57,7 +71,9 @@ endfunction
 
 nnoremap <silent><space>q <cmd>call QuitRedirWindow()<CR>
 
-command! -nargs=1 -complete=command C call ChangeDir(<f-args>)
+command! C call ChangeRootDirWithNetrw()
+command! Rpwd call ShowRootDir()
+command! -nargs=1 -complete=command Rcd call ChangeRedirDir(<f-args>)
 
 augroup redirWhenTabNew
     autocmd!
