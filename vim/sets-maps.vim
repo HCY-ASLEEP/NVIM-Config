@@ -6,6 +6,7 @@ set clipboard+=unnamedplus,unnamed
 
 " show line number
 set number
+set relativenumber
 
 " case insensitive
 set ignorecase
