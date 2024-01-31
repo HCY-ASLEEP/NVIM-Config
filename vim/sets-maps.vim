@@ -79,6 +79,16 @@ set incsearch
 set hlsearch
 
 vnoremap y "+y
+vnoremap d "+d
+vnoremap p "+p
+vnoremap yy "+yy
+vnoremap dd "+dd
+
+nnoremap y "+y
+nnoremap d "+d
+nnoremap p "+p
+nnoremap yy "+yy
+nnoremap dd "+dd
 
 " visual block short-cut
 nnoremap vv <C-v>
