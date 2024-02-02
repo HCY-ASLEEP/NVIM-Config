@@ -20,7 +20,7 @@ set statusline=%*\ %.50F\ %m\                " show filename and filepath
 set statusline+=%=%l/%L\ \ %c\ \             " show the column and raw num where cursor in
 set statusline+=%p%%\ \                      " show proportion of the text in front of the cursor to the total text
 set statusline+=%{&ff}[%{&fenc}]\ \          " show encoding type of file
-set statusline+=%{strftime('%H:%M')}\ \      " show current time
+" set statusline+=%{strftime('%H:%M')}\ \      " show current time
 set statusline+=%{winnr()}\                   " show winNum of current
 hi Statusline ctermfg=lightyellow ctermbg=darkgray cterm=bold
 hi StatuslineNC ctermfg=lightmagenta ctermbg=darkgray cterm=bold
