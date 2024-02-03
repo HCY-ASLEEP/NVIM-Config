@@ -197,10 +197,10 @@ endfunction
 " centre the screen on the current search result
 nnoremap <silent> n n:call StressCurMatch()<CR>
 nnoremap <silent> N N:call StressCurMatch()<CR>
-nnoremap <silent><expr> <CR> @/=='' ?
-    \ ':let @/=@s<CR><CR>' :
+nnoremap <silent><expr> <SPACE><SPACE> @/=='' ?
+    \ ':let @/=@s<CR>' :
     \ ':let @/=""<CR>
-        \:call clearmatches()<CR><CR>'
+        \:call clearmatches()<CR>'
 cnoremap <silent><expr> <CR> getcmdtype() =~ '[/?]' ?
     \ '<CR>:let @s=@/<CR>
         \:call StressCurMatch()<CR>' :
