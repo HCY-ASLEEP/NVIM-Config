@@ -5,6 +5,7 @@ function! PrepareForQuickfix()
     end
     let t:redirPreviewWinid=win_getid(winnr('#'),tabpagenr())
     let t:redirWinid = l:cur_win_id
+    bo wincmd J
     resize 10
     setlocal bufhidden=wipe nobuflisted noswapfile nocursorline
 endfunction
@@ -15,4 +16,3 @@ augroup quickFixPreparation
     autocmd FileType qf nnoremap <buffer> j j<CR>zz<C-w>p
     autocmd FileType qf nnoremap <buffer> k k<CR>zz<C-w>p
 augroup END
-
