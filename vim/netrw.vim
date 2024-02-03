@@ -1,4 +1,4 @@
---------
+" netrw settings -----------------------------------------------------------------------------------
 " not show the help banner on top 
 let g:netrw_banner = 0
 
