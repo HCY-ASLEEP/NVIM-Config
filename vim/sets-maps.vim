@@ -197,7 +197,6 @@ endfunction
 " centre the screen on the current search result
 nnoremap <silent> n n:call StressCurMatch()<CR>
 nnoremap <silent> N N:call StressCurMatch()<CR>
-nnoremap / :set hlsearch<CR>/
 nnoremap <silent><expr> <CR> @/=='' ?
     \ ':let @/=@s<CR><CR>' :
     \ ':let @/=""<CR>
