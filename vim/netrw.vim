@@ -1,4 +1,4 @@
-" netrw settings -----------------------------------------------------------------------------------
+--------
 " not show the help banner on top 
 let g:netrw_banner = 0
 
@@ -11,7 +11,8 @@ let g:netrw_browse_split = 4
 " explorer vertical split max win width
 let g:max_explore_win_width=35
 
-let g:netrw_bufsettings = 'noma nomod nobl nowrap ro number relativenumber cursorlineopt=number,line'
+" let g:netrw_bufsettings = 'noma nomod nobl nowrap ro number relativenumber cursorlineopt=number,line'
+let g:netrw_bufsettings = 'noma nomod nobl nowrap ro nonumber norelativenumber cursorlineopt=line'
 
 " skip the netrw win when the netrw hidden
 function! SkipNetrwWin()
