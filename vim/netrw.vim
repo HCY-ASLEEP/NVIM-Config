@@ -114,18 +114,6 @@ function! ExploreWhenEnter()
     endif
 endfunction
 
-function! OpenNewTabpageByNetrw()
-    if &filetype !=# 'netrw'
-        echo ">> Not in netrw window!"
-        return
-    endif
-    let l:rootDir=netrw#Call('NetrwTreePath', w:netrw_treetop)
-    tabnew
-    let t:rootDir=substitute(l:rootDir, '.$', '', '')
-    exec 'tc '.t:rootDir
-    echo t:rootDir
-endfunction
-
 function! NetrwCd()
     let t:rootDir=netrw#Call('NetrwTreePath', w:netrw_treetop)
     let t:rootDir=substitute(t:rootDir, '.$', '', '')
@@ -133,7 +121,6 @@ function! NetrwCd()
     echo t:rootDir
 endfunction
 
-command! Ntn call OpenNewTabpageByNetrw()
 command! Ncd call NetrwCd()
 
 augroup initExplore
