@@ -55,6 +55,7 @@ function! WordSearchWithGit(substr)
     if getline('.') == ""
         exec "normal! dd"
     endif
+    echo t:rootDir
 endfunction
 
 " Show Files fuzzily searched without git
@@ -67,6 +68,7 @@ function! WordSearchWithoutGit(substr)
     if getline('.') == ""
         exec "normal! dd"
     endif
+    echo t:rootDir
 endfunction
 
 " autocmd to jump to file with CR only in RipgrepWordSearch buffer
@@ -79,7 +81,7 @@ endfunction
 command! -nargs=1 -complete=command WordSearchRedir silent! call WordSearchRedir(<q-args>)
 
 " Wg means 'word git', search file fuzzily names with git
-command! -nargs=1 -complete=command Wg silent! call WordSearchWithGit(<q-args>)
+command! -nargs=1 -complete=command Wg call WordSearchWithGit(<q-args>)
 
 " Ws means 'word search', search file fuzzily names without git
-command! -nargs=1 -complete=command Ws silent! call WordSearchWithoutGit(<q-args>)
+command! -nargs=1 -complete=command Ws call WordSearchWithoutGit(<q-args>)
