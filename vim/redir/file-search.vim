@@ -1,6 +1,6 @@
 " Fuzzy Match filenames -----------------------------------------------------------------------------
 function! FileSearchLocateTarget()
-    if filereadable(expand(t:redirLocateTarget))
+    if filereadable(t:redirLocateTarget)
         exec "edit ".t:redirLocateTarget
     else
         echo ">> File Not Exist!"
@@ -25,6 +25,7 @@ function! FileSearchWithGit(substr)
     if getline('.') == ""
         exec "normal! dd"
     endif
+    exec "%s/^/".escape(t:rootDir.'/','/')
 endfunction
 
 " Show Files searched fuzzily without git
@@ -36,6 +37,7 @@ function! FileSearchWithoutGit(substr)
     if getline('.') == ""
         exec "normal! dd"
     endif
+    exec "%s/^/".escape(t:rootDir.'/','/')
 endfunction
 
 " autocmd to jump to file with CR only in FuzzyFilenameSearch buffer
@@ -52,4 +54,3 @@ command! -nargs=1 -complete=command Fg silent! call FileSearchWithGit(<q-args>)
 
 " Fs means 'file search', search file names fuzzily
 command! -nargs=1 -complete=command Fs silent! call FileSearchWithoutGit(<q-args>)
-
