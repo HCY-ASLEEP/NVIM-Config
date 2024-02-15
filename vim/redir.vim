@@ -1,4 +1,4 @@
-function! ChangeRedirDir(path)
+function! s:RedirCdWithPathString(path)
     if !isdirectory(expand(a:path))
         echo ">> Error Path!"
         return
@@ -13,14 +13,23 @@ function! ChangeRedirDir(path)
     echo getcwd()
 endfunction
 
-function! ChangeRootDirWithNetrw()
+function! s:RedirCdWithNetrw()
     if &filetype !=# 'netrw'
         echo ">> Not in netrw window!"
         return
     endif
     let t:rootDir=netrw#Call('NetrwTreePath', w:netrw_treetop)
+    let t:rootDir=substitute(t:rootDir, '.$', '', '')
     exec 'tc '.t:rootDir
     echo t:rootDir
+endfunction
+
+function! RedirCd(path)
+    if empty(a:path)
+        call s:RedirCdWithNetrw()
+        return
+    endif
+    call s:RedirCdWithPathString(a:path)
 endfunction
 
 function! ShowRootDir()
@@ -46,7 +55,6 @@ function! QuitRedirWindow()
 endfunction
 
 function! JumpWhenPressEnter(locateTargetFunctionName)
-    exec "tc ".t:rootDir
     let t:redirLocateTarget=getline('.')
     if win_id2tabwin(t:redirPreviewWinid)[1] == 0
         top new
@@ -58,7 +66,6 @@ function! JumpWhenPressEnter(locateTargetFunctionName)
 endfunction
 
 function! JumpWhenPressJOrK(direction,locateTargetFunctionName)
-    exec "tc ".t:rootDir
     exec "normal! ".a:direction
     let t:redirLocateTarget=getline('.')
     if win_id2tabwin(t:redirPreviewWinid)[1] == 0
@@ -71,9 +78,8 @@ endfunction
 
 nnoremap <silent><space>q <cmd>call QuitRedirWindow()<CR>
 
-command! C call ChangeRootDirWithNetrw()
 command! Rpwd call ShowRootDir()
-command! -nargs=1 -complete=command Rcd call ChangeRedirDir(<f-args>)
+command! -nargs=? Rcd call RedirCd(<q-args>)
 
 augroup redirWhenTabNew
     autocmd!
