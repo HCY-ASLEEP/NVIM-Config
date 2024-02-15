@@ -117,7 +117,6 @@ endfunction
 function! NetrwCd()
     let t:rootDir=netrw#Call('NetrwTreePath', w:netrw_treetop)
     let t:rootDir=substitute(t:rootDir, '.$', '', '')
-    Ntree
     echo t:rootDir
 endfunction
 
