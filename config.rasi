@@ -1,3 +1,4 @@
+/* ~/.config/rofi/config.rasi */
 configuration {
 	modi: "window,run,ssh,combi";
 /*	font: "jetbrainsmono 14";*/ 
