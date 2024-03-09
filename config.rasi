@@ -1,6 +1,6 @@
 /* ~/.config/rofi/config.rasi */
 configuration {
-	modi: "window,drun,run,ssh,combi";
+	modi: "window,drun,ssh,combi";
 /*	font: "jetbrainsmono 14";*/ 
 /*	location: 0;*/
 /*	yoffset: 0;*/
@@ -33,7 +33,7 @@ configuration {
 /*	auto-select: false;*/
 /*	parse-hosts: false;*/
 /*	parse-known-hosts: true;*/
-	combi-modi: "window,drun,run,ssh,combi";
+	combi-modi: "window,drun,ssh,combi";
 /*	matching: "normal";*/
 /*	tokenize: true;*/
 /*	m: "-5";*/
