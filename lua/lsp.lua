@@ -127,6 +127,27 @@ if vim.fn.executable("lua-language-server") == 1 then
     })
 end
 
+if vim.fn.executable("gopls") == 1 then
+    local golang_lsp = vim.api.nvim_create_augroup("golang_lsp", { clear = true })
+    vim.api.nvim_create_autocmd("FileType", {
+        pattern = { "go", "gomod", "gowork", "gotmpl" },
+        callback = function()
+            local root_dir = vim.fs.dirname(vim.fs.find({
+                "go.work",
+                "go.mod",
+                ".git",
+            }, { upward = true, path = vim.fs.dirname(vim.api.nvim_buf_get_name(0)) })[1])
+            local client = vim.lsp.start({
+                name = "gopls",
+                cmd = { "gopls" },
+                root_dir = root_dir,
+            })
+            vim.lsp.buf_attach_client(0, client)
+        end,
+        group = golang_lsp,
+    })
+end
+
 vim.api.nvim_command("highlight NormalFloat ctermbg=darkgray")
 
 vim.api.nvim_buf_set_option(0, "omnifunc", "v:lua.vim.lsp.omnifunc")
