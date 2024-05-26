@@ -238,3 +238,12 @@ endfunction
 command! RmTrailingSpace call RmTrailingSpace()
 
 nnoremap <silent><S-TAB> <cmd>tabnext<CR>
+
+" spetial chars
+set fillchars+=eob:\ 
+set fillchars+=vert:\│
+
+set list
+set listchars=tab:┊\ ,eol:\ 
+set listchars+=trail:\ 
+set listchars+=leadmultispace:┊\ \ \ 
