@@ -18,6 +18,7 @@ if vim.fn.executable("clangd") == 1 then
                 name = "clangd",
                 cmd = { "clangd" },
                 root_dir = root_dir,
+                single_file_support = true,
                 capabilities = {
                     textDocument = {
                         completion = {
@@ -27,7 +28,7 @@ if vim.fn.executable("clangd") == 1 then
                     offsetEncoding = { "utf-8", "utf-16" },
                 },
             })
-            vim.lsp.buf_attach_client(0, client)
+            -- vim.lsp.buf_attach_client(0, client)
         end,
         group = clangd_lsp,
     })
@@ -61,7 +62,7 @@ if vim.fn.executable("pyright-langserver") == 1 then
                     },
                 },
             })
-            vim.lsp.buf_attach_client(0, client)
+            -- vim.lsp.buf_attach_client(0, client)
         end,
         group = pyright_lsp,
     })
@@ -94,7 +95,7 @@ if vim.fn.executable("vim-language-server") == 1 then
                     suggest = { fromVimruntime = true, fromRuntimepath = true },
                 },
             })
-            vim.lsp.buf_attach_client(0, client)
+            -- vim.lsp.buf_attach_client(0, client)
         end,
         group = vimls_lsp,
     })
@@ -121,7 +122,7 @@ if vim.fn.executable("lua-language-server") == 1 then
                 root_dir = root_dir,
                 settings = { Lua = { telemetry = { enable = false } } },
             })
-            vim.lsp.buf_attach_client(0, client)
+            -- vim.lsp.buf_attach_client(0, client)
         end,
         group = luals_lsp,
     })
@@ -142,7 +143,7 @@ if vim.fn.executable("gopls") == 1 then
                 cmd = { "gopls" },
                 root_dir = root_dir,
             })
-            vim.lsp.buf_attach_client(0, client)
+            -- vim.lsp.buf_attach_client(0, client)
         end,
         group = golang_lsp,
     })
@@ -186,3 +187,5 @@ end, {})
 --	log_file:write(log_message .. "\n") -- 写入日志文件
 --	log_file:flush() -- 刷新文件缓冲区
 --end
+
+vim.lsp.inlay_hint.enable()
