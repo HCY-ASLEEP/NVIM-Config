@@ -159,9 +159,10 @@ vim.keymap.set("n", "gh", vim.lsp.buf.hover, { noremap = true, silent = true })
 vim.keymap.set("n", "gi", vim.lsp.buf.implementation, { noremap = true, silent = true })
 vim.keymap.set("n", "gr", vim.lsp.buf.references, { noremap = true, silent = true })
 vim.keymap.set("n", "gt", vim.lsp.buf.type_definition, { noremap = true, silent = true })
+vim.keymap.set("n", "gs", vim.lsp.buf.signature_help, { noremap = true, silent = true })
 vim.keymap.set("n", "<space>r", vim.lsp.buf.rename, { noremap = true, silent = true })
+vim.keymap.set("n", "<space>d", vim.diagnostic.open_float, { noremap =true, silent =true })
 vim.keymap.set("n", "<space>a", vim.diagnostic.setloclist, { noremap = true, silent = true })
-vim.keymap.set("n", "<C-k>", vim.lsp.buf.signature_help, { noremap = true, silent = true })
 vim.keymap.set("n", "<C-up>", vim.diagnostic.goto_prev, { noremap = true, silent = true })
 vim.keymap.set("n", "<C-down>", vim.diagnostic.goto_next, { noremap = true, silent = true })
 
@@ -189,3 +190,19 @@ end, {})
 --end
 
 vim.lsp.inlay_hint.enable()
+-- Decorate floating windows
+vim.lsp.handlers['textDocument/hover'] = vim.lsp.with(
+    vim.lsp.handlers.hover,
+    { border = 'rounded' }
+)
+
+vim.lsp.handlers['textDocument/signatureHelp'] = vim.lsp.with(
+    vim.lsp.handlers.signature_help,
+    { border = 'rounded' }
+)
+
+vim.diagnostic.config({     
+    float = { border = "rounded" },
+    virtual_text = false,
+    underline = true
+})
