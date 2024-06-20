@@ -1,17 +1,18 @@
 local vim = vim
 
 vim.cmd([[
-    hi FocusedSymbol ctermfg=black ctermbg=lightgray cterm=NONE
-    hi SymbolIndent ctermfg=darkgray ctermbg=NONE cterm=NONE
-    hi SymbolName ctermfg=lightgray ctermbg=NONE cterm=bold
-    hi SymbolDetial ctermfg=darkmagenta ctermbg=NONE cterm=italic
-    hi SymbolKindName ctermfg=darkgray ctermbg=NONE cterm=NONE
-    hi SymbolIcon_File ctermfg=cyan ctermbg=NONE cterm=bold,italic
-    hi SymbolIcon_Package ctermfg=red ctermbg=NONE cterm=bold,italic
-    hi SymbolIcon_Class ctermfg=yellow ctermbg=NONE cterm=bold,italic
-    hi SymbolIcon_Method ctermfg=lightmagenta ctermbg=NONE cterm=bold,italic
-    hi SymbolIcon_Field ctermfg=lightblue ctermbg=NONE cterm=bold,italic
-    hi SymbolIcon_Array ctermfg=lightgreen ctermbg=NONE cterm=bold,italic
+    hi! link FocusedSymbol CursorLine 
+    hi! link SymbolIndent Comment
+    hi! link SymbolName Normal
+    hi! link SymbolDetial Directory
+    hi! link SymbolKindName Comment
+    hi! link SymbolIcon_File Typedef
+    hi! link SymbolIcon_Package Identifier
+    hi! link SymbolIcon_Class Constant
+    hi! link SymbolIcon_Method Function
+    hi! link SymbolIcon_Field Type
+    hi! link SymbolIcon_Array Boolean
+    "" Comment
     hi! link SymbolIcon_Module SymbolIcon_File
     hi! link SymbolIcon_Namespace SymbolIcon_File
     hi! link SymbolIcon_Property SymbolIcon_File
