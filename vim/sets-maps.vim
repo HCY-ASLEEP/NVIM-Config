@@ -232,7 +232,7 @@ vnoremap <silent><M-up> :m '<-2<CR>gv=gv
 
 " %s/\s\+$//e
 function! RmTrailingSpace()
-    exec "%s/\s\+$//e"
+    %s/\s\+$//e
 endfunction
 
 command! RmTrailingSpace call RmTrailingSpace()
