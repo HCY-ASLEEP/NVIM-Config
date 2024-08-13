@@ -881,3 +881,6 @@ augroup quickFixPreparation
     autocmd FileType qf nnoremap <buffer> j j<CR>zz<C-w>p
     autocmd FileType qf nnoremap <buffer> k k<CR>zz<C-w>p
 augroup END
+
+" let g:config_path=expand("<sfile>:p:h")
+" exec "source ".g:config_path."/lsp.lua"
