@@ -1021,7 +1021,7 @@ function s:write(osc52)
 endfunction
 
 " -------------------- PUBLIC ------------------------------
-function! OSCYank(text) abort
+function! s:OSCYank(text) abort
   let l:text = s:options_trim() ? s:trim_text(a:text) : a:text
 
   if s:options_max_length() > 0 && strlen(l:text) > s:options_max_length()
@@ -1044,7 +1044,7 @@ endfunction
 
 function! OSCYankOperatorCallback(type) abort
   let l:text = s:get_text('operator', a:type)
-  return OSCYank(l:text)
+  return s:OSCYank(l:text)
 endfunction
 
 function! OSCYankOperator() abort
@@ -1052,20 +1052,20 @@ function! OSCYankOperator() abort
   return 'g@'
 endfunction
 
-function! OSCYankVisual() abort
+function! s:OSCYankVisual() abort
   let l:text = s:get_text('visual', visualmode())
-  return OSCYank(l:text)
+  return s:OSCYank(l:text)
 endfunction
 
-function! OSCYankRegister(register) abort
+function! s:OSCYankRegister(register) abort
   let l:text = getreg(a:register)
-  return OSCYank(l:text)
+  return s:OSCYank(l:text)
 endfunction
 
 " -------------------- COMMANDS ----------------------------
-command! -nargs=1 OSCYank call OSCYank('<args>')
-command! -range OSCYankVisual call OSCYankVisual()
-command! -register OSCYankRegister call OSCYankRegister('<reg>')
+command! -nargs=1 OSCYank call s:OSCYank('<args>')
+command! -range OSCYankVisual call s:OSCYankVisual()
+command! -register OSCYankRegister call s:OSCYankRegister('<reg>')
 
 nnoremap <expr> <Plug>OSCYankOperator OSCYankOperator()
 vnoremap <Plug>OSCYankVisual :OSCYankVisual<CR>
