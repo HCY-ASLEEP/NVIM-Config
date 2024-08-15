@@ -1,18 +1,18 @@
-" ╔═══════════════════════════════════════════════╗
-" ║                                               ║
-" ║                  COLORSCHEME                  ║
-" ║                                               ║
-" ╚═══════════════════════════════════════════════╝
+" +-----------------------------------------------+
+" |                                               |
+" |                  COLORSCHEME                  |
+" |                                               |
+" +-----------------------------------------------+
 
 
 colorscheme retrobox
 
 
-" ╔═══════════════════════════════════════════════╗
-" ║                                               ║
-" ║              BASIC SETS AND MAPS              ║
-" ║                                               ║
-" ╚═══════════════════════════════════════════════╝
+" +-----------------------------------------------+
+" |                                               |
+" |              BASIC SETS AND MAPS              |
+" |                                               |
+" +-----------------------------------------------+
 
 
 syntax on
@@ -77,11 +77,6 @@ set showcmd
 let &t_SI = "\e[6 q"
 let &t_EI = "\e[2 q"
 
-" Break line at predefined characters
-set linebreak
-" Character to show before the lines that have been soft-wrapped
-set showbreak=↪\ 
-
 
 " jump to the last position when reopening a file
 augroup resCur
@@ -131,12 +126,12 @@ endif
 
 
 " auto pair ---------------------------------------------------------------------------------------
-inoremap { {}<LEFT>
-inoremap ( ()<LEFT>
-inoremap [ []<LEFT>
-inoremap ' ''<LEFT>
-inoremap " ""<LEFT>
-inoremap ` ``<LEFT>
+inoremap { {}<Left>
+inoremap ( ()<Left>
+inoremap [ []<Left>
+inoremap ' ''<Left>
+inoremap " ""<Left>
+inoremap ` ``<Left>
 
 " {} and ()completion when press enter in the middle of them
 function! s:InsertCRBrace()
@@ -184,7 +179,7 @@ else
     augroup END
 endif
 " switch windows -----------------------------------------------------------------------------------
-nnoremap <silent><TAB> <cmd>wincmd w<CR>
+nnoremap <silent><Tab> :wincmd w<CR>
 
 
 " Search only in displayed scope -------------------------------------------------------------------
@@ -201,13 +196,13 @@ function! s:QuickMovement()
     let l:toLefts=""
     let l:limitSearchScopeCmdStr="/ | LimitSearchScope"
     for i in range(1,strlen(l:limitSearchScopeCmdStr))
-        let l:toLefts = l:toLefts."\<LEFT>"
+        let l:toLefts = l:toLefts."\<Left>"
     endfor
     call feedkeys(":silent! ".l:top.",".l:bottom."g/".l:limitSearchScopeCmdStr.l:toLefts)
 endfunction
 
 command! LimitSearchScope call s:LimitSearchScope()
-nnoremap <silent> s <cmd>call <SID>QuickMovement()<CR>
+nnoremap <silent> s :call <SID>QuickMovement()<CR>
 
 
 " highlight settings -------------------------------------------------------------------------------
@@ -218,9 +213,9 @@ function! s:StressCurMatch()
 endfunction
 
 " centre the screen on the current search result
-nnoremap <silent> n n<cmd>call <SID>StressCurMatch()<CR>
-nnoremap <silent> N N<cmd>call <SID>StressCurMatch()<CR>
-nnoremap <silent><expr> <SPACE><SPACE> @/=='' ?
+nnoremap <silent> n n:call <SID>StressCurMatch()<CR>
+nnoremap <silent> N N:call <SID>StressCurMatch()<CR>
+nnoremap <silent><expr> <Space><Space> @/=='' ?
     \ ':let @/=@s<CR>' :
     \ ':let @/=""<CR>
         \:call clearmatches()<CR>'
@@ -234,12 +229,12 @@ cnoremap <silent><expr> <CR> getcmdtype() =~ '[/?]' ?
 " wild* settings -----------------------------------------------------------------------------------
 set wildmenu
 set wildoptions=pum
-set wildcharm=<TAB>
+set wildcharm=<Tab>
 if has('nvim')
-    cnoremap <expr> <up> wildmenumode() ? "\<left>" : "\<up>"
-    cnoremap <expr> <down> wildmenumode() ? "\<right>" : "\<down>"
-    cnoremap <expr> <left> wildmenumode() ? "\<SPACE>\<BS>" : "\<left>"
-    cnoremap <expr> <right> wildmenumode() ? "\<SPACE>\<BS>" : "\<right>"
+    cnoremap <expr> <Up> wildmenumode() ? "\<Left>" : "\<Up>"
+    cnoremap <expr> <Down> wildmenumode() ? "\<Right>" : "\<Down>"
+    cnoremap <expr> <Left> wildmenumode() ? "\<Space>\<BS>" : "\<Left>"
+    cnoremap <expr> <Right> wildmenumode() ? "\<Space>\<BS>" : "\<Right>"
 endif
 
 
@@ -248,10 +243,10 @@ nnoremap <expr>0 col('.') == 1 ? '$' : '0'
 vnoremap <expr>0 col('.') == 1 ? '$' : '0'
 
 " move code block up or down
-nnoremap <silent><M-down> <cmd>m .+1<CR>==
-nnoremap <silent><M-up> <cmd>m .-2<CR>==
-vnoremap <silent><M-down> :m '>+1<CR>gv=gv
-vnoremap <silent><M-up> :m '<-2<CR>gv=gv
+nnoremap <silent><S-Down> :m .+1<CR>==
+nnoremap <silent><S-Up> :m .-2<CR>==
+vnoremap <silent><S-Down> :m '>+1<CR>gv=gv
+vnoremap <silent><S-Up> :m '<-2<CR>gv=gv
 
 " %s/\s\+$//e
 function! s:RmTrailingSpace()
@@ -260,7 +255,7 @@ endfunction
 
 command! RmTrailingSpace call s:RmTrailingSpace()
 
-nnoremap <silent><S-TAB> <cmd>tabnext<CR>
+nnoremap <silent><S-Tab> :tabnext<CR>
 
 " spetial chars
 set fillchars+=eob:\ 
@@ -271,12 +266,17 @@ set listchars=tab:┊\ ,eol:\
 set listchars+=trail:\ 
 set listchars+=leadmultispace:┊\ \ \ 
 
+" Break line at predefined characters
+set linebreak
+" Character to show before the lines that have been soft-wrapped
+set showbreak=↪\ 
 
-" ╔═══════════════════════════════════════════════╗
-" ║                                               ║
-" ║                AUTO COMPLETION                ║
-" ║                                               ║
-" ╚═══════════════════════════════════════════════╝
+
+" +-----------------------------------------------+
+" |                                               |
+" |                AUTO COMPLETION                |
+" |                                               |
+" +-----------------------------------------------+
 
 
 set completeopt=menuone,noselect
@@ -333,19 +333,19 @@ augroup openFilePathCompletion
 augroup END
 
 " use tab for navigating the autocomplete menu
-inoremap <expr> <TAB> pumvisible() ? "\<C-n>" : "\<TAB>"
-inoremap <expr> <S-TAB> pumvisible() ? "\<C-p>" : "\<S-TAB>"
+inoremap <expr> <Tab> pumvisible() ? "\<C-n>" : "\<Tab>"
+inoremap <expr> <S-TAB> pumvisible() ? "\<C-p>" : "\<S-Tab>"
 
 " use up and down keys for navigating the autocomplete menu
-inoremap <expr> <down> pumvisible() ? "\<C-n>" : "\<down>"
-inoremap <expr> <up> pumvisible() ? "\<C-p>" : "\<up>"
+inoremap <expr> <Down> pumvisible() ? "\<C-n>" : "\<Down>"
+inoremap <expr> <Up> pumvisible() ? "\<C-p>" : "\<Up>"
 
 
-" ╔═══════════════════════════════════════════════╗
-" ║                                               ║
-" ║     FOLD ACCORDING TO "/" SEARCH PATTERN      ║
-" ║                                               ║
-" ╚═══════════════════════════════════════════════╝
+" +-----------------------------------------------+
+" |                                               |
+" |     FOLD ACCORDING TO "/" SEARCH PATTERN      |
+" |                                               |
+" +-----------------------------------------------+
 
 
 function! s:HasFolds()
@@ -379,14 +379,14 @@ function! s:ToggleSearchFolding()
     endif
 endfunction
 
-nnoremap <SPACE>z <cmd>call <SID>ToggleSearchFolding()<CR>
+nnoremap <Space>z :call <SID>ToggleSearchFolding()<CR>
 
 
-" ╔═══════════════════════════════════════════════╗
-" ║                                               ║
-" ║                 CODE FORMATER                 ║
-" ║                                               ║
-" ╚═══════════════════════════════════════════════╝
+" +-----------------------------------------------+
+" |                                               |
+" |                 CODE FORMATER                 |
+" |                                               |
+" +-----------------------------------------------+
 
 
 function! s:FormatCodes(formatCmd,formatArgs)
@@ -407,11 +407,11 @@ augroup codeFormat
 augroup END
 
 
-" ╔═══════════════════════════════════════════════╗
-" ║                                               ║
-" ║            KEEP NETRW OPEN STATUS             ║
-" ║                                               ║
-" ╚═══════════════════════════════════════════════╝
+" +-----------------------------------------------+
+" |                                               |
+" |            KEEP NETRW OPEN STATUS             |
+" |                                               |
+" +-----------------------------------------------+
 
 
 " netrw settings -----------------------------------------------------------------------------------
@@ -445,7 +445,7 @@ function! s:GetExploreWinnr()
     if l:expl_win_num <= 1
         return l:expl_win_num
     endif
-    let l:filetype = win_execute(t:netrw_winid, 'echo &filetype')
+    let l:filetype = getbufvar(winbufnr(l:expl_win_num), '&filetype')
     if substitute(l:filetype, '\n', '', '') !=# 'netrw'
         return 0
     endif
@@ -484,9 +484,9 @@ function! s:ToggleExplorer()
     endif
     " if explorer is not hidden
     if winwidth(l:expl_win_num)!=0
+        call s:SkipNetrwWin()
         let t:win_width=0
         exec t:cur_work_win_num."wincmd w"
-        call s:SkipNetrwWin()
     else
         let t:win_width=g:max_explore_win_width
         " disable skip netrw win
@@ -543,14 +543,14 @@ augroup initExplore
     autocmd TabEnter,VimEnter * call s:ExploreWhenEnter()
 augroup END
 
-nnoremap <silent><SPACE>e <cmd>call <SID>ToggleExplorer()<CR>
+nnoremap <silent><Space>e :call <SID>ToggleExplorer()<CR>
 
 
-" ╔═══════════════════════════════════════════════╗
-" ║                                               ║
-" ║     REDIRECT CMD OUTPUT AND SELF-QUICKFIX     ║
-" ║                                               ║
-" ╚═══════════════════════════════════════════════╝
+" +-----------------------------------------------+
+" |                                               |
+" |     REDIRECT CMD OUTPUT AND SELF-QUICKFIX     |
+" |                                               |
+" +-----------------------------------------------+
 
 
 function! s:RedirCdWithPathString(path)
@@ -631,7 +631,7 @@ function! s:JumpWhenPressJOrK(direction,locateTargetFunctionName)
     call win_execute(t:redirPreviewWinid, "call ".a:locateTargetFunctionName."()")
 endfunction
 
-nnoremap <silent><space>q <cmd>call <SID>QuitRedirWindow()<CR>
+nnoremap <silent><Space>q :call <SID>QuitRedirWindow()<CR>
 
 command! Rpwd call s:ShowRootDir()
 command! -nargs=? Rcd call s:RedirCd(<q-args>)
@@ -659,11 +659,11 @@ hi def link RedirFocusCurMatch DiffChange
 " exec "source ".g:config_path."/vim/redir/quickfix.vim"
 
 
-" ╔═══════════════════════════════════════════════╗
-" ║                                               ║
-" ║             BUFFER LIST REDIRECT              ║
-" ║                                               ║
-" ╚═══════════════════════════════════════════════╝
+" +-----------------------------------------------+
+" |                                               |
+" |             BUFFER LIST REDIRECT              |
+" |                                               |
+" +-----------------------------------------------+
 
 
 " Go to the buffer on line
@@ -691,19 +691,19 @@ endfunction
 
 " autocmd to jump to buffer with CR only in BufferList buffer
 function! s:BufferListJumpMap()
-    nnoremap <buffer><silent><CR> <cmd>call <SID>JumpWhenPressEnter('s:BufferListLocateTarget')<CR>
-    nnoremap <buffer><silent>j <cmd>call <SID>JumpWhenPressJOrK('+', 's:BufferListLocateTarget')<CR>
-    nnoremap <buffer><silent>k <cmd>call <SID>JumpWhenPressJOrK('-', 's:BufferListLocateTarget')<CR>
+    nnoremap <buffer><silent><CR> :call <SID>JumpWhenPressEnter('s:BufferListLocateTarget')<CR>
+    nnoremap <buffer><silent>j :call <SID>JumpWhenPressJOrK('+', 's:BufferListLocateTarget')<CR>
+    nnoremap <buffer><silent>k :call <SID>JumpWhenPressJOrK('-', 's:BufferListLocateTarget')<CR>
 endfunction
 
-nnoremap <silent><space>l <cmd>call <SID>BufferListRedir()<CR>
+nnoremap <silent><Space>l :call <SID>BufferListRedir()<CR>
 
 
-" ╔═══════════════════════════════════════════════╗
-" ║                                               ║
-" ║    FUZZY FILE SEARCH WITH RIPGREP REDIRECT    ║
-" ║                                               ║
-" ╚═══════════════════════════════════════════════╝
+" +-----------------------------------------------+
+" |                                               |
+" |    FUZZY FILE SEARCH WITH RIPGREP REDIRECT    |
+" |                                               |
+" +-----------------------------------------------+
 
 
 " Fuzzy Match filenames -----------------------------------------------------------------------------
@@ -752,9 +752,9 @@ endfunction
 
 " autocmd to jump to file with CR only in FuzzyFilenameSearch buffer
 function! s:FileSearchJumpMap()
-    nnoremap <buffer><silent><CR> <cmd>call <SID>JumpWhenPressEnter('s:FileSearchLocateTarget')<CR>
-    nnoremap <buffer><silent>j <cmd>call <SID>JumpWhenPressJOrK('+', 's:FileSearchLocateTarget')<CR>
-    nnoremap <buffer><silent>k <cmd>call <SID>JumpWhenPressJOrK('-', 's:FileSearchLocateTarget')<CR>
+    nnoremap <buffer><silent><CR> :call <SID>JumpWhenPressEnter('s:FileSearchLocateTarget')<CR>
+    nnoremap <buffer><silent>j :call <SID>JumpWhenPressJOrK('+', 's:FileSearchLocateTarget')<CR>
+    nnoremap <buffer><silent>k :call <SID>JumpWhenPressJOrK('-', 's:FileSearchLocateTarget')<CR>
 endfunction
 
 command! -nargs=1 -complete=command FileSearchRedir silent! call s:FileSearchRedir(<q-args>)
@@ -766,11 +766,11 @@ command! -nargs=1 -complete=command Fg call s:FileSearchWithGit(<q-args>)
 command! -nargs=1 -complete=command Fs call s:FileSearchWithoutGit(<q-args>)
 
 
-" ╔═══════════════════════════════════════════════╗
-" ║                                               ║
-" ║    FUZZY WORD SEARCH WITH RIPGREP REDIRECT    ║
-" ║                                               ║
-" ╚═══════════════════════════════════════════════╝
+" +-----------------------------------------------+
+" |                                               |
+" |    FUZZY WORD SEARCH WITH RIPGREP REDIRECT    |
+" |                                               |
+" +-----------------------------------------------+
 
 
 function! s:LegalLocationsInUnix()
@@ -848,9 +848,9 @@ endfunction
 
 " autocmd to jump to file with CR only in RipgrepWordSearch buffer
 function! s:WordSearchJumpMap()
-    nnoremap <buffer><silent><CR> <cmd>call <SID>JumpWhenPressEnter('s:WordSearchLocateTarget')<CR>
-    nnoremap <buffer><silent>j <cmd>call <SID>JumpWhenPressJOrK('+', 's:WordSearchLocateTarget')<CR>
-    nnoremap <buffer><silent>k <cmd>call <SID>JumpWhenPressJOrK('-', 's:WordSearchLocateTarget')<CR>
+    nnoremap <buffer><silent><CR> :call <SID>JumpWhenPressEnter('s:WordSearchLocateTarget')<CR>
+    nnoremap <buffer><silent>j :call <SID>JumpWhenPressJOrK('+', 's:WordSearchLocateTarget')<CR>
+    nnoremap <buffer><silent>k :call <SID>JumpWhenPressJOrK('-', 's:WordSearchLocateTarget')<CR>
 endfunction
 
 command! -nargs=1 -complete=command WordSearchRedir silent! call s:WordSearchRedir(<q-args>)
@@ -862,11 +862,11 @@ command! -nargs=1 -complete=command Wg call s:WordSearchWithGit(<q-args>)
 command! -nargs=1 -complete=command Ws call s:WordSearchWithoutGit(<q-args>)
 
 
-" ╔═══════════════════════════════════════════════╗
-" ║                                               ║
-" ║  COMBINE QUICKFIX SHORTCUT WITH REDIRECT SYS  ║
-" ║                                               ║
-" ╚═══════════════════════════════════════════════╝
+" +-----------------------------------------------+
+" |                                               |
+" |  COMBINE QUICKFIX SHORTCUT WITH REDIRECT SYS  |
+" |                                               |
+" +-----------------------------------------------+
 
 
 function! s:PrepareForQuickfix()
@@ -889,17 +889,17 @@ augroup quickFixPreparation
 augroup END
 
 
-" ╔═══════════════════════════════════════════════╗
-" ║                                               ║
-" ║      COPY OF ojroques/vim-oscyank GITHUB      ║
-" ║                                               ║
-" ╚═══════════════════════════════════════════════╝
+" +-----------------------------------------------+
+" |                                               |
+" |      COPY OF ojroques/vim-oscyank GITHUB      |
+" |                                               |
+" +-----------------------------------------------+
 
 
 " -------------------- VARIABLES ---------------------------
 let s:yank_commands = {
   \ 'operator': {'block': '`[\<C-v>`]y', 'char': '`[v`]y', 'line': "'[V']y"},
-  \ 'visual': {'': 'gvy', 'V': 'gvy', 'v': 'gvy', '': 'gvy'}}
+  \ 'visual': {'': 'gvy', 'V': 'gvy', 'v': 'gvy'}}
 let s:b64_table = [
   \ 'A','B','C','D','E','F','G','H','I','J','K','L','M','N','O','P',
   \ 'Q','R','S','T','U','V','W','X','Y','Z','a','b','c','d','e','f',
@@ -1058,15 +1058,16 @@ function! s:OSCYankRegister(register) abort
   return s:OSCYank(l:text)
 endfunction
 
-nnoremap <expr> Y <SID>OSCYankOperator().'_'
-vnoremap Y :<C-u>call <SID>OSCYankVisual()<CR>
+nnoremap <silent><expr> Y <SID>OSCYankOperator().'_'
+vnoremap <silent>Y :<C-u>call <SID>OSCYankVisual()<CR>
 command! -register OSCYankRegister call s:OSCYankRegister('<reg>')
 
-" ╔═══════════════════════════════════════════════╗
-" ║                                               ║
-" ║         LOAD LANGUAGE SERVER (NEOVIM)         ║
-" ║                                               ║
-" ╚═══════════════════════════════════════════════╝
+
+" +-----------------------------------------------+
+" |                                               |
+" |         LOAD LANGUAGE SERVER (NEOVIM)         |
+" |                                               |
+" +-----------------------------------------------+
 
 
 " let g:config_path=expand("<sfile>:p:h")
