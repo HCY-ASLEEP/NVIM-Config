@@ -139,7 +139,7 @@ inoremap " ""<LEFT>
 inoremap ` ``<LEFT>
 
 " {} and ()completion when press enter in the middle of them
-function! InsertCRBrace()
+function! s:InsertCRBrace()
     call feedkeys("\<BS>",'n')
     let l:frontChar = getline('.')[col('.') - 2]
     if l:frontChar == "{" || l:frontChar == "("
@@ -148,11 +148,11 @@ function! InsertCRBrace()
         call feedkeys("\<CR>", 'n')
     endif
 endfunction
-inoremap <expr> <CR> InsertCRBrace()
+inoremap <expr> <CR> <SID>InsertCRBrace()
 
 
 " map ;; to esc -----------------------------------------------------------------------------------
-function! ESC_IMAP()
+function! s:ESC_IMAP()
     " If the char in front the cursor is ";"
     if getline('.')[col('.') - 2]== ";"
         call feedkeys("\<BS>\<BS>\<C-c>", 'n')
@@ -160,7 +160,7 @@ function! ESC_IMAP()
         call feedkeys("\<BS>\;", 'n')
     endif
 endfunction
-inoremap <expr> ; ESC_IMAP()
+inoremap <expr> ; <SID>ESC_IMAP()
 
 vnoremap ;; <C-c>
 snoremap ;; <C-c>
@@ -188,43 +188,45 @@ nnoremap <silent><TAB> <cmd>wincmd w<CR>
 
 
 " Search only in displayed scope -------------------------------------------------------------------
-function! LimitSearchScope()
+function! s:LimitSearchScope()
     let l:top = line('w0') - 1
     let l:bottom = line('w$') + 1
     call feedkeys("H^")
     call feedkeys("/\\%>".l:top."l".@/."\\%<".l:bottom."l\<CR>")
 endfunction
 
-function! QuickMovement()
+function! s:QuickMovement()
     let l:top = line('w0')
     let l:bottom = line('w$')
     let l:toLefts=""
-    for i in range(1,strlen("/ | :call LimitSearchScope()"))
+    let l:limitSearchScopeCmdStr="/ | LimitSearchScope"
+    for i in range(1,strlen(l:limitSearchScopeCmdStr))
         let l:toLefts = l:toLefts."\<LEFT>"
     endfor
-    call feedkeys(":silent! ".l:top.",".l:bottom."g// | :call LimitSearchScope()".l:toLefts)
+    call feedkeys(":silent! ".l:top.",".l:bottom."g/".l:limitSearchScopeCmdStr.l:toLefts)
 endfunction
 
-nnoremap <silent> s :call QuickMovement()<CR>
+command! LimitSearchScope call s:LimitSearchScope()
+nnoremap <silent> s <cmd>call <SID>QuickMovement()<CR>
 
 
 " highlight settings -------------------------------------------------------------------------------
 hi! def link FocusCurMatch DiffText
-function! StressCurMatch()
+function! s:StressCurMatch()
     let l:target = '\c\%#'.@/
     call matchadd('FocusCurMatch', l:target)
 endfunction
 
 " centre the screen on the current search result
-nnoremap <silent> n n:call StressCurMatch()<CR>
-nnoremap <silent> N N:call StressCurMatch()<CR>
+nnoremap <silent> n n<cmd>call <SID>StressCurMatch()<CR>
+nnoremap <silent> N N<cmd>call <SID>StressCurMatch()<CR>
 nnoremap <silent><expr> <SPACE><SPACE> @/=='' ?
     \ ':let @/=@s<CR>' :
     \ ':let @/=""<CR>
         \:call clearmatches()<CR>'
 cnoremap <silent><expr> <CR> getcmdtype() =~ '[/?]' ?
     \ '<CR>:let @s=@/<CR>
-        \:call StressCurMatch()<CR>' :
+        \:call <SID>StressCurMatch()<CR>' :
     \ '<CR>'
 " cnoremap <silent><expr> <CR> getcmdtype() =~ '[/?]' ? '<CR>:call StressCurMatch()<CR>' : '<CR>'
 
@@ -367,7 +369,7 @@ function! s:SearchFoldEpxr()
 endfunction
 
 " Folding according to search result
-function! ToggleSearchFolding()
+function! s:ToggleSearchFolding()
     if s:HasFolds()
         setlocal foldmethod=syntax foldcolumn=0
         exec "normal! zR"
@@ -377,7 +379,7 @@ function! ToggleSearchFolding()
     endif
 endfunction
 
-nnoremap <silent><SPACE>z <cmd>call ToggleSearchFolding()<CR>
+nnoremap <SPACE>z <cmd>call <SID>ToggleSearchFolding()<CR>
 
 
 " ╔═══════════════════════════════════════════════╗
@@ -460,7 +462,7 @@ function! s:OpenExplorerOnSize(size)
     return winnr()
 endfunction
 
-function! ToggleExplorer()
+function! s:ToggleExplorer()
     let l:expl_win_num = s:GetExploreWinnr()
     " handling the case where explorer takes up the entire window
     if l:expl_win_num == 1
@@ -541,7 +543,7 @@ augroup initExplore
     autocmd TabEnter,VimEnter * call s:ExploreWhenEnter()
 augroup END
 
-nnoremap <silent><SPACE>e <cmd>call ToggleExplorer()<CR>
+nnoremap <silent><SPACE>e <cmd>call <SID>ToggleExplorer()<CR>
 
 
 " ╔═══════════════════════════════════════════════╗
@@ -599,7 +601,7 @@ function! s:OpenRedirWindow()
     let t:redirWinid = win_getid()
 endfunction
 
-function! QuitRedirWindow()
+function! s:QuitRedirWindow()
     if win_id2tabwin(t:redirWinid)[1] != 0
         call win_execute(t:redirWinid, 'close')
         return
@@ -607,7 +609,7 @@ function! QuitRedirWindow()
     echo ">> No OpenRedirWindow!"
 endfunction
 
-function! JumpWhenPressEnter(locateTargetFunctionName)
+function! s:JumpWhenPressEnter(locateTargetFunctionName)
     let t:redirLocateTarget=getline('.')
     if win_id2tabwin(t:redirPreviewWinid)[1] == 0
         top new
@@ -618,7 +620,7 @@ function! JumpWhenPressEnter(locateTargetFunctionName)
     call function(a:locateTargetFunctionName)()
 endfunction
 
-function! JumpWhenPressJOrK(direction,locateTargetFunctionName)
+function! s:JumpWhenPressJOrK(direction,locateTargetFunctionName)
     exec "normal! ".a:direction
     let t:redirLocateTarget=getline('.')
     if win_id2tabwin(t:redirPreviewWinid)[1] == 0
@@ -629,7 +631,7 @@ function! JumpWhenPressJOrK(direction,locateTargetFunctionName)
     call win_execute(t:redirPreviewWinid, "call ".a:locateTargetFunctionName."()")
 endfunction
 
-nnoremap <silent><space>q <cmd>call QuitRedirWindow()<CR>
+nnoremap <silent><space>q <cmd>call <SID>QuitRedirWindow()<CR>
 
 command! Rpwd call s:ShowRootDir()
 command! -nargs=? Rcd call s:RedirCd(<q-args>)
@@ -675,7 +677,7 @@ function! s:BufferListLocateTarget()
 endfunction
 
 " redirect the command output to a buffer
-function! BufferListRedir()
+function! s:BufferListRedir()
     call s:OpenRedirWindow()
     exec "edit BufferList".tabpagenr()
     setlocal buftype=nofile bufhidden=wipe nobuflisted noswapfile cursorline filetype=redirWindows
@@ -689,12 +691,12 @@ endfunction
 
 " autocmd to jump to buffer with CR only in BufferList buffer
 function! s:BufferListJumpMap()
-    nnoremap <buffer><silent><CR> <cmd>call JumpWhenPressEnter('s:BufferListLocateTarget')<CR>
-    nnoremap <buffer><silent>j <cmd>call JumpWhenPressJOrK('+', 's:BufferListLocateTarget')<CR>
-    nnoremap <buffer><silent>k <cmd>call JumpWhenPressJOrK('-', 's:BufferListLocateTarget')<CR>
+    nnoremap <buffer><silent><CR> <cmd>call <SID>JumpWhenPressEnter('s:BufferListLocateTarget')<CR>
+    nnoremap <buffer><silent>j <cmd>call <SID>JumpWhenPressJOrK('+', 's:BufferListLocateTarget')<CR>
+    nnoremap <buffer><silent>k <cmd>call <SID>JumpWhenPressJOrK('-', 's:BufferListLocateTarget')<CR>
 endfunction
 
-nnoremap <silent><space>l <cmd>call BufferListRedir()<CR>
+nnoremap <silent><space>l <cmd>call <SID>BufferListRedir()<CR>
 
 
 " ╔═══════════════════════════════════════════════╗
@@ -750,9 +752,9 @@ endfunction
 
 " autocmd to jump to file with CR only in FuzzyFilenameSearch buffer
 function! s:FileSearchJumpMap()
-    nnoremap <buffer><silent><CR> <cmd>call JumpWhenPressEnter('s:FileSearchLocateTarget')<CR>
-    nnoremap <buffer><silent>j <cmd>call JumpWhenPressJOrK('+', 's:FileSearchLocateTarget')<CR>
-    nnoremap <buffer><silent>k <cmd>call JumpWhenPressJOrK('-', 's:FileSearchLocateTarget')<CR>
+    nnoremap <buffer><silent><CR> <cmd>call <SID>JumpWhenPressEnter('s:FileSearchLocateTarget')<CR>
+    nnoremap <buffer><silent>j <cmd>call <SID>JumpWhenPressJOrK('+', 's:FileSearchLocateTarget')<CR>
+    nnoremap <buffer><silent>k <cmd>call <SID>JumpWhenPressJOrK('-', 's:FileSearchLocateTarget')<CR>
 endfunction
 
 command! -nargs=1 -complete=command FileSearchRedir silent! call s:FileSearchRedir(<q-args>)
@@ -846,9 +848,9 @@ endfunction
 
 " autocmd to jump to file with CR only in RipgrepWordSearch buffer
 function! s:WordSearchJumpMap()
-    nnoremap <buffer><silent><CR> <cmd>call JumpWhenPressEnter('s:WordSearchLocateTarget')<CR>
-    nnoremap <buffer><silent>j <cmd>call JumpWhenPressJOrK('+', 's:WordSearchLocateTarget')<CR>
-    nnoremap <buffer><silent>k <cmd>call JumpWhenPressJOrK('-', 's:WordSearchLocateTarget')<CR>
+    nnoremap <buffer><silent><CR> <cmd>call <SID>JumpWhenPressEnter('s:WordSearchLocateTarget')<CR>
+    nnoremap <buffer><silent>j <cmd>call <SID>JumpWhenPressJOrK('+', 's:WordSearchLocateTarget')<CR>
+    nnoremap <buffer><silent>k <cmd>call <SID>JumpWhenPressJOrK('-', 's:WordSearchLocateTarget')<CR>
 endfunction
 
 command! -nargs=1 -complete=command WordSearchRedir silent! call s:WordSearchRedir(<q-args>)
@@ -893,12 +895,6 @@ augroup END
 " ║                                               ║
 " ╚═══════════════════════════════════════════════╝
 
-
-" -------------------- INIT --------------------------------
-if exists('g:loaded_oscyank')
-  finish
-endif
-let g:loaded_oscyank = 1
 
 " -------------------- VARIABLES ---------------------------
 let s:yank_commands = {
@@ -1042,13 +1038,13 @@ function! s:OSCYank(text) abort
   return l:success
 endfunction
 
-function! OSCYankOperatorCallback(type) abort
+function! s:OSCYankOperatorCallback(type) abort
   let l:text = s:get_text('operator', a:type)
   return s:OSCYank(l:text)
 endfunction
 
-function! OSCYankOperator() abort
-  set operatorfunc=OSCYankOperatorCallback
+function! s:OSCYankOperator() abort
+  set operatorfunc=s:OSCYankOperatorCallback
   return 'g@'
 endfunction
 
@@ -1062,26 +1058,9 @@ function! s:OSCYankRegister(register) abort
   return s:OSCYank(l:text)
 endfunction
 
-" -------------------- COMMANDS ----------------------------
-command! -nargs=1 OSCYank call s:OSCYank('<args>')
-command! -range OSCYankVisual call s:OSCYankVisual()
+nnoremap <expr> Y <SID>OSCYankOperator().'_'
+vnoremap Y :<C-u>call <SID>OSCYankVisual()<CR>
 command! -register OSCYankRegister call s:OSCYankRegister('<reg>')
-
-nnoremap <expr> <Plug>OSCYankOperator OSCYankOperator()
-vnoremap <Plug>OSCYankVisual :OSCYankVisual<CR>
-
-" -------------------- DEPRECATION NOTICES -----------------
-nnoremap <Plug>OSCYank
-  \ :echohl WarningMsg<bar>echom "[oscyank] OSCYank is deprecated, use OSCYankOperator instead. See :h oscyank-usage."<bar>echohl None<CR>
-command! -range OSCYank execute
-  \ ':echohl WarningMsg<bar>echom "[oscyank] OSCYank is deprecated, use OSCYankVisual instead. See :h oscyank-usage."<bar>echohl None<CR>'
-command! -nargs=1 OSCYankReg execute
-  \ ':echohl WarningMsg<bar>echom "[oscyank] OSCYankReg is deprecated, use OSCYankRegister instead. See :h oscyank-usage."<bar>echohl None<CR>'
-
-nmap <leader>c <Plug>OSCYankOperator
-nmap Y <leader>c_
-vmap Y <Plug>OSCYankVisual
-
 
 " ╔═══════════════════════════════════════════════╗
 " ║                                               ║
