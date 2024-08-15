@@ -107,8 +107,8 @@ if has('nvim') && exists('$TMUX')
     nnoremap dd "+dd
 endif
 
-" " visual block short-cut
-" nnoremap vv <C-v>
+" visual block short-cut
+nnoremap vv <C-v>
 
 " paste in command mod
 cnoremap <C-v> <C-r>"
