@@ -379,7 +379,7 @@ function! s:ToggleSearchFolding()
     endif
 endfunction
 
-nnoremap <Space>z :call <SID>ToggleSearchFolding()<CR>
+nnoremap <silent><Space>z :call <SID>ToggleSearchFolding()<CR>
 
 
 " +-----------------------------------------------+
