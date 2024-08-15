@@ -185,29 +185,6 @@ vim.diagnostic.config({
     underline = true,
 })
 
--- -- symbol_outline
--- require("lsp.symbol-outline-preload")
--- local symbol_outline_nested = require("lsp.symbol-outline-nested")
--- local symbol_outline_sorted = require("lsp.symbol-outline-sorted")
--- vim.keymap.set("n", "gs", function()
---     symbol_outline_nested.open(0)
--- end, { noremap = true, silent = true })
--- vim.api.nvim_create_user_command("OpenSymbolOutlineNested", function()
---     symbol_outline_nested.open(0)
--- end, {})
--- vim.api.nvim_create_user_command("OpenSymbolOutlineSorted", function()
---     symbol_outline_sorted.open(0)
--- end, {})
-
---log_file = io.open("/home/devenv/.config/nvim/log.log", "a")
---
---function log(message)
---	local timestamp = os.date("%Y-%m-%d %H:%M:%S") -- 获取当前时间戳
---	local log_message = string.format("[%s] %s", timestamp, message) -- 格式化日志消息
---	log_file:write(log_message .. "\n") -- 写入日志文件
---	log_file:flush() -- 刷新文件缓冲区
---end
-
 
 -- ╔═══════════════════════════════════════════════╗
 -- ║                                               ║
@@ -353,40 +330,40 @@ local markers = {
 
 -- highlight groups
 vim.cmd([[
-    hi! link FocusedSymbol CursorLine 
-    hi! link SymbolIndent Comment
-    hi! link SymbolName Normal
-    hi! link SymbolDetial Directory
-    hi! link SymbolKindName Comment
-    hi! link SymbolIcon_File Typedef
-    hi! link SymbolIcon_Package Identifier
-    hi! link SymbolIcon_Class Constant
-    hi! link SymbolIcon_Method Function
-    hi! link SymbolIcon_Field Type
-    hi! link SymbolIcon_Array Boolean
+    hi def link FocusedSymbol CursorLine 
+    hi def link SymbolIndent Comment
+    hi def link SymbolName Normal
+    hi def link SymbolDetial Directory
+    hi def link SymbolKindName Comment
+    hi def link SymbolIcon_File Typedef
+    hi def link SymbolIcon_Package Identifier
+    hi def link SymbolIcon_Class Constant
+    hi def link SymbolIcon_Method Function
+    hi def link SymbolIcon_Field Type
+    hi def link SymbolIcon_Array Boolean
     " Self link
-    hi! link SymbolIcon_Module SymbolIcon_File
-    hi! link SymbolIcon_Namespace SymbolIcon_File
-    hi! link SymbolIcon_Property SymbolIcon_File
-    hi! link SymbolIcon_Constructor SymbolIcon_Method
-    hi! link SymbolIcon_Enum SymbolIcon_Class
-    hi! link SymbolIcon_Interface SymbolIcon_Field
-    hi! link SymbolIcon_Function SymbolIcon_Method
-    hi! link SymbolIcon_Variable SymbolIcon_Field
-    hi! link SymbolIcon_Constant SymbolIcon_File
-    hi! link SymbolIcon_String SymbolIcon_Method
-    hi! link SymbolIcon_Number SymbolIcon_Class
-    hi! link SymbolIcon_Boolean SymbolIcon_File
-    hi! link SymbolIcon_Object SymbolIcon_File
-    hi! link SymbolIcon_Key SymbolIcon_File
-    hi! link SymbolIcon_Null SymbolIcon_File
-    hi! link SymbolIcon_EnumMember SymbolIcon_Class
-    hi! link SymbolIcon_Struct SymbolIcon_File
-    hi! link SymbolIcon_Event SymbolIcon_Class
-    hi! link SymbolIcon_Operator SymbolIcon_File
-    hi! link SymbolIcon_TypeParameter SymbolIcon_File
-    hi! link SymbolIcon_Component SymbolIcon_File
-    hi! link SymbolIcon_Fragment SymbolIcon_File
+    hi def link SymbolIcon_Module SymbolIcon_File
+    hi def link SymbolIcon_Namespace SymbolIcon_File
+    hi def link SymbolIcon_Property SymbolIcon_File
+    hi def link SymbolIcon_Constructor SymbolIcon_Method
+    hi def link SymbolIcon_Enum SymbolIcon_Class
+    hi def link SymbolIcon_Interface SymbolIcon_Field
+    hi def link SymbolIcon_Function SymbolIcon_Method
+    hi def link SymbolIcon_Variable SymbolIcon_Field
+    hi def link SymbolIcon_Constant SymbolIcon_File
+    hi def link SymbolIcon_String SymbolIcon_Method
+    hi def link SymbolIcon_Number SymbolIcon_Class
+    hi def link SymbolIcon_Boolean SymbolIcon_File
+    hi def link SymbolIcon_Object SymbolIcon_File
+    hi def link SymbolIcon_Key SymbolIcon_File
+    hi def link SymbolIcon_Null SymbolIcon_File
+    hi def link SymbolIcon_EnumMember SymbolIcon_Class
+    hi def link SymbolIcon_Struct SymbolIcon_File
+    hi def link SymbolIcon_Event SymbolIcon_Class
+    hi def link SymbolIcon_Operator SymbolIcon_File
+    hi def link SymbolIcon_TypeParameter SymbolIcon_File
+    hi def link SymbolIcon_Component SymbolIcon_File
+    hi def link SymbolIcon_Fragment SymbolIcon_File
 ]])
 
 -- interfaces that need to overwrite
