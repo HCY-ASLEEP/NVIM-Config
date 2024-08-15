@@ -653,11 +653,6 @@ augroup END
 
 hi def link RedirFocusCurMatch DiffChange
 
-" exec "source ".g:config_path."/vim/redir/buffer-list.vim"
-" exec "source ".g:config_path."/vim/redir/file-search.vim"
-" exec "source ".g:config_path."/vim/redir/word-search.vim"
-" exec "source ".g:config_path."/vim/redir/quickfix.vim"
-
 
 " +-----------------------------------------------+
 " |                                               |
