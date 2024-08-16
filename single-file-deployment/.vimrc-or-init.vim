@@ -37,10 +37,6 @@ set expandtab
 " autoindent
 set autoindent
 
-" foldmethod
-set foldmethod=syntax
-set nofoldenable
-
 " auto sync
 set autoread
 
@@ -370,12 +366,12 @@ endfunction
 
 " Folding according to search result
 function! s:ToggleSearchFolding()
-    if s:HasFolds()
-        setlocal foldmethod=syntax foldcolumn=0
-        exec "normal! zR"
-    else
+    if s:HasFolds()==0
         setlocal foldexpr=s:SearchFoldEpxr() foldmethod=expr foldlevel=0 foldcolumn=2
-        exec "normal! zM"
+        exec 'normal! zM'
+    else
+        setlocal foldmethod=syntax foldcolumn=0
+        exec 'normal! zR'
     endif
 endfunction
 
@@ -893,164 +889,164 @@ augroup END
 
 " -------------------- VARIABLES ---------------------------
 let s:yank_commands = {
-  \ 'operator': {'block': '`[\<C-v>`]y', 'char': '`[v`]y', 'line': "'[V']y"},
-  \ 'visual': {'': 'gvy', 'V': 'gvy', 'v': 'gvy'}}
+    \ 'operator': {'block': '`[\<C-v>`]y', 'char': '`[v`]y', 'line': "'[V']y"},
+    \ 'visual': {'': 'gvy', 'V': 'gvy', 'v': 'gvy'}}
 let s:b64_table = [
-  \ 'A','B','C','D','E','F','G','H','I','J','K','L','M','N','O','P',
-  \ 'Q','R','S','T','U','V','W','X','Y','Z','a','b','c','d','e','f',
-  \ 'g','h','i','j','k','l','m','n','o','p','q','r','s','t','u','v',
-  \ 'w','x','y','z','0','1','2','3','4','5','6','7','8','9','+','/']
+    \ 'A','B','C','D','E','F','G','H','I','J','K','L','M','N','O','P',
+    \ 'Q','R','S','T','U','V','W','X','Y','Z','a','b','c','d','e','f',
+    \ 'g','h','i','j','k','l','m','n','o','p','q','r','s','t','u','v',
+    \ 'w','x','y','z','0','1','2','3','4','5','6','7','8','9','+','/']
 
 " -------------------- OPTIONS ---------------------------
 function s:options_max_length()
-  return get(g:, 'oscyank_max_length', 0)
+    return get(g:, 'oscyank_max_length', 0)
 endfunction
 
 function s:options_silent()
-  return get(g:, 'oscyank_silent', 0)
+    return get(g:, 'oscyank_silent', 0)
 endfunction
 
 function s:options_trim()
-  return get(g:, 'oscyank_trim', 0)
+    return get(g:, 'oscyank_trim', 0)
 endfunction
 
 function s:options_osc52()
-  return get(g:, 'oscyank_osc52', "\x1b]52;c;%s\x07")
+    return get(g:, 'oscyank_osc52', "\x1b]52;c;%s\x07")
 endfunction
 
 " -------------------- UTILS -------------------------------
 function s:echo(text, hl)
-  echohl a:hl
-  echo printf('[oscyank] %s', a:text)
-  echohl None
+    echohl a:hl
+    echo printf('[oscyank] %s', a:text)
+    echohl None
 endfunction
 
 function s:encode_b64(str, size)
-  let l:bytes = map(range(len(a:str)), 'char2nr(a:str[v:val])')
-  let l:b64 = []
+    let l:bytes = map(range(len(a:str)), 'char2nr(a:str[v:val])')
+    let l:b64 = []
 
-  for i in range(0, len(l:bytes) - 1, 3)
-    let n = l:bytes[i] * 0x10000
-          \ + get(l:bytes, i + 1, 0) * 0x100
-          \ + get(l:bytes, i + 2, 0)
-    call add(l:b64, s:b64_table[n / 0x40000])
-    call add(l:b64, s:b64_table[n / 0x1000 % 0x40])
-    call add(l:b64, s:b64_table[n / 0x40 % 0x40])
-    call add(l:b64, s:b64_table[n % 0x40])
-  endfor
+    for i in range(0, len(l:bytes) - 1, 3)
+        let n = l:bytes[i] * 0x10000
+                    \ + get(l:bytes, i + 1, 0) * 0x100
+                    \ + get(l:bytes, i + 2, 0)
+        call add(l:b64, s:b64_table[n / 0x40000])
+        call add(l:b64, s:b64_table[n / 0x1000 % 0x40])
+        call add(l:b64, s:b64_table[n / 0x40 % 0x40])
+        call add(l:b64, s:b64_table[n % 0x40])
+    endfor
 
-  if len(l:bytes) % 3 == 1
-    let l:b64[-1] = '='
-    let l:b64[-2] = '='
-  endif
+    if len(l:bytes) % 3 == 1
+        let l:b64[-1] = '='
+        let l:b64[-2] = '='
+    endif
 
-  if len(l:bytes) % 3 == 2
-    let l:b64[-1] = '='
-  endif
+    if len(l:bytes) % 3 == 2
+        let l:b64[-1] = '='
+    endif
 
-  let l:b64 = join(l:b64, '')
-  if a:size <= 0
-    return l:b64
-  endif
+    let l:b64 = join(l:b64, '')
+    if a:size <= 0
+        return l:b64
+    endif
 
-  let l:chunked = ''
-  while strlen(l:b64) > 0
-    let l:chunked .= strpart(l:b64, 0, a:size) . "\n"
-    let l:b64 = strpart(l:b64, a:size)
-  endwhile
+    let l:chunked = ''
+    while strlen(l:b64) > 0
+        let l:chunked .= strpart(l:b64, 0, a:size) . "\n"
+        let l:b64 = strpart(l:b64, a:size)
+    endwhile
 
-  return l:chunked
+    return l:chunked
 endfunction
 
 function s:get_text(mode, type)
-  " Save user settings
-  let l:clipboard = &clipboard
-  let l:selection = &selection
-  let l:register = getreg('"')
-  let l:visual_marks = [getpos("'<"), getpos("'>")]
+    " Save user settings
+    let l:clipboard = &clipboard
+    let l:selection = &selection
+    let l:register = getreg('"')
+    let l:visual_marks = [getpos("'<"), getpos("'>")]
 
-  " Retrieve text
-  set clipboard=
-  set selection=inclusive
-  silent execute printf('keepjumps normal! %s', s:yank_commands[a:mode][a:type])
-  let l:text = getreg('"')
+    " Retrieve text
+    set clipboard=
+    set selection=inclusive
+    silent execute printf('keepjumps normal! %s', s:yank_commands[a:mode][a:type])
+    let l:text = getreg('"')
 
-  " Restore user settings
-  let &clipboard = l:clipboard
-  let &selection = l:selection
-  call setreg('"', l:register)
-  call setpos("'<", l:visual_marks[0])
-  call setpos("'>", l:visual_marks[1])
+    " Restore user settings
+    let &clipboard = l:clipboard
+    let &selection = l:selection
+    call setreg('"', l:register)
+    call setpos("'<", l:visual_marks[0])
+    call setpos("'>", l:visual_marks[1])
 
-  return l:text
+    return l:text
 endfunction
 
 function s:trim_text(text)
-  let l:text = a:text
-  let l:indent = matchstrpos(l:text, '^\s\+')
+    let l:text = a:text
+    let l:indent = matchstrpos(l:text, '^\s\+')
 
-  " Remove common indent from all lines
-  if l:indent[1] >= 0
-    let l:pattern = printf('\n%s', repeat('\s', l:indent[2] - l:indent[1]))
-    let l:text = substitute(l:text, l:pattern, '\n', 'g')
-  endif
+    " Remove common indent from all lines
+    if l:indent[1] >= 0
+        let l:pattern = printf('\n%s', repeat('\s', l:indent[2] - l:indent[1]))
+        let l:text = substitute(l:text, l:pattern, '\n', 'g')
+    endif
 
-  return trim(l:text)
+    return trim(l:text)
 endfunction
 
 function s:write(osc52)
-  if filewritable('/dev/fd/2') == 1
-    let l:success = writefile([a:osc52], '/dev/fd/2', 'b') == 0
-  elseif has('nvim')
-    let l:success = chansend(v:stderr, a:osc52) > 0
-  else
-    exec("silent! !echo " . shellescape(a:osc52))
-    redraw!
-    let l:success = 1
-  endif
-  return l:success
+    if filewritable('/dev/fd/2') == 1
+        let l:success = writefile([a:osc52], '/dev/fd/2', 'b') == 0
+    elseif has('nvim')
+        let l:success = chansend(v:stderr, a:osc52) > 0
+    else
+        exec("silent! !echo " . shellescape(a:osc52))
+        redraw!
+        let l:success = 1
+    endif
+    return l:success
 endfunction
 
 " -------------------- PUBLIC ------------------------------
 function! s:OSCYank(text) abort
-  let l:text = s:options_trim() ? s:trim_text(a:text) : a:text
+    let l:text = s:options_trim() ? s:trim_text(a:text) : a:text
 
-  if s:options_max_length() > 0 && strlen(l:text) > s:options_max_length()
-    call s:echo(printf('Selection is too big: length is %d, limit is %d', strlen(l:text), s:options_max_length()), 'WarningMsg')
-    return
-  endif
+    if s:options_max_length() > 0 && strlen(l:text) > s:options_max_length()
+        call s:echo(printf('Selection is too big: length is %d, limit is %d', strlen(l:text), s:options_max_length()), 'WarningMsg')
+        return
+    endif
 
-  let l:text_b64 = s:encode_b64(l:text, 0)
-  let l:osc52 = printf(s:options_osc52(), l:text_b64)
-  let l:success = s:write(l:osc52)
+    let l:text_b64 = s:encode_b64(l:text, 0)
+    let l:osc52 = printf(s:options_osc52(), l:text_b64)
+    let l:success = s:write(l:osc52)
 
-  if !l:success
-    call s:echo('Failed to copy selection', 'ErrorMsg')
-  elseif !s:options_silent()
-    call s:echo(printf('%d characters copied', strlen(l:text)), 'Normal')
-  endif
+    if !l:success
+        call s:echo('Failed to copy selection', 'ErrorMsg')
+    elseif !s:options_silent()
+        call s:echo(printf('%d characters copied', strlen(l:text)), 'Normal')
+    endif
 
-  return l:success
+    return l:success
 endfunction
 
 function! s:OSCYankOperatorCallback(type) abort
-  let l:text = s:get_text('operator', a:type)
-  return s:OSCYank(l:text)
+    let l:text = s:get_text('operator', a:type)
+    return s:OSCYank(l:text)
 endfunction
 
 function! s:OSCYankOperator() abort
-  set operatorfunc=s:OSCYankOperatorCallback
-  return 'g@'
+    set operatorfunc=s:OSCYankOperatorCallback
+    return 'g@'
 endfunction
 
 function! s:OSCYankVisual() abort
-  let l:text = s:get_text('visual', visualmode())
-  return s:OSCYank(l:text)
+    let l:text = s:get_text('visual', visualmode())
+    return s:OSCYank(l:text)
 endfunction
 
 function! s:OSCYankRegister(register) abort
-  let l:text = getreg(a:register)
-  return s:OSCYank(l:text)
+    let l:text = getreg(a:register)
+    return s:OSCYank(l:text)
 endfunction
 
 nnoremap <silent><expr> Y <SID>OSCYankOperator().'_'
