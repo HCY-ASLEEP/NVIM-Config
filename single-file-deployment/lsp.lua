@@ -366,7 +366,7 @@ vim.cmd([[
     hi def link SymbolIcon_Fragment SymbolIcon_File
 ]])
 
--- interfaces that need to overwrite
+-- interfaces that need to override
 local init_symbol_infos = function() end
 local add_symbol_info = function(kind, t) end
 local splice = function() end
@@ -389,12 +389,14 @@ local function get_win_buf_by(buf_name)
 end
 
 -- init vars
+-- @override init_symbol_infos 
 local function sorted_init_symbol_infos()
     for i = 1, #kind_names do
         symbol_infos[i] = {}
     end
 end
 
+-- @override init_symbol_infos 
 local function nested_init_symbol_infos()
     symbol_infos = {}
 end
@@ -410,10 +412,12 @@ local function inits(source_buf)
 end
 
 -- parse lsp response to get the symbol_infos
+-- @override add_symbol_info 
 local function sorted_add_symbol_info(kind, t)
     symbol_infos[kind][#symbol_infos[kind] + 1] = t
 end
 
+-- @override add_symbol_info 
 local function nested_add_symbol_info(kind, t)
     symbol_infos[#symbol_infos + 1] = t
 end
@@ -545,6 +549,7 @@ local function get_indent_markers(cur, prev, indent_markers)
 end
 
 -- splicing of each line of symbol outline content
+-- @override splice 
 local function sorted_splice()
     local cur_sequence = 1
     for i = 1, #kind_names do
@@ -553,6 +558,7 @@ local function sorted_splice()
     vim.t.jump_positions = jump_positions
 end
 
+-- @override splice 
 local function nested_splice()
     local indent_markers = {}
     local prev = {}
@@ -630,10 +636,12 @@ local function write(outline_buf)
 end
 
 -- highlight the symbol outline
+-- @override get_icon_color_index 
 local function sorted_get_icon_color_index(line, kind)
     return presentings_line_kinds[line]
 end
 
+-- @override get_icon_color_index 
 local function nested_get_icon_color_index(line, kind)
     return symbol_infos[line][kind]
 end
