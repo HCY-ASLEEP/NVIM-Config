@@ -367,11 +367,19 @@ endfunction
 " Folding according to search result
 function! s:ToggleSearchFolding()
     if s:HasFolds()==0
+        let b:fde=$foldexpr
+        let b:fdm=&foldmethod
+        let b:fdl=&foldlevel
+        let b:fdc=&foldcolumn
         setlocal foldexpr=s:SearchFoldEpxr() foldmethod=expr foldlevel=0 foldcolumn=2
         exec 'normal! zM'
     else
         setlocal foldmethod=syntax foldcolumn=0
         exec 'normal! zR'
+        exec 'setlocal foldexpr='.b:fde
+        exec 'setlocal foldmethod='.b:fdm
+        exec 'setlocal foldlevel='.b:fdl
+        exec 'setlocal foldcolumn='.b:fdc
     endif
 endfunction
 
