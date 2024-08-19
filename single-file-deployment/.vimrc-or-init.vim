@@ -34,8 +34,9 @@ set softtabstop=4
 " let tap become four spaces
 set expandtab
 
-" autoindent
+" indent
 set autoindent
+set cindent
 
 " auto sync
 set autoread
