@@ -107,6 +107,8 @@ endif
 " visual block short-cut
 nnoremap vv <C-v>
 
+nnoremap <silent> W :let @"=expand("<cword>")<CR>
+
 " paste in command mod
 cnoremap <C-v> <C-r>"
 
@@ -256,18 +258,21 @@ nnoremap <silent><S-Tab> :tabnext<CR>
 
 " spetial chars
 set fillchars+=eob:\ 
-set fillchars+=vert:\│
+set fillchars+=vert:\| 
 
 set list
-set listchars=tab:┊\ ,eol:\ 
+set listchars=tab:\|\ ,eol:\ 
 set listchars+=trail:\ 
-set listchars+=leadmultispace:┊\ \ \ 
+set listchars+=leadmultispace:\|\ \ \ 
+set listchars+=precedes:<
+set listchars+=extends:>
 
 " Break line at predefined characters
 set linebreak
 " Character to show before the lines that have been soft-wrapped
-set showbreak=↪\ 
+set showbreak=\ \^\ 
 
+set nowrap
 
 " +-----------------------------------------------+
 " |                                               |
