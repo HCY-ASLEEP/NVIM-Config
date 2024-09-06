@@ -443,11 +443,17 @@ let g:netrw_dirhistmax = 0
 let g:netrw_bufsettings = 'noma nomod nobl nowrap ro nonumber norelativenumber cursorlineopt=line'
 
 " skip the netrw win when the netrw hidden
-function! s:SkipNetrwWin()
+function! s:EnableSkipNetrwWin()
     augroup skipNetrwWin
         autocmd!
         autocmd BufEnter NetrwTreeListing wincmd w
     augroup END
+endfunction
+
+function! s:DisableSkipNetrwWin()
+    if exists('#skipNetrwWin#BufEnter')
+        autocmd! skipNetrwWin
+    endif
 endfunction
 
 function! s:GetExploreWinnr()
@@ -482,9 +488,7 @@ function! s:ToggleExplorer()
     if l:expl_win_num==0
         let t:cur_work_win_num = winnr()
         call s:OpenExplorerOnSize(g:max_explore_win_width)
-        if exists('#skipNetrwWin#BufEnter')
-            autocmd! skipNetrwWin
-        endif
+        call s:DisableSkipNetrwWin()
         return
     endif
     " if expl_win_num exists
@@ -494,15 +498,13 @@ function! s:ToggleExplorer()
     endif
     " if explorer is not hidden
     if winwidth(l:expl_win_num)!=0
-        call s:SkipNetrwWin()
+        call s:EnableSkipNetrwWin()
         let t:win_width=0
         exec t:cur_work_win_num."wincmd w"
     else
         let t:win_width=g:max_explore_win_width
         " disable skip netrw win
-        if exists('#skipNetrwWin#BufEnter')
-            autocmd! skipNetrwWin
-        endif
+        call s:DisableSkipNetrwWin()
         exec l:expl_win_num."wincmd w"
     endif
     exec "vertical ".l:expl_win_num."resize ".t:win_width
@@ -527,17 +529,14 @@ function! s:ExploreWhenEnter()
         exec t:cur_work_win_num."wincmd w"
         " hide the explorer
         exec "vertical ".l:expl_win_num."resize 0"
-        call s:SkipNetrwWin()
+        call s:EnableSkipNetrwWin()
         return
     endif
     if winwidth(l:expl_win_num)==0
-        call s:SkipNetrwWin()
+        call s:EnableSkipNetrwWin()
         return
     endif
-    if exists('#skipNetrwWin#BufEnter')
-        autocmd! skipNetrwWin
-        return
-    endif
+    call s:DisableSkipNetrwWin()
 endfunction
 
 function! s:NetrwCd()
