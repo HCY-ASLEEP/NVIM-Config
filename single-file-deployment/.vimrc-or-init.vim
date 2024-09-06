@@ -107,7 +107,7 @@ endif
 " visual block short-cut
 nnoremap vv <C-v>
 
-nnoremap <silent> W :let @"=expand("<cword>")<CR>
+nnoremap W :let @"=expand("<cword>") <Bar> echo 'COPY WORD -->  '.@" <CR>
 
 " paste in command mod
 cnoremap <C-v> <C-r>"
