@@ -1,172 +1,104 @@
-" Constants {{{
-function! s:define(name, value)
-    let s:{a:name} = a:value
-    lockvar s:{a:name}
+let s:fullPaths = []
+let s:fileTreeIndent = '    '
+let s:bias = 1
+
+function! GetNodesAndFullPaths(path)
+    let l:dirNodes = []
+    let l:dirPaths = []
+    let l:fileNodes = []
+    let l:filePaths = []
+
+    " 获取目录下的所有文件和文件夹
+    let l:items = readdir(a:path)
+
+    " 遍历每个项目，分类为文件或文件夹
+    for l:item in l:items
+        let l:fullPath = a:path . '/' . l:item
+        if isdirectory(l:fullPath)
+            call add(l:dirNodes, l:item.'/')
+            call add(l:dirPaths, l:fullPath)
+        else
+            call add(l:fileNodes, l:item)
+            call add(l:filePaths, l:fullPath)
+        endif
+    endfor
+    
+    return [l:dirNodes + l:fileNodes, l:dirPaths + l:filePaths]
 endfunction
 
-call s:define('EXCEPTION_NAME',   'ttree: ')
-call s:define('BUFFER_NAME',      'ttree')
-call s:define('FILE_NODE_MARKER', '-')
-call s:define('CLOSE_DIR_MARKER', '+')
-call s:define('OPEN_DIR_MARKER',  '-')
-call s:define('UPPER',            '../')
-call s:define('OFFSET',           0)
-call s:define('EMPTY',            {})
+function! GetNextPeerLineNum()
+    normal ^
+    let l:curLine = line('.')
+    " 获取当前列号
+    let l:curCol = col('.')
+    " 执行搜索
+    exec '/' . '\%' . l:curCol . 'v\S'
+    let l:peerLine = line('.')
+    exec l:curLine
+    return l:peerLine
+endfunction
 
-call s:define('BOTTOM', '└─')
-call s:define('MIDDLE', '├─')
-call s:define('VERTICAL', '│ ')
-call s:define('SPACE', ' ')
-
-if has('win32') || has('win64') || has('win32unix')
-    call s:define('DIR_SEPARATOR',    '\')
-else
-    call s:define('DIR_SEPARATOR',    '/')
-endif
-
-function! s:get_node_infos(path)
-    let l:path=a:path
-    if l:path[len(l:path)-1] != s:DIR_SEPARATOR
-        let l:path=l:path.s:DIR_SEPARATOR
+function! WriteNodes(lines, startLine, indents)
+    if empty(a:lines)
+        return
     endif
-    
-    let l:node_infos=[[],[],[],[]]
-
-    let l:dir_hidden=0
-    let l:dir_not_hidden=1
-    let l:file_hidden=2
-    let l:file_not_hidden=3
-    
-    let l:hiddens=glob('.*' ,0 ,1)
-    let l:not_hiddens=glob('*', 0 ,1)
-    
-    for i in range(len(l:hiddens))
-        let l:node=l:hiddens[i]
-        let l:absolute_node=l:path.l:node
-        if isdirectory(l:absolute_node)
-            call add(l:node_infos[l:dir_hidden], l:node.s:DIR_SEPARATOR.' '.l:absolute_node)
-        else
-            call add(l:node_infos[l:file_hidden], l:node.' '.l:absolute_node)
-        endif
-    endfor
-    
-    for i in range(len(l:not_hiddens))
-        let l:node=l:not_hiddens[i]
-        let l:absolute_node=l:path.l:node
-        if isdirectory(l:absolute_node)
-            call add(l:node_infos[l:dir_hidden], l:node.s:DIR_SEPARATOR.' '.l:absolute_node)
-        else
-            call add(l:node_infos[l:file_hidden], l:node.' '.l:absolute_node)
-        endif
-    endfor
-
-    return l:node_infos
+    call append(a:startLine, a:lines)
+    let l:startLine = a:startLine + 1
+    let l:endLine = a:startLine + len(a:lines)
+    exec l:startLine . ',' . l:endLine . 's/^/' . a:indents .'/'
 endfunction
 
-function! Write()
-    let s:root_path=getcwd()
-    let s:root_dir_name=split(s:root_path, s:DIR_SEPARATOR)[-1]
-    
-    let l:node_infos=s:get_node_infos(s:root_path)
-    for n in l:node_infos
-        call append(line('$'), n)
-    endfor
-    
-    normal 2dd
-    call append(1, s:root_dir_name.s:DIR_SEPARATOR.' '.s:root_path)
+function! WriteFullPaths(fullPaths, startLine)
+    if empty(a:fullPaths)
+        return
+    endif
+    call extend(s:fullPaths, a:fullPaths, a:startLine)
 endfunction
 
-
-"" 整个索引结构 s:dirIndexes
-"" {
-""      "top_dir":[
-""          {
-""              "displayed":9
-""          },
-""          {
-""              "dir_1_1":[
-""                  {    
-""                      // 当前目录展示的总的节点个数，包括所有孩子目录展示的节点个数
-""                      "displayed": 5
-""                  },
-""                  {   
-""                      // 当前目录下已经被打开的子目录就会被加入到这个字典，注意这个字典可以为空
-""                      // 因为有可能当前目录没有打开的子目录，但是有打开的子文件
-""                      "dir_2_1":[
-""                          {
-""                              "displayed":4
-""                          },
-""                          {}
-""                      ],
-""                      ...
-""                  }
-""              ]
-""          }
-""      ]
-""  }
-
-"" s:absPathIndexes
-"" 同时也要存储一个扁平的索引方便寻找每一行对应的绝对路径
-"" [
-""     abs_path_1,
-""     abs_path_2,
-""     ...
-"" ]
-
-"" 首先获取该目录下所有的文件和文件夹
-"" 获取到的文件和文件夹是不分开的，所以要手动分开
-"" 文件和文件夹统称为node
-function! s:getNodesIn(dir)
-    "" 使用 glob 函数获取隐藏的非隐藏节点
-    "" hiddens , not_hiddens
-    "" [[dirs],[files]]
-    "" 使用 isdirectory 判断每个是否为目录，并加入到集合里面去 [[],[]]
-    "" 由于 isdirectory 也需用绝对路径来判断，所以要先获取 absPath
-    "" absPath=dir+'/'+node
-    "" 同时将 absPath 加入到 list [] l:absPaths 里面
-    return l:nodes,l:absPaths
+function! DeleteNodes(startLine, endLine)
+    exec a:startLine . "," . a:endLine . "delete"
 endfunction
 
-"" lineNr 是行数，nodes 是要写入的文件和目录名称，在 lineNr 这一行后面写入 nodes 
-function! s:writeWith(lineNr,nodes)
-    "" nodes 是一个 list 形式的文件节点列表
-    "" 获取 lineNr 这一行的缩进 indent
-    "" 先使用 append 将这些 nodes 插入到 lineNr 后面
-    "" 然后推导出 indent+1 的样式
-    "" 再把 indent+1 的样式通过 normal 命令和正则插入到 nodes 前面
-    "" 避免使用 vimscript 拼接
+function! DeleteFullPaths(startLine, endLine)
+    call remove(s:fullPaths, a:startLine, a:endLine)
 endfunction
 
-"" 打开目录
-"" 传入目录所在的行数，知道了行数之后才方便后续插入
-function! s:openDir(lineNr)
-    let l:dir=s:absPaths[lineNr]
-    let l:nodes=s:getNodesIn(a:dir)
-    "" 统计 l:nodes 的行数
-    "" 根据 s:dirIndexes 将行数一级一级地从上往下加到父目录里面，方便后续关闭目录
-    "" 同时在 s:dirIndexes 里面加入这个目录
-    "" 也在 s:absPaths 里面加入这个目录
-    call s:writeWith(a:lineNr,l:nodes)
+function! OpenDir()
+    normal ^
+    let l:curLine = line('.')
+    let l:curCol = col('.')
+    let l:nodesAndFullPaths = GetNodesAndFullPaths(s:fullPaths[l:curLine - s:bias - 1])
+    let l:nodes = l:nodesAndFullPaths[0]
+    let l:fullPaths = l:nodesAndFullPaths[1]
+    let l:indents = repeat(s:fileTreeIndent, l:curCol / len(s:fileTreeIndent) +1)
+    call WriteNodes(l:nodes, l:curLine, l:indents)
+    call WriteFullPaths(l:fullPaths, l:curLine - s:bias)
+    exec l:curLine
 endfunction
 
-"" 插入目录所在的行数
-function! s:closeDir(lineNr)
-    let l:dir=s:absPaths[lineNr]
-    "" 获取当前的目录下面打开的节点总数，从 s:dirIndexes 里面获取
-    "" 利用 normal 模式下的指令快速删除
-    "" 删除 s:dirIndexes 和 s:absPaths 里面关于这个这个目录的索引
+function! CloseDir()
+    let l:curLine = line('.')
+    let l:nextPeerLine = GetNextPeerLineNum()
+    if l:nextPeerLine == 1 && line('$') ==  l:curLine
+        return
+    endif  
+    if l:nextPeerLine != 1 && l:nextPeerLine - l:curLine <= 1
+        return
+    endif
+    if l:nextPeerLine == 1
+        let l:nextPeerLine = line('$') + 1
+    endif
+    call DeleteNodes(l:curLine + 1, l:nextPeerLine - 1)
+    call DeleteFullPaths(l:curLine - 1, l:nextPeerLine - 3)
+    exec l:curLine
 endfunction
 
-function! s:openFile(lineNr)
+function! InitTree(path)
+    call setline(1, '../')
+    call setline(2, a:path) 
+    call insert(s:fullPaths, a:path)
 endfunction
 
-"" 打开上层目录
-function! s:goUpper(lineNr)
-    "" 改变工作目录
-    "" 先把原来的目录索引和绝对路径索引，以及原来的这个全文存起来
-    "" 构建上层的目录索引和绝对路径索引，深度为一
-    "" 把原来的目录索引加到新的索引里面
-    "" 使用 vimscript 的全文匹配函数定位到原来目录的位置
-    "" 将原来的全文加到定位之后的位置
-    "" 同时在新的上面追加原来的全文
+function! ShowFullPaths()
+    return s:fullPaths
 endfunction
