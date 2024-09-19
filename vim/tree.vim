@@ -1,6 +1,6 @@
 let s:fullPaths = []
 let s:fileTreeIndent = '    '
-let s:bias = 1
+let s:closed = -1
 
 function! GetNodesAndFullPaths(path)
     let l:dirNodes = []
@@ -63,34 +63,46 @@ function! DeleteFullPaths(startLine, endLine)
     call remove(s:fullPaths, a:startLine, a:endLine)
 endfunction
 
+function! IsOpened()
+    let l:curLine = line('.')
+    let l:nextPeerLine = GetNextPeerLineNum()
+    let l:endLine = line('$')
+    if l:curLine == l:endLine
+        return s:closed
+    endif
+    if l:curLine + 1 == l:nextPeerLine
+        return s:closed
+    endif
+    if l:nextPeerLine == 1
+        return l:endLine + 1
+    endif
+    return l:nextPeerLine
+endfunction
+
 function! OpenDir()
     normal ^
     let l:curLine = line('.')
     let l:curCol = col('.')
-    let l:nodesAndFullPaths = GetNodesAndFullPaths(s:fullPaths[l:curLine - s:bias - 1])
+    let l:nodesAndFullPaths = GetNodesAndFullPaths(s:fullPaths[l:curLine - 2])
     let l:nodes = l:nodesAndFullPaths[0]
     let l:fullPaths = l:nodesAndFullPaths[1]
-    let l:indents = repeat(s:fileTreeIndent, l:curCol / len(s:fileTreeIndent) +1)
+""    if len(l:nodes) == 0 || len(l:fullPaths) == 0
+""        return
+""    endif
+    let l:indents = repeat(s:fileTreeIndent, l:curCol / len(s:fileTreeIndent) + 1)
     call WriteNodes(l:nodes, l:curLine, l:indents)
-    call WriteFullPaths(l:fullPaths, l:curLine - s:bias)
+    call WriteFullPaths(l:fullPaths, l:curLine - 1)
     exec l:curLine
 endfunction
 
-function! CloseDir()
+function! CloseDir(nextPeerLine)
     let l:curLine = line('.')
-    let l:nextPeerLine = GetNextPeerLineNum()
-    if l:nextPeerLine == 1 && line('$') ==  l:curLine
-        return
-    endif  
-    if l:nextPeerLine != 1 && l:nextPeerLine - l:curLine <= 1
-        return
-    endif
-    if l:nextPeerLine == 1
-        let l:nextPeerLine = line('$') + 1
-    endif
-    call DeleteNodes(l:curLine + 1, l:nextPeerLine - 1)
-    call DeleteFullPaths(l:curLine - 1, l:nextPeerLine - 3)
+    call DeleteNodes(l:curLine + 1, a:nextPeerLine - 1)
+    call DeleteFullPaths(l:curLine - 1, a:nextPeerLine - 3)
     exec l:curLine
+endfunction
+
+function! Upper()
 endfunction
 
 function! InitTree(path)
@@ -99,6 +111,18 @@ function! InitTree(path)
     call insert(s:fullPaths, a:path)
 endfunction
 
+function! ToggleTree()
+    if line('.') == 1
+        call Upper()
+    endif
+    let l:status = IsOpened()
+    if(l:status == s:closed)
+        call OpenDir()
+        return
+    endif
+    call CloseDir(l:status)
+endfunction
+    
 function! ShowFullPaths()
     return s:fullPaths
 endfunction
