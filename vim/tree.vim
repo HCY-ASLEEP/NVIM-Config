@@ -4,6 +4,7 @@ let s:closed = -1
 let s:nodesCache = {}
 let s:fullPathsCache = {}
 let s:dirSeparator = '/'
+let s:treeLoaded = 0
 
 function! GetNodesAndFullPaths(path)
     let l:dirNodes = []
@@ -163,9 +164,6 @@ function! Upper()
     let l:upperDir = fnamemodify(l:curFullPath, ':h')
     exec 2
     let l:status = IsOpened()
-    echo l:status
-    echo l:curFullPath
-    echo l:upperDir
     if l:status != s:closed
         call CloseDir(l:status)
     endif
@@ -185,6 +183,10 @@ function! HighlightTree()
     syntax clear
     syntax match Directory ".*\/$"
     execute 'syntax match Directory ".*\' . s:dirSeparator . '$"'
+endfunction
+
+function! MapTree()
+    nnoremap <buffer> <CR> :silent! call ToggleNode()<CR>
 endfunction
 
 function! InitTree(path)
@@ -214,7 +216,6 @@ function! ToggleNode()
         return
     endif
     let l:status = IsOpened()
-    echo l:status
     if l:status == s:closed
         call OpenDir()
         return
