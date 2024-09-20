@@ -8,7 +8,8 @@ let s:minusKidCountOp = 0
 let s:plusKidCountOp = 1
 let s:topDirDepth = 0
 let s:dirSeparator = '/'
-let s:treeLoaded = 0
+let s:treeWinid = -1
+let s:treeBufnr = -1
 
 function! GetNodesAndFullPaths(path)
     let l:dirNodes = []
@@ -178,7 +179,7 @@ function! Upper()
     exec 2
 endfunction
 
-function! ClearCache()
+function! ClearAllCache()
     let s:nodesCache = {}
     let s:fullPathsCache = {}
     let s:kidCountCache = {}
@@ -228,3 +229,29 @@ function! ToggleNode()
     endif
     call CloseDir(l:status)
 endfunction
+
+function! ToggleTree()
+    if s:treeBufnr == -1
+        vnew
+        call InitTree(getcwd())
+        call MapTree()
+        let s:treeBufnr = bufnr()
+        let s:treeWinid = win_getid()
+        return
+    endif
+    if s:treeWinid == -1
+        vnew
+        exec "buffer" . s:treeBufnr
+        let s:treeWinid = win_getid()
+        return
+    endif
+    call win_gotoid(s:treeWinid)
+    if winnr() == 1
+        vnew
+    endif
+    call win_gotoid(s:treeWinid)
+    close
+    let s:treeWinid = -1
+endfunction
+
+set splitright
