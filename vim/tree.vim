@@ -3,6 +3,10 @@ let s:fileTreeIndent = '    '
 let s:closed = -1
 let s:nodesCache = {}
 let s:fullPathsCache = {}
+let s:kidCountCache = {}
+let s:minusKidCountOp = 0
+let s:plusKidCountOp = 1
+let s:topDirDepth = 0
 let s:dirSeparator = '/'
 let s:treeLoaded = 0
 
@@ -26,28 +30,32 @@ function! GetNodesAndFullPaths(path)
     return [l:dirNodes + l:fileNodes, l:dirPaths + l:filePaths]
 endfunction
 
-function! GetNextPeerLineNum()
-    normal ^
-    let l:curLine = line('.')
-    let l:curCol = col('.')
-    exec '/' . '\%' . l:curCol . 'v\S'
-    let l:peerLine = line('.')
-    exec l:curLine
-    return l:peerLine
+function! GetDirDepth(path)
+    let l:upperDir = fnamemodify(a:path, ':h')
+    if l:upperDir == a:path
+        return 1
+    endif
+    return GetDirDepth(l:upperDir) + 1
 endfunction
 
-function! GetNextEmptyCharLineNum()
-    normal ^
-    let l:curLine = line('.')
-    let l:curCol = col('.')
-    silent! exec '/' . '\%' . l:curCol . 'v$'
-    let l:emptyCharLine = line('.')
-    exec l:curLine
-    return l:emptyCharLine
+function! ChangeKidCount(path, n, depth, operate)
+    if a:depth < s:topDirDepth 
+        return 
+    endif
+    if !has_key(s:kidCountCache, a:path)
+        let s:kidCountCache[a:path] = 0
+    endif
+    if a:operate == s:minusKidCountOp
+        let s:kidCountCache[a:path] -= a:n
+    else
+        let s:kidCountCache[a:path] += a:n
+    endif
+    let l:upperDir = fnamemodify(a:path, ':h')
+    call ChangeKidCount(l:upperDir, a:n, a:depth - 1, a:operate)
 endfunction
 
 function! AddIndents(startLine, endLine, indents)
-    exec a:startLine . ',' . a:endLine . 's/^/' . a:indents .'/'
+    silent exec a:startLine . ',' . a:endLine . 's/^/' . a:indents .'/'
 endfunction
 
 function! RemoveIndents(startLine, endLine, endCol)
@@ -57,7 +65,7 @@ function! RemoveIndents(startLine, endLine, endCol)
     exec a:startLine . "normal! 0"
     exec "normal! \<C-V>"
     exec a:endLine . "normal! " . a:endCol . "|"
-    exec "normal! d"
+    silent exec "normal! d"
 endfunction
 
 function! WriteNodes(lines, startLine, indents)
@@ -74,7 +82,7 @@ function! WriteCachedNodes(block, startLine, lineLength, indents)
     let l:startLine = a:startLine + 1
     let l:endLine = a:startLine + a:lineLength
     let @" = a:block
-    exec "normal p"
+    silent exec "normal p"
     exec l:startLine . "normal! ^"
     call RemoveIndents(l:startLine, l:endLine, col('.') - 1)
     call AddIndents(l:startLine, l:endLine, a:indents)
@@ -88,7 +96,7 @@ function! WriteFullPaths(fullPaths, startLine)
 endfunction
 
 function! DeleteNodes(nodeId, startLine, endLine)
-    exec a:startLine . "," . a:endLine . "delete"
+    silent exec a:startLine . "," . a:endLine . "delete"
     let s:nodesCache[a:nodeId] = @"
 endfunction
 
@@ -98,29 +106,15 @@ endfunction
 
 function! IsOpened()
     let l:curLine = line('.')
-    let l:curCol = col('.')
-    let l:nextPeerLine = GetNextPeerLineNum()
-    let l:endLine = line('$')
-    if l:curLine == l:endLine
+    let l:nodeId = s:fullPaths[l:curLine - 2]
+    if !has_key(s:kidCountCache, l:nodeId)
         return s:closed
     endif
-    if l:curLine + 1 == l:nextPeerLine
+    let l:kidCount = s:kidCountCache[l:nodeId]
+    if l:kidCount == 0
         return s:closed
     endif
-    if l:nextPeerLine == 1
-        return l:endLine + 1
-    endif
-    let l:emptyCharLine = GetNextEmptyCharLineNum()
-    if l:emptyCharLine <= l:curLine
-        return l:nextPeerLine
-    endif
-    if l:emptyCharLine < l:nextPeerLine
-        let l:nextPeerLine = l:emptyCharLine
-    endif
-    if l:curLine + 1 == l:nextPeerLine 
-        return s:closed
-    endif
-    return l:nextPeerLine
+    return  l:curLine + l:kidCount + 1
 endfunction
 
 function! OpenDir()
@@ -130,33 +124,40 @@ function! OpenDir()
     let l:indents = repeat(s:fileTreeIndent, l:curCol / len(s:fileTreeIndent) + 1)
     " nodeId is the full path of the node under the cursor
     let l:nodeId = s:fullPaths[l:curLine - 2]
+    let l:dirDepth = GetDirDepth(l:nodeId)
     if has_key(s:nodesCache, l:nodeId) || has_key(s:fullPathsCache, l:nodeId)
         let l:nodes = s:nodesCache[l:nodeId]
         let l:fullPaths = s:fullPathsCache[l:nodeId]
         let l:lineLength = len(l:fullPaths)
+        call ChangeKidCount(l:nodeId, l:lineLength, l:dirDepth, s:plusKidCountOp)
         call WriteCachedNodes(l:nodes, l:curLine, l:lineLength, l:indents)
         call WriteFullPaths(l:fullPaths, l:curLine - 1)
-        exec l:curLine
+        exec l:curLine . "normal! ^"
         return
     endif
     let l:nodesAndFullPaths = GetNodesAndFullPaths(l:nodeId)
     let l:nodes = l:nodesAndFullPaths[0]
     let l:fullPaths = l:nodesAndFullPaths[1]
     if len(l:nodes) == 0 || len(l:fullPaths) == 0
-        echo ">> Empty folder!"
+        echom ">> Empty folder!"
     endif
+    let l:lineLength = len(l:nodes)
+    call ChangeKidCount(l:nodeId, l:lineLength, l:dirDepth, s:plusKidCountOp)
     call WriteNodes(l:nodes, l:curLine, l:indents)
     call WriteFullPaths(l:fullPaths, l:curLine - 1)
-    exec l:curLine
+    exec l:curLine . "normal! ^"
 endfunction
 
 function! CloseDir(nextPeerLine)
     let l:curLine = line('.')
     " nodeId is the full path of the node under the cursor
     let l:nodeId = s:fullPaths[l:curLine - 2]
+    let l:dirDepth = GetDirDepth(l:nodeId)
+    let l:kidCount = s:kidCountCache[l:nodeId]
+    call ChangeKidCount(l:nodeId, l:kidCount, l:dirDepth, s:minusKidCountOp)
     call DeleteNodes(l:nodeId, l:curLine + 1, a:nextPeerLine - 1)
     call DeleteFullPaths(l:nodeId, l:curLine - 1, a:nextPeerLine - 3)
-    exec l:curLine
+    exec l:curLine . "normal! ^"
 endfunction
 
 function! Upper()
@@ -164,11 +165,14 @@ function! Upper()
     let l:upperDir = fnamemodify(l:curFullPath, ':h')
     exec 2
     let l:status = IsOpened()
-    if l:status != s:closed
-        call CloseDir(l:status)
+    if l:status == s:closed
+        call InitTree(l:upperDir)
+        exec 2
+        return
     endif
+    call CloseDir(l:status)
     call InitTree(l:upperDir)
-    exec '/ '.fnamemodify(l:curFullPath, ':t').'\'.s:dirSeparator
+    silent exec '/ '.fnamemodify(l:curFullPath, ':t').'\'.s:dirSeparator
     let @/ = ''
     call OpenDir()
     exec 2
@@ -177,20 +181,22 @@ endfunction
 function! ClearCache()
     let s:nodesCache = {}
     let s:fullPathsCache = {}
+    let s:kidCountCache = {}
 endfunction
 
 function! HighlightTree()
     syntax clear
     syntax match Directory ".*\/$"
-    execute 'syntax match Directory ".*\' . s:dirSeparator . '$"'
+    exec 'syntax match Directory ".*\' . s:dirSeparator . '$"'
 endfunction
 
 function! MapTree()
-    nnoremap <buffer> <CR> :silent! call ToggleNode()<CR>
+    nnoremap <buffer><silent> <CR> :call ToggleNode()<CR>
 endfunction
 
 function! InitTree(path)
-    exec '%d'
+    let s:topDirDepth = GetDirDepth(a:path)
+    silent exec '%d'
     call HighlightTree()
     call setline(1, '..' . s:dirSeparator)
     if a:path == '/'
