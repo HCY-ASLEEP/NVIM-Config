@@ -4,6 +4,8 @@ let s:closed = -1
 let s:nodesCache = {}
 let s:fullPathsCache = {}
 let s:kidCountCache = {}
+let s:kidCountKey = 'kidCount'
+let s:kidsKey = 'kids'
 let s:minusKidCountOp = 0
 let s:plusKidCountOp = 1
 let s:topDirDepth = 0
@@ -41,18 +43,60 @@ endfunction
 
 function! ChangeKidCount(path, n, depth, operate)
     if a:depth < s:topDirDepth 
-        return 
-    endif
-    if !has_key(s:kidCountCache, a:path)
-        let s:kidCountCache[a:path] = 0
-    endif
-    if a:operate == s:minusKidCountOp
-        let s:kidCountCache[a:path] -= a:n
-    else
-        let s:kidCountCache[a:path] += a:n
+        return s:kidCountCache
     endif
     let l:upperDir = fnamemodify(a:path, ':h')
-    call ChangeKidCount(l:upperDir, a:n, a:depth - 1, a:operate)
+    let l:kidCountCache = ChangeKidCount(l:upperDir, a:n, a:depth - 1, a:operate)
+    if !has_key(l:kidCountCache, a:path)
+        let l:kidCountCache[a:path] = {}
+        let l:subDict = l:kidCountCache[a:path]
+        let l:subDict[s:kidCountKey] = 0
+        let l:subDict[s:kidsKey] = {}
+    endif
+    let l:subDict = l:kidCountCache[a:path]
+    if a:operate == s:minusKidCountOp
+        let l:subDict[s:kidCountKey] -= a:n
+    else
+        let l:subDict[s:kidCountKey] += a:n
+    endif
+    return l:subDict[s:kidsKey]
+endfunction
+
+function! GetKidCountInfo(path, depth)
+    if a:depth <= s:topDirDepth
+        return s:kidCountCache
+    endif
+    let l:upperDir = fnamemodify(a:path, ':h')
+    let l:subDict = GetKidCountInfo(l:upperDir, a:depth - 1)
+    if !has_key(l:subDict, l:upperDir)
+        return {}
+    endif
+    return l:subDict[l:upperDir][s:kidsKey]
+endfunction
+
+function! GetKidCount(path, depth)
+    let l:kidCountInfo = GetKidCountInfo(a:path, a:depth)
+    if !has_key(l:kidCountInfo, a:path)
+        return 0
+    endif
+    return l:kidCountInfo[a:path][s:kidCountKey]
+endfunction
+
+function! ClearCacheUpward(path, curDirDepth, endDirDepth)
+    if a:curDirDepth < a:endDirDepth
+        return
+    endif
+    call remove(s:nodesCache, a:path)
+    call remove(s:fullPathsCache, a:path)
+    ""call remove(s:kidCountCache, a:path)
+    let l:upperDir = fnamemodify(a:path, ':h')
+    call ClearCacheUpward(l:upperDir, a:curDirDepth - 1, a:endDirDepth)
+endfunction
+
+function! ClearAllCache()
+    let s:nodesCache = {}
+    let s:fullPathsCache = {}
+    ""let s:kidCountCache = {}
 endfunction
 
 function! AddIndents(startLine, endLine, indents)
@@ -108,10 +152,7 @@ endfunction
 function! IsOpened()
     let l:curLine = line('.')
     let l:nodeId = s:fullPaths[l:curLine - 2]
-    if !has_key(s:kidCountCache, l:nodeId)
-        return s:closed
-    endif
-    let l:kidCount = s:kidCountCache[l:nodeId]
+    let l:kidCount = GetKidCount(l:nodeId, GetDirDepth(l:nodeId))
     if l:kidCount == 0
         return s:closed
     endif
@@ -154,7 +195,7 @@ function! CloseDir(nextPeerLine)
     " nodeId is the full path of the node under the cursor
     let l:nodeId = s:fullPaths[l:curLine - 2]
     let l:dirDepth = GetDirDepth(l:nodeId)
-    let l:kidCount = s:kidCountCache[l:nodeId]
+    let l:kidCount = a:nextPeerLine - l:curLine - 1
     call ChangeKidCount(l:nodeId, l:kidCount, l:dirDepth, s:minusKidCountOp)
     call DeleteNodes(l:nodeId, l:curLine + 1, a:nextPeerLine - 1)
     call DeleteFullPaths(l:nodeId, l:curLine - 1, a:nextPeerLine - 3)
@@ -164,25 +205,44 @@ endfunction
 function! Upper()
     let l:curFullPath = getline(2)[:-2]
     let l:upperDir = fnamemodify(l:curFullPath, ':h')
+    if l:curFullPath == l:upperDir
+        return
+    endif
     exec 2
+    let l:kidCountCache = s:kidCountCache
     let l:status = IsOpened()
     if l:status == s:closed
         call InitTree(l:upperDir)
+        let s:kidCountCache[l:upperDir][s:kidsKey][l:curFullPath] = l:kidCountCache[l:curFullPath]
         exec 2
         return
     endif
     call CloseDir(l:status)
     call InitTree(l:upperDir)
+    let s:kidCountCache[l:upperDir][s:kidsKey][l:curFullPath] = l:kidCountCache[l:curFullPath]
     silent exec '/ '.fnamemodify(l:curFullPath, ':t').'\'.s:dirSeparator
     let @/ = ''
     call OpenDir()
     exec 2
 endfunction
 
-function! ClearAllCache()
-    let s:nodesCache = {}
-    let s:fullPathsCache = {}
-    let s:kidCountCache = {}
+function! RefreshDir()
+    let l:curLine = line('.')
+    if l:curLine == 1
+        call Upper()
+    endif
+    let l:nodeId = s:fullPaths[l:curLine - 2]
+    if !isdirectory(l:nodeId)
+        echo ">> Can not refresh a file, but a dir!"
+        return
+    endif
+    let l:status = IsOpened()
+    if l:status != s:closed
+        call CloseDir(l:status)
+    endif
+    let l:curDirDepth = GetDirDepth(l:nodeId)
+    call ClearCacheUpward(l:nodeId, l:curDirDepth, l:curDirDepth)
+    call OpenDir()
 endfunction
 
 function! HighlightTree()
@@ -196,6 +256,7 @@ function! MapTree()
 endfunction
 
 function! InitTree(path)
+    let s:kidCountCache = {}
     let s:topDirDepth = GetDirDepth(a:path)
     silent exec '%d'
     call HighlightTree()
@@ -252,6 +313,18 @@ function! ToggleTree()
     call win_gotoid(s:treeWinid)
     close
     let s:treeWinid = -1
+endfunction
+
+function! ShowNodes()
+    return s:nodesCache
+endfunction
+
+function! ShowPaths()
+    return s:fullPaths
+endfunction
+
+function! ShowKids()
+    return s:kidCountCache
 endfunction
 
 set splitright
