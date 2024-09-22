@@ -98,7 +98,7 @@ endfunction
 function! ClearAllCache()
     let s:nodesCache = {}
     let s:fullPathsCache = {}
-    ""let s:kidCountCache = {}
+    let s:kidCountCache = {}
 endfunction
 
 function! AddIndents(startLine, endLine, indents)
@@ -253,6 +253,9 @@ function! RefreshDir()
         call CloseDir()
     endif
     let l:curDirDepth = GetDirDepth(l:nodeId)
+    let l:curDirInfo = GetKidCountInfo(l:nodeId, l:curDirDepth)[l:nodeId]
+    let l:kidCount = l:curDirInfo[s:kidCountKey]
+    let l:curDirInfo[s:openedSubDirsKey] = {}
     call ClearCacheUpward(l:nodeId, l:curDirDepth, l:curDirDepth)
     call OpenDir()
 endfunction
