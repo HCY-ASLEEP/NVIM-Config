@@ -1,7 +1,7 @@
 let s:fullPaths = []
 let s:fileTreeIndent = '    '
-let s:opened = 1
-let s:closed = -1
+let s:dirOpened = 1
+let s:dirClosed = -1
 let s:nodesCache = {}
 let s:fullPathsCache = {}
 let s:kidCountCache = {}
@@ -155,7 +155,7 @@ endfunction
 function! IsOpened()
     let l:curLine = line('.')
     if l:curLine == line('$')
-        return s:closed
+        return s:dirClosed
     endif
     exec l:curLine . "normal! ^"
     let l:curInentCharNum = col('.')
@@ -164,9 +164,9 @@ function! IsOpened()
     let l:nextInentCharNum = col('.')
     exec l:curLine . "normal! ^"
     if(l:curInentCharNum < l:nextInentCharNum)
-        return s:opened
+        return s:dirOpened
     endif
-    return s:closed
+    return s:dirClosed
 endfunction
 
 function! OpenDir()
@@ -222,7 +222,7 @@ function! Upper()
     endif
     exec 2
     let l:kidCountCache = s:kidCountCache
-    if IsOpened() == s:closed
+    if IsOpened() == s:dirClosed
         call InitTree(l:upperDir)
         let s:kidCountCache[l:upperDir][s:openedSubDirsKey][l:curFullPath] =
                     \ l:kidCountCache[l:curFullPath]
@@ -249,7 +249,7 @@ function! RefreshDir()
         echo ">> Can not refresh a file, but a dir!"
         return
     endif
-    if IsOpened() == s:opened
+    if IsOpened() == s:dirOpened
         call CloseDir()
     endif
     let l:curDirDepth = GetDirDepth(l:nodeId)
@@ -295,7 +295,7 @@ function! ToggleNode()
         echo "File, not dir!"
         return
     endif
-    if IsOpened() == s:closed
+    if IsOpened() == s:dirClosed
         call OpenDir()
         return
     endif
