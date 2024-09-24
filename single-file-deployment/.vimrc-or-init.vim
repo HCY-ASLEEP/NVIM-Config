@@ -304,7 +304,7 @@ function! s:OpenFilePathCompletion()
 endfunction
 
 function! s:AutoComplete()
-    if has('nvim') && luaeval('#vim.lsp.buf_get_clients()') != 0
+    if has('nvim') && luaeval('#vim.lsp.get_clients({bufnr = 0})') != 0
         augroup openCompletion
             autocmd! * <buffer>
             autocmd InsertCharPre <buffer> silent! call s:OpenLSPCompletion()
@@ -1319,5 +1319,5 @@ nnoremap <silent> <Space>e :call <SID>ToggleTree()<CR>
 " +-----------------------------------------------+
 
 
-" let g:config_path=expand("<sfile>:p:h")
-" exec "source ".g:config_path."/lsp.lua"
+let g:config_path=expand("<sfile>:p:h")
+exec "source ".g:config_path."/lsp.lua"
