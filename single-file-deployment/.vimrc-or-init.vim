@@ -937,7 +937,7 @@ command! -register OSCYankRegister call s:OSCYankRegister('<reg>')
 
 
 let s:fullPaths = []
-let s:fileTreeIndent = '    '
+let s:fileTreeIndent = '  '
 let s:closedDir = -1
 let s:openedDir = 1
 let s:nodesCache = {}
@@ -1161,7 +1161,7 @@ function! s:OpenFile()
     endif
     let l:curWinid = win_getid()
     if win_id2tabwin(s:treePreWinid)[1] == 0
-        to vnew 
+        bot vnew 
         exec "edit ".l:nodeId
         echo l:nodeId
         return
@@ -1240,6 +1240,9 @@ endfunction
 
 function! s:SetTreeOptions()
     setlocal buftype=nofile bufhidden=hide nobuflisted noswapfile
+    setlocal tabstop=2 shiftwidth=2 softtabstop=2 
+    setlocal list listchars=multispace:\|\ 
+    setlocal nonumber norelativenumber
     setlocal autoread
     exec "file ".s:treeBufname
     augroup switchContext
@@ -1288,7 +1291,7 @@ endfunction
 function! s:ToggleTree()
     let s:treePreWinid = win_getid()
     if s:treeBufnr == -1
-        bot vnew
+        to vnew
         call s:BeforeEnterTree()
         call s:InitTree(getcwd())
         call s:MapTree()
@@ -1298,7 +1301,7 @@ function! s:ToggleTree()
         return
     endif
     if s:treeWinid == -1
-        bot vnew
+        to vnew
         exec "buffer ".s:treeBufname
         let s:treeWinid = win_getid()
         return
