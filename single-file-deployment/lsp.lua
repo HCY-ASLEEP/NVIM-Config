@@ -635,7 +635,7 @@ local function open_outline_win()
         outline_name = "SymbolOutline" .. outline_tabpage
         outline_win, outline_buf = get_win_buf_by(outline_name)
         if outline_win == -1 then
-            vim.cmd("topleft 45vs")
+            vim.cmd("bot 45vs")
             vim.cmd.edit(outline_name)
             outline_win = vim.api.nvim_get_current_win()
             outline_buf = vim.api.nvim_get_current_buf()
@@ -731,7 +731,7 @@ local function jump()
     local jump_win, jump_buf = get_win_buf_by(jump_buf_name)
     if jump_win == -1 then
         local outline_win = vim.api.nvim_get_current_win()
-        vim.cmd("rightbelow vsplit")
+        vim.cmd("to vsplit")
         vim.cmd.edit(jump_buf_name)
         jump_win = vim.api.nvim_get_current_win()
         jump_buf = vim.api.nvim_get_current_buf()
