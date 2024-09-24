@@ -1161,7 +1161,7 @@ function! s:OpenFile()
     endif
     let l:curWinid = win_getid()
     if win_id2tabwin(s:treePreWinid)[1] == 0
-        vnew 
+        to vnew 
         exec "edit ".l:nodeId
         echo l:nodeId
         return
@@ -1288,7 +1288,7 @@ endfunction
 function! s:ToggleTree()
     let s:treePreWinid = win_getid()
     if s:treeBufnr == -1
-        vnew
+        bot vnew
         call s:BeforeEnterTree()
         call s:InitTree(getcwd())
         call s:MapTree()
@@ -1298,7 +1298,7 @@ function! s:ToggleTree()
         return
     endif
     if s:treeWinid == -1
-        vnew
+        bot vnew
         exec "buffer ".s:treeBufname
         let s:treeWinid = win_getid()
         return
@@ -1319,5 +1319,5 @@ nnoremap <silent> <Space>e :call <SID>ToggleTree()<CR>
 " +-----------------------------------------------+
 
 
-let g:config_path=expand("<sfile>:p:h")
-exec "source ".g:config_path."/lsp.lua"
+" let g:config_path=expand("<sfile>:p:h")
+" exec "source ".g:config_path."/lsp.lua"
