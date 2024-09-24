@@ -11,12 +11,12 @@ let s:topDirDepth = 0
 let s:dirSeparator = '/'
 let s:treeWinid = -1
 let s:treeBufnr = -1
-let s:preWinid = -1
+let s:treePreWinid = -1
 let s:treeBufname = "Tree explorer for files and dirs"
-let s:unamedReg = ""
-let s:searchReg = ""
+let s:treeUnamedReg = ""
+let s:treeSearchReg = ""
 
-function! GetNodesAndFullPaths(path)
+function! s:GetNodesAndFullPaths(path)
     let l:dirNodes = []
     let l:dirPaths = []
     let l:fileNodes = []
@@ -36,41 +36,41 @@ function! GetNodesAndFullPaths(path)
     return [l:dirNodes + l:fileNodes, l:dirPaths + l:filePaths]
 endfunction
 
-function! GetFullPath(lineNum)
+function! s:GetFullPath(lineNum)
     return s:fullPaths[a:lineNum - 2]
 endfunction
 
-function! GetFullPathsCache(path)
+function! s:GetFullPathsCache(path)
     return s:fullPathsCache[a:path]
 endfunction
 
-function! IsInFullPathsCache(path)
+function! s:IsInFullPathsCache(path)
     return has_key(s:fullPathsCache, a:path)
 endfunction
 
-function! GetDirDepth(path)
+function! s:GetDirDepth(path)
     let l:upperDir = fnamemodify(a:path, ':h')
     if l:upperDir == a:path
         return 1
     endif
-    return GetDirDepth(l:upperDir) + 1
+    return s:GetDirDepth(l:upperDir) + 1
 endfunction
 
-function! GetNodesCache(path)
+function! s:GetNodesCache(path)
     return s:nodesCache[a:path]
 endfunction
 
-function! IsInNodesCache(path)
+function! s:IsInNodesCache(path)
     return has_key(s:nodesCache, a:path)
 endfunction
 
-function! ClearCache(path)
+function! s:ClearCache(path)
     call remove(s:nodesCache, a:path)
     call remove(s:fullPathsCache, a:path)
     call remove(s:kidCountCache, a:path)
 endfunction
 
-function! ChangeKidCount(path, n, depth, operate)
+function! s:ChangeKidCount(path, n, depth, operate)
     if a:depth < s:topDirDepth 
         return 
     endif
@@ -83,22 +83,22 @@ function! ChangeKidCount(path, n, depth, operate)
         let s:kidCountCache[a:path] += a:n
     endif
     let l:upperDir = fnamemodify(a:path, ':h')
-    call ChangeKidCount(l:upperDir, a:n, a:depth - 1, a:operate)
+    call s:ChangeKidCount(l:upperDir, a:n, a:depth - 1, a:operate)
 endfunction
 
-function! ZeroKidCount(path)
+function! s:ZeroKidCount(path)
     let s:kidCountCache[a:path] = 0
 endfunction
 
-function! GetKidCount(path)
+function! s:GetKidCount(path)
     return s:kidCountCache[a:path]
 endfunction
 
-function! AddIndents(startLine, endLine, indents)
+function! s:AddIndents(startLine, endLine, indents)
     silent exec a:startLine . ',' . a:endLine . 's/^/' . a:indents .'/'
 endfunction
 
-function! RemoveIndents(startLine, endLine, endCol)
+function! s:RemoveIndents(startLine, endLine, endCol)
     if a:endCol == 0
         return
     endif
@@ -108,43 +108,43 @@ function! RemoveIndents(startLine, endLine, endCol)
     silent exec "normal! d"
 endfunction
 
-function! WriteNodes(lines, startLine, indents)
+function! s:WriteNodes(lines, startLine, indents)
     if empty(a:lines)
         return
     endif
     call append(a:startLine, a:lines)
     let l:startLine = a:startLine + 1
     let l:endLine = a:startLine + len(a:lines)
-    call AddIndents(l:startLine, l:endLine, a:indents)
+    call s:AddIndents(l:startLine, l:endLine, a:indents)
 endfunction
 
-function! WriteCachedNodes(block, startLine, lineLength, indents)
+function! s:WriteCachedNodes(block, startLine, lineLength, indents)
     let l:startLine = a:startLine + 1
     let l:endLine = a:startLine + a:lineLength
     let @" = a:block
     silent exec "normal p"
     exec l:startLine . "normal! ^"
-    call RemoveIndents(l:startLine, l:endLine, col('.') - 1)
-    call AddIndents(l:startLine, l:endLine, a:indents)
+    call s:RemoveIndents(l:startLine, l:endLine, col('.') - 1)
+    call s:AddIndents(l:startLine, l:endLine, a:indents)
 endfunction
 
-function! WriteFullPaths(fullPaths, startLine)
+function! s:WriteFullPaths(fullPaths, startLine)
     if empty(a:fullPaths)
         return
     endif
     call extend(s:fullPaths, a:fullPaths, a:startLine)
 endfunction
 
-function! DeleteNodes(nodeId, startLine, endLine)
+function! s:DeleteNodes(nodeId, startLine, endLine)
     silent exec a:startLine . "," . a:endLine . "delete"
     let s:nodesCache[a:nodeId] = @"
 endfunction
 
-function! DeleteFullPaths(nodeId, startLine, endLine)
+function! s:DeleteFullPaths(nodeId, startLine, endLine)
     let s:fullPathsCache[a:nodeId] = remove(s:fullPaths, a:startLine, a:endLine)
 endfunction
 
-function! IsOpenedDir()
+function! s:IsOpenedDir()
     let l:curLine = line('.')
     if l:curLine == line('$')
         return s:closedDir
@@ -161,28 +161,28 @@ function! IsOpenedDir()
     return s:closedDir
 endfunction
 
-function! OpenDir()
+function! s:OpenDir()
     normal ^
     let l:curLine = line('.')
     let l:curCol = col('.')
     let l:indents = repeat(s:fileTreeIndent, l:curCol / len(s:fileTreeIndent) + 1)
     " nodeId is the full path of the node under the cursor
-    let l:nodeId = GetFullPath(l:curLine)
-    let l:dirDepth = GetDirDepth(l:nodeId)
-    if IsInNodesCache(l:nodeId) || IsInFullPathsCache(l:nodeId)
+    let l:nodeId = s:GetFullPath(l:curLine)
+    let l:dirDepth = s:GetDirDepth(l:nodeId)
+    if s:IsInNodesCache(l:nodeId) || s:IsInFullPathsCache(l:nodeId)
         setlocal modifiable
-        let l:nodes = GetNodesCache(l:nodeId)
-        let l:fullPaths = GetFullPathsCache(l:nodeId)
+        let l:nodes = s:GetNodesCache(l:nodeId)
+        let l:fullPaths = s:GetFullPathsCache(l:nodeId)
         let l:kidCount = len(l:fullPaths)
-        call ZeroKidCount(l:nodeId)
-        call ChangeKidCount(l:nodeId, l:kidCount, l:dirDepth, s:plusKidCountOp)
-        call WriteCachedNodes(l:nodes, l:curLine, l:kidCount, l:indents)
-        call WriteFullPaths(l:fullPaths, l:curLine - 1)
+        call s:ZeroKidCount(l:nodeId)
+        call s:ChangeKidCount(l:nodeId, l:kidCount, l:dirDepth, s:plusKidCountOp)
+        call s:WriteCachedNodes(l:nodes, l:curLine, l:kidCount, l:indents)
+        call s:WriteFullPaths(l:fullPaths, l:curLine - 1)
         exec l:curLine . "normal! ^"
         setlocal nomodifiable
         return
     endif
-    let l:nodesAndFullPaths = GetNodesAndFullPaths(l:nodeId)
+    let l:nodesAndFullPaths = s:GetNodesAndFullPaths(l:nodeId)
     let l:nodes = l:nodesAndFullPaths[0]
     let l:fullPaths = l:nodesAndFullPaths[1]
     if len(l:nodes) == 0 || len(l:fullPaths) == 0
@@ -191,44 +191,44 @@ function! OpenDir()
     endif
     setlocal modifiable
     let l:kidCount = len(l:nodes)
-    call ChangeKidCount(l:nodeId, l:kidCount, l:dirDepth, s:plusKidCountOp)
-    call WriteNodes(l:nodes, l:curLine, l:indents)
-    call WriteFullPaths(l:fullPaths, l:curLine - 1)
+    call s:ChangeKidCount(l:nodeId, l:kidCount, l:dirDepth, s:plusKidCountOp)
+    call s:WriteNodes(l:nodes, l:curLine, l:indents)
+    call s:WriteFullPaths(l:fullPaths, l:curLine - 1)
     exec l:curLine . "normal! ^"
     setlocal nomodifiable
 endfunction
 
-function! CloseDir()
+function! s:CloseDir()
     setlocal modifiable
     let l:curLine = line('.')
     " nodeId is the full path of the node under the cursor
-    let l:nodeId = GetFullPath(l:curLine)
-    let l:dirDepth = GetDirDepth(l:nodeId)
-    let l:kidCount = GetKidCount(l:nodeId)
+    let l:nodeId = s:GetFullPath(l:curLine)
+    let l:dirDepth = s:GetDirDepth(l:nodeId)
+    let l:kidCount = s:GetKidCount(l:nodeId)
     let l:startLine = l:curLine + 1
     let l:endLine = l:curLine + l:kidCount
-    call ChangeKidCount(l:nodeId, l:kidCount, l:dirDepth, s:minusKidCountOp)
-    call DeleteNodes(l:nodeId, l:startLine, l:endLine)
-    call DeleteFullPaths(l:nodeId, l:startLine - 2, l:endLine - 2)
+    call s:ChangeKidCount(l:nodeId, l:kidCount, l:dirDepth, s:minusKidCountOp)
+    call s:DeleteNodes(l:nodeId, l:startLine, l:endLine)
+    call s:DeleteFullPaths(l:nodeId, l:startLine - 2, l:endLine - 2)
     exec l:curLine . "normal! ^"
     setlocal nomodifiable
 endfunction
 
-function! OpenFile()
+function! s:OpenFile()
     let l:curLine = line('.')
-    let l:nodeId = GetFullPath(l:curLine)
+    let l:nodeId = s:GetFullPath(l:curLine)
     if !filereadable(expand(l:nodeId))
         echo ">> File not exists!"
         return
     endif
     let l:curWinid = win_getid()
-    if win_id2tabwin(s:preWinid)[1] == 0
+    if win_id2tabwin(s:treePreWinid)[1] == 0
         vnew 
         exec "edit ".l:nodeId
         echo l:nodeId
         return
     endif
-    call win_gotoid(s:preWinid)
+    call win_gotoid(s:treePreWinid)
     if expand(bufname()) ==# l:nodeId
         return
     endif
@@ -236,85 +236,86 @@ function! OpenFile()
     echo l:nodeId
 endfunction
 
-function! Upper()
+function! s:Upper()
     let l:curFullPath = getline(2)[:-2]
     let l:upperDir = fnamemodify(l:curFullPath, ':h')
     if l:curFullPath == l:upperDir
         return
     endif
     exec 2
-    if IsOpenedDir() == s:closedDir
-        call InitTree(l:upperDir)
+    if s:IsOpenedDir() == s:closedDir
+        call s:InitTree(l:upperDir)
         exec 2
         return
     endif
-    call CloseDir()
-    call InitTree(l:upperDir)
+    call s:CloseDir()
+    call s:InitTree(l:upperDir)
     silent exec '/ '.fnamemodify(l:curFullPath, ':t').'\'.s:dirSeparator
     let @/ = ''
-    call OpenDir()
+    call s:OpenDir()
     exec 2
 endfunction
 
-function! RefreshDir()
+function! s:RefreshDir()
     let l:curLine = line('.')
     if l:curLine == 1
-        call Upper()
+        call s:Upper()
     endif
     let l:nodeId = s:fullPaths[l:curLine - 2]
     if !isdirectory(l:nodeId)
         echo ">> Can not refresh a file, but a dir!"
         return
     endif
-    if IsOpenedDir() == s:openedDir
-        call CloseDir()
+    if s:IsOpenedDir() == s:openedDir
+        call s:CloseDir()
     endif
-    call ClearCache(l:nodeId)
-    call OpenDir()
+    call s:ClearCache(l:nodeId)
+    call s:OpenDir()
 endfunction
 
-function! ClearAllCache()
+function! s:ClearAllCache()
     let s:nodesCache = {}
     let s:fullPathsCache = {}
     let s:kidCountCache = {}
 endfunction
 
-function! HighlightTree()
+function! s:HighlightTree()
     syntax clear
     syntax match Directory ".*\/$"
     exec 'syntax match Directory ".*\' . s:dirSeparator . '$"'
 endfunction
 
-function! MapTree()
-    nnoremap <buffer><silent> <CR> :call ToggleNode()<CR>
+function! s:MapTree()
+    nnoremap <buffer><silent> <CR> :call <SID>ToggleNode()<CR>
+    nnoremap <buffer><silent> r :call <SID>RefreshDir()<CR>
 endfunction
 
-function! BeforeEnterTree()
-    let s:searchReg = @/
-    let s:unamedReg = @"
+function! s:BeforeEnterTree()
+    let s:treeSearchReg = @/
+    let s:treeUnamedReg = @"
 endfunction
 
-function! AfterLeaveTree()
-    let @/ = s:searchReg
-    let @" = s:unamedReg
+function! s:AfterLeaveTree()
+    let @/ = s:treeSearchReg
+    let @" = s:treeUnamedReg
 endfunction
 
-function! SetTreeOptions()
+function! s:SetTreeOptions()
     setlocal buftype=nofile bufhidden=hide nobuflisted noswapfile
     setlocal autoread
     exec "file ".s:treeBufname
     augroup switchContext
         autocmd!
-        autocmd BufEnter <buffer> call BeforeEnterTree()
-        autocmd BufLeave <buffer> call AfterLeaveTree()
+        autocmd BufEnter <buffer> call s:BeforeEnterTree()
+        autocmd BufLeave <buffer> call s:AfterLeaveTree()
     augroup END
 endfunction
 
-function! InitTree(path)
+function! s:InitTree(path)
     setlocal modifiable
-    let s:topDirDepth = GetDirDepth(a:path)
+    let s:topDirDepth = s:GetDirDepth(a:path)
     silent exec '%d'
-    call HighlightTree()
+    call s:HighlightTree()
     call setline(1, '..' . s:dirSeparator)
     if a:path == '/'
         call setline(2, a:path) 
@@ -324,36 +325,36 @@ function! InitTree(path)
     let s:fullPaths = []
     call insert(s:fullPaths, a:path)
     exec 2
-    call OpenDir()
+    call s:OpenDir()
     setlocal nomodifiable
 endfunction
 
-function! ToggleNode()
+function! s:ToggleNode()
     let l:curLine = line('.')
     if l:curLine == 1
-        call Upper()
+        call s:Upper()
         return
     endif
     let l:lineContent = getline(l:curLine)
     if l:lineContent[-1:] != s:dirSeparator
-        call OpenFile()
+        call s:OpenFile()
         return
     endif
-    if IsOpenedDir() == s:closedDir
-        call OpenDir()
+    if s:IsOpenedDir() == s:closedDir
+        call s:OpenDir()
         return
     endif
-    call CloseDir()
+    call s:CloseDir()
 endfunction
 
-function! ToggleTree()
-    let s:preWinid = win_getid()
+function! s:ToggleTree()
+    let s:treePreWinid = win_getid()
     if s:treeBufnr == -1
         vnew
-        call BeforeEnterTree()
-        call InitTree(getcwd())
-        call MapTree()
-        call SetTreeOptions()
+        call s:BeforeEnterTree()
+        call s:InitTree(getcwd())
+        call s:MapTree()
+        call s:SetTreeOptions()
         let s:treeBufnr = bufnr()
         let s:treeWinid = win_getid()
         return
@@ -370,4 +371,4 @@ function! ToggleTree()
 endfunction
 
 set splitright
-nnoremap <silent> <Space>e :call ToggleTree()<CR>
+nnoremap <silent> <Space>e :call <SID>ToggleTree()<CR>
