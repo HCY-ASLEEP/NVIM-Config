@@ -1322,5 +1322,5 @@ nnoremap <silent> <Space>e :call <SID>ToggleTree()<CR>
 " +-----------------------------------------------+
 
 
-let g:config_path=expand("<sfile>:p:h")
-exec "source ".g:config_path."/lsp.lua"
+" let g:config_path=expand("<sfile>:p:h")
+" exec "source ".g:config_path."/lsp.lua"
