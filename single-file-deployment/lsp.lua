@@ -739,7 +739,7 @@ local function refresh()
 end
 
 local function return_immediately()
-    if next(vim.lsp.buf_get_clients())==nil then
+    if next(vim.lsp.get_clients({bufnr = 0})) == nil then
         return true
     end
     if vim.t.jump_buf_name == nil then
