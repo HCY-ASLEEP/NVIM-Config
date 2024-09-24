@@ -1162,7 +1162,7 @@ function! s:OpenFile()
     let l:curWinid = win_getid()
     if win_id2tabwin(s:treePreWinid)[1] == 0
         bot vnew 
-        exec "edit ".l:nodeId
+        silent exec "edit ".l:nodeId
         echo l:nodeId
         return
     endif
@@ -1170,7 +1170,7 @@ function! s:OpenFile()
     if expand(bufname()) ==# l:nodeId
         return
     endif
-    exec "edit ".l:nodeId
+    silent exec "edit ".l:nodeId
     echo l:nodeId
 endfunction
 
@@ -1322,5 +1322,5 @@ nnoremap <silent> <Space>e :call <SID>ToggleTree()<CR>
 " +-----------------------------------------------+
 
 
-" let g:config_path=expand("<sfile>:p:h")
-" exec "source ".g:config_path."/lsp.lua"
+let g:config_path=expand("<sfile>:p:h")
+exec "source ".g:config_path."/lsp.lua"
