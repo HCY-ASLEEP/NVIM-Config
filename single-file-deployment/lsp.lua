@@ -186,6 +186,29 @@ vim.diagnostic.config({
 })
 
 
+vim.cmd("hi! link NormalFloat Normal")
+vim.cmd("hi! link FloatBorder MoreMsg")
+
+local function CursorHoldLSPHoverWithDelay()
+    -- 创建一个新的 augroup
+    vim.api.nvim_create_augroup("CursorHoldLSPHover", { clear = true })
+    vim.api.nvim_create_autocmd("LspAttach", {
+        callback = function()
+            -- 创建 autocmd，当光标停留时触发，仅在当前缓冲区内
+            vim.api.nvim_create_autocmd("CursorHold", {
+    	        group = "CursorHoldLSPHover",  -- 关联到刚创建的 augroup
+                buffer = 0,  -- 只在当前缓冲区中生效
+                callback = function()
+                    -- 延迟 1000 毫秒（1 秒）执行操作
+                    vim.defer_fn(function() vim.lsp.buf.hover() end, 1000)
+                    -- 延迟时间为 1000 毫秒
+                end,
+            })
+        end
+    })
+end
+
+
 -- +-----------------------------------------------+
 -- |                                               |
 -- |     SYMBOL OUTLINE NESTED AND SORTED VIEW     |
@@ -818,3 +841,5 @@ end, {})
 vim.api.nvim_create_user_command("OpenSymbolOutlineSorted", function()
     activate_sorted_view(0)
 end, {})
+
+
