@@ -1249,6 +1249,8 @@ function! s:SetTreeOptions()
         autocmd!
         autocmd BufEnter <buffer> call s:BeforeEnterTree()
         autocmd BufLeave <buffer> call s:AfterLeaveTree()
+        autocmd BufHidden <buffer> let s:treeWinid = -1
+        autocmd TabLeave * if s:treeWinid != -1 | call s:ToggleTree() | let s:treeWinid = -1 | endif
     augroup END
 endfunction
 
@@ -1308,7 +1310,6 @@ function! s:ToggleTree()
     endif
     call win_gotoid(s:treeWinid)
     close
-    let s:treeWinid = -1
 endfunction
 
 set splitright
