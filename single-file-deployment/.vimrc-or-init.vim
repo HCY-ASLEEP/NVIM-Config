@@ -474,8 +474,7 @@ endfunction
 
 function! s:QuitRedirWindow()
     if win_id2tabwin(t:redirWinid)[1] != 0
-        call win_gotoid(t:redirWinid)
-        close
+        call win_execute(t:redirWinid, 'close')
         return
     end
     echo ">> No OpenRedirWindow!"
@@ -500,13 +499,7 @@ function! s:JumpWhenPressJOrK(direction,locateTargetFunctionName)
         let t:redirPreviewWinid = win_getid()
         wincmd p
     endif
-    if exists('*win_execute')
-        call win_execute(t:redirPreviewWinid, "call ".a:locateTargetFunctionName."()")
-        return
-    endif
-    call win_gotoid(t:redirPreviewWinid)
-    exec "call ".a:locateTargetFunctionName."()"
-    call win_gotoid(t:redirWinid)
+    call win_execute(t:redirPreviewWinid, "call ".a:locateTargetFunctionName."()")
 endfunction
 
 nnoremap <silent><Space>q :call <SID>QuitRedirWindow()<CR>
@@ -745,8 +738,7 @@ command! -nargs=1 -complete=command Ws call s:WordSearchWithoutGit(<q-args>)
 function! s:PrepareForQuickfix()
     let l:cur_win_id=win_getid()
     if win_id2tabwin(t:redirWinid)[1] != 0 && t:redirWinid != l:cur_win_id
-        call win_gotoid(t:redirWinid)
-        close
+        call win_execute(t:redirWinid, 'close')
     end
     let t:redirPreviewWinid=win_getid(winnr('#'),tabpagenr())
     let t:redirWinid = l:cur_win_id
@@ -1331,5 +1323,5 @@ nnoremap <silent> <Space>e :call <SID>ToggleTree()<CR>
 " +-----------------------------------------------+
 
 
-let g:config_path=expand("<sfile>:p:h")
-exec "source ".g:config_path."/lsp.lua"
+" let g:config_path=expand("<sfile>:p:h")
+" exec "source ".g:config_path."/lsp.lua"
