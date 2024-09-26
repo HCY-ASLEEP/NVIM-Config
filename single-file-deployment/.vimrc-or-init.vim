@@ -439,20 +439,19 @@ function! s:RedirCdWithPathString(path)
     echo getcwd()
 endfunction
 
-function! s:RedirCdWithNetrw()
-    if &filetype !=# 'netrw'
-        echo ">> Not in netrw window!"
+function! s:RedirCdWithTreeFileExplorer()
+    if bufname() !=# s:treeBufname
+        echo ">> Not in tree file explorer window!"
         return
     endif
-    let t:rootDir=netrw#Call('NetrwTreePath', w:netrw_treetop)
-    let t:rootDir=substitute(t:rootDir, '.$', '', '')
+    let t:rootDir=expand(s:GetFullPath(line('.')))
     exec 'tc '.t:rootDir
     echo t:rootDir
 endfunction
 
 function! s:RedirCd(path)
     if empty(a:path)
-        call s:RedirCdWithNetrw()
+        call s:RedirCdWithTreeFileExplorer()
         return
     endif
     call s:RedirCdWithPathString(a:path)
@@ -1243,6 +1242,8 @@ function! s:SetTreeOptions()
     setlocal tabstop=2 shiftwidth=2 softtabstop=2 
     setlocal list listchars=multispace:\|\ 
     setlocal nonumber norelativenumber
+    setlocal cursorline
+    setlocal cursorlineopt=line
     setlocal autoread
     exec "file ".s:treeBufname
     augroup switchContext
