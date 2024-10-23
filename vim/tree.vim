@@ -1,5 +1,5 @@
 let s:fullPaths = []
-let s:fileTreeIndent = '    '
+let s:fileTreeIndent = '  '
 let s:closedDir = -1
 let s:openedDir = 1
 let s:nodesCache = {}
@@ -64,13 +64,19 @@ function! s:IsInNodesCache(path)
     return has_key(s:nodesCache, a:path)
 endfunction
 
+function! s:ClearAllCache()
+    let s:nodesCache = {}
+    let s:fullPathsCache = {}
+    let s:kidCountCache = {}
+endfunction
+
 function! s:ClearCache(path)
     call remove(s:nodesCache, a:path)
     call remove(s:fullPathsCache, a:path)
     call remove(s:kidCountCache, a:path)
 endfunction
 
-function! s:ChangeKidCount(path, n, depth, operate)
+function! s:ChangeKidCountUpward(path, n, depth, operate)
     if a:depth < s:topDirDepth 
         return 
     endif
@@ -83,7 +89,7 @@ function! s:ChangeKidCount(path, n, depth, operate)
         let s:kidCountCache[a:path] += a:n
     endif
     let l:upperDir = fnamemodify(a:path, ':h')
-    call s:ChangeKidCount(l:upperDir, a:n, a:depth - 1, a:operate)
+    call s:ChangeKidCountUpward(l:upperDir, a:n, a:depth - 1, a:operate)
 endfunction
 
 function! s:ZeroKidCount(path)
@@ -175,7 +181,7 @@ function! s:OpenDir()
         let l:fullPaths = s:GetFullPathsCache(l:nodeId)
         let l:kidCount = len(l:fullPaths)
         call s:ZeroKidCount(l:nodeId)
-        call s:ChangeKidCount(l:nodeId, l:kidCount, l:dirDepth, s:plusKidCountOp)
+        call s:ChangeKidCountUpward(l:nodeId, l:kidCount, l:dirDepth, s:plusKidCountOp)
         call s:WriteCachedNodes(l:nodes, l:curLine, l:kidCount, l:indents)
         call s:WriteFullPaths(l:fullPaths, l:curLine - 1)
         exec l:curLine . "normal! ^"
@@ -191,7 +197,7 @@ function! s:OpenDir()
     endif
     setlocal modifiable
     let l:kidCount = len(l:nodes)
-    call s:ChangeKidCount(l:nodeId, l:kidCount, l:dirDepth, s:plusKidCountOp)
+    call s:ChangeKidCountUpward(l:nodeId, l:kidCount, l:dirDepth, s:plusKidCountOp)
     call s:WriteNodes(l:nodes, l:curLine, l:indents)
     call s:WriteFullPaths(l:fullPaths, l:curLine - 1)
     exec l:curLine . "normal! ^"
@@ -207,7 +213,7 @@ function! s:CloseDir()
     let l:kidCount = s:GetKidCount(l:nodeId)
     let l:startLine = l:curLine + 1
     let l:endLine = l:curLine + l:kidCount
-    call s:ChangeKidCount(l:nodeId, l:kidCount, l:dirDepth, s:minusKidCountOp)
+    call s:ChangeKidCountUpward(l:nodeId, l:kidCount, l:dirDepth, s:minusKidCountOp)
     call s:DeleteNodes(l:nodeId, l:startLine, l:endLine)
     call s:DeleteFullPaths(l:nodeId, l:startLine - 2, l:endLine - 2)
     exec l:curLine . "normal! ^"
@@ -223,8 +229,8 @@ function! s:OpenFile()
     endif
     let l:curWinid = win_getid()
     if win_id2tabwin(s:treePreWinid)[1] == 0
-        to vnew 
-        exec "edit ".l:nodeId
+        bot vnew 
+        silent exec "edit ".l:nodeId
         echo l:nodeId
         return
     endif
@@ -232,7 +238,7 @@ function! s:OpenFile()
     if expand(bufname()) ==# l:nodeId
         return
     endif
-    exec "edit ".l:nodeId
+    silent exec "edit ".l:nodeId
     echo l:nodeId
 endfunction
 
@@ -256,6 +262,13 @@ function! s:Upper()
     exec 2
 endfunction
 
+function! s:CdCurDir()
+    let l:curLine = line('.')
+    let l:nodeId = s:fullPaths[l:curLine - 2]
+    call s:ClearAllCache()
+    call s:InitTree(l:nodeId)
+endfunction
+
 function! s:RefreshDir()
     let l:curLine = line('.')
     if l:curLine == 1
@@ -273,12 +286,6 @@ function! s:RefreshDir()
     call s:OpenDir()
 endfunction
 
-function! s:ClearAllCache()
-    let s:nodesCache = {}
-    let s:fullPathsCache = {}
-    let s:kidCountCache = {}
-endfunction
-
 function! s:HighlightTree()
     syntax clear
     syntax match Directory ".*\/$"
@@ -288,6 +295,7 @@ endfunction
 function! s:MapTree()
     nnoremap <buffer><silent> <CR> :call <SID>ToggleNode()<CR>
     nnoremap <buffer><silent> r :call <SID>RefreshDir()<CR>
+    nnoremap <buffer><silent> c :call <SID>CdCurDir()<CR>
 endfunction
 
 function! s:BeforeEnterTree()
@@ -302,12 +310,19 @@ endfunction
 
 function! s:SetTreeOptions()
     setlocal buftype=nofile bufhidden=hide nobuflisted noswapfile
+    setlocal tabstop=2 shiftwidth=2 softtabstop=2 
+    setlocal list listchars=multispace:\|\ 
+    setlocal nonumber norelativenumber
+    setlocal cursorline
+    setlocal cursorlineopt=line
     setlocal autoread
     exec "file ".s:treeBufname
     augroup switchContext
         autocmd!
         autocmd BufEnter <buffer> call s:BeforeEnterTree()
         autocmd BufLeave <buffer> call s:AfterLeaveTree()
+        autocmd BufHidden <buffer> let s:treeWinid = -1
+        autocmd TabLeave * if s:treeWinid != -1 | call s:ToggleTree() | let s:treeWinid = -1 | endif
     augroup END
 endfunction
 
@@ -330,6 +345,7 @@ function! s:InitTree(path)
 endfunction
 
 function! s:ToggleNode()
+    echo
     let l:curLine = line('.')
     if l:curLine == 1
         call s:Upper()
@@ -350,7 +366,7 @@ endfunction
 function! s:ToggleTree()
     let s:treePreWinid = win_getid()
     if s:treeBufnr == -1
-        bot vnew
+        to vnew
         call s:BeforeEnterTree()
         call s:InitTree(getcwd())
         call s:MapTree()
@@ -360,14 +376,13 @@ function! s:ToggleTree()
         return
     endif
     if s:treeWinid == -1
-        bot vnew
+        to vnew
         exec "buffer ".s:treeBufname
         let s:treeWinid = win_getid()
         return
     endif
     call win_gotoid(s:treeWinid)
     close
-    let s:treeWinid = -1
 endfunction
 
 set splitright
