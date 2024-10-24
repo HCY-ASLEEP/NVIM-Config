@@ -268,98 +268,116 @@ local refresh_outline_buf = -1
 
 -- symbol kind names
 local kind_names = {
-    "File",
-    "Module",
-    "Namespace",
-    "Package",
-    "Class",
-    "Method",
-    "Property",
-    "Field",
-    "Constructor",
-    "Enum",
-    "Interface",
-    "Function",
-    "Variable",
-    "Constant",
-    "String",
-    "Number",
-    "Boolean",
-    "Array",
-    "Object",
-    "Key",
-    "Null",
-    "EnumMember",
-    "Struct",
-    "Event",
-    "Operator",
-    "TypeParameter",
-    "Component",
-    "Fragment",
+    [1]  = "File",
+    [2]  = "Module",
+    [3]  = "Namespace",
+    [4]  = "Package",
+    [5]  = "Class",
+    [6]  = "Method",
+    [7]  = "Property",
+    [8]  = "Field",
+    [9]  = "Constructor",
+    [10] = "Enum",
+    [11] = "Interface",
+    [12] = "Function",
+    [13] = "Variable",
+    [14] = "Constant",
+    [15] = "String",
+    [16] = "Number",
+    [17] = "Boolean",
+    [18] = "Array",
+    [19] = "Object",
+    [20] = "Key",
+    [21] = "Null",
+    [22] = "EnumMember",
+    [23] = "Struct",
+    [24] = "Event",
+    [25] = "Operator",
+    [26] = "TypeParameter",
+    [27] = "Component",
+    [28] = "Fragment",
+
+    -- ccls
+    [252] = "TypeAlias",
+    [253] = "Parameter",
+    [254] = "StaticMethod",
+    [255] = "Macro"
 }
 
 -- icon highlight groups corresponding to the name of the symbol kind
 local icon_colors = {
-    "SymbolIcon_File",
-    "SymbolIcon_Module",
-    "SymbolIcon_Namespace",
-    "SymbolIcon_Package",
-    "SymbolIcon_Class",
-    "SymbolIcon_Method",
-    "SymbolIcon_Property",
-    "SymbolIcon_Field",
-    "SymbolIcon_Constructor",
-    "SymbolIcon_Enum",
-    "SymbolIcon_Interface",
-    "SymbolIcon_Function",
-    "SymbolIcon_Variable",
-    "SymbolIcon_Constant",
-    "SymbolIcon_String",
-    "SymbolIcon_Number",
-    "SymbolIcon_Boolean",
-    "SymbolIcon_Array",
-    "SymbolIcon_Object",
-    "SymbolIcon_Key",
-    "SymbolIcon_Null",
-    "SymbolIcon_EnumMember",
-    "SymbolIcon_Struct",
-    "SymbolIcon_Event",
-    "SymbolIcon_Operator",
-    "SymbolIcon_TypeParameter",
-    "SymbolIcon_Component",
-    "SymbolIcon_Fragment",
+    [1]  = "SymbolIcon_File",
+    [2]  = "SymbolIcon_Module",
+    [3]  = "SymbolIcon_Namespace",
+    [4]  = "SymbolIcon_Package",
+    [5]  = "SymbolIcon_Class",
+    [6]  = "SymbolIcon_Method",
+    [7]  = "SymbolIcon_Property",
+    [8]  = "SymbolIcon_Field",
+    [9]  = "SymbolIcon_Constructor",
+    [10] = "SymbolIcon_Enum",
+    [11] = "SymbolIcon_Interface",
+    [12] = "SymbolIcon_Function",
+    [13] = "SymbolIcon_Variable",
+    [14] = "SymbolIcon_Constant",
+    [15] = "SymbolIcon_String",
+    [16] = "SymbolIcon_Number",
+    [17] = "SymbolIcon_Boolean",
+    [18] = "SymbolIcon_Array",
+    [19] = "SymbolIcon_Object",
+    [20] = "SymbolIcon_Key",
+    [21] = "SymbolIcon_Null",
+    [22] = "SymbolIcon_EnumMember",
+    [23] = "SymbolIcon_Struct",
+    [24] = "SymbolIcon_Event",
+    [25] = "SymbolIcon_Operator",
+    [26] = "SymbolIcon_TypeParameter",
+    [27] = "SymbolIcon_Component",
+    [28] = "SymbolIcon_Fragment",
+
+    -- ccls
+    [252] ="SymbolIcon_TypeAlias",
+    [253] ="SymbolIcon_Parameter",
+    [254] ="SymbolIcon_StaticMethod",
+    [255] ="SymbolIcon_Macro"
 }
 
 -- icon fonts corresponding to the name of the symbol kind
 local icons = {
-    " F ",
-    " M ",
-    " N ",
-    " P ",
-    " C ",
-    " M ",
-    " P ",
-    " F ",
-    " C ",
-    " E ",
-    " I ",
-    " F ",
-    " V ",
-    " C ",
-    " S ",
-    " N ",
-    " B ",
-    " A ",
-    " O ",
-    " K ",
-    " N ",
-    " E ",
-    " S ",
-    " E ",
-    " O ",
-    " T ",
-    " C ",
-    " F ",
+    [1]  = " F ",
+    [2]  = " M ",
+    [3]  = " N ",
+    [4]  = " P ",
+    [5]  = " C ",
+    [6]  = " M ",
+    [7]  = " P ",
+    [8]  = " F ",
+    [9]  = " C ",
+    [10] = " E ",
+    [11] = " I ",
+    [12] = " F ",
+    [13] = " V ",
+    [14] = " C ",
+    [15] = " S ",
+    [16] = " N ",
+    [17] = " B ",
+    [18] = " A ",
+    [19] = " O ",
+    [20] = " K ",
+    [21] = " N ",
+    [22] = " E ",
+    [23] = " S ",
+    [24] = " E ",
+    [25] = " O ",
+    [26] = " T ",
+    [27] = " C ",
+    [28] = " F ",
+
+    -- ccls
+    [252] =" T ",
+    [253] =" P ",
+    [254] =" S ",
+    [255] =" M ",
 }
 
 -- indent marker fonts
@@ -372,40 +390,43 @@ local markers = {
 
 -- highlight groups
 vim.cmd([[
-    hi def link FocusedSymbol CursorLine 
+    hi def link FocusedSymbol CursorLine
     hi def link SymbolIndent Comment
     hi def link SymbolName Normal
     hi def link SymbolDetial Directory
     hi def link SymbolKindName Comment
-    hi def link SymbolIcon_File Typedef
-    hi def link SymbolIcon_Package Identifier
-    hi def link SymbolIcon_Class Constant
+    hi def link SymbolIcon_File Identifier
+    hi def link SymbolIcon_Module Include
+    hi def link SymbolIcon_Namespace Include
+    hi def link SymbolIcon_Package Include
+    hi def link SymbolIcon_Class Type
     hi def link SymbolIcon_Method Function
-    hi def link SymbolIcon_Field Type
-    hi def link SymbolIcon_Array Boolean
-    " Self link
-    hi def link SymbolIcon_Module SymbolIcon_File
-    hi def link SymbolIcon_Namespace SymbolIcon_File
-    hi def link SymbolIcon_Property SymbolIcon_File
-    hi def link SymbolIcon_Constructor SymbolIcon_Method
-    hi def link SymbolIcon_Enum SymbolIcon_Class
-    hi def link SymbolIcon_Interface SymbolIcon_Field
-    hi def link SymbolIcon_Function SymbolIcon_Method
-    hi def link SymbolIcon_Variable SymbolIcon_Field
-    hi def link SymbolIcon_Constant SymbolIcon_File
-    hi def link SymbolIcon_String SymbolIcon_Method
-    hi def link SymbolIcon_Number SymbolIcon_Class
-    hi def link SymbolIcon_Boolean SymbolIcon_File
-    hi def link SymbolIcon_Object SymbolIcon_File
-    hi def link SymbolIcon_Key SymbolIcon_File
-    hi def link SymbolIcon_Null SymbolIcon_File
-    hi def link SymbolIcon_EnumMember SymbolIcon_Class
-    hi def link SymbolIcon_Struct SymbolIcon_File
-    hi def link SymbolIcon_Event SymbolIcon_Class
-    hi def link SymbolIcon_Operator SymbolIcon_File
-    hi def link SymbolIcon_TypeParameter SymbolIcon_File
-    hi def link SymbolIcon_Component SymbolIcon_File
-    hi def link SymbolIcon_Fragment SymbolIcon_File
+    hi def link SymbolIcon_Property Identifier
+    hi def link SymbolIcon_Field Identifier
+    hi def link SymbolIcon_Constructor Spetial
+    hi def link SymbolIcon_Enum Type
+    hi def link SymbolIcon_Interface Type
+    hi def link SymbolIcon_Function Function
+    hi def link SymbolIcon_Variable Constant
+    hi def link SymbolIcon_Constant Constant
+    hi def link SymbolIcon_String String
+    hi def link SymbolIcon_Number Number
+    hi def link SymbolIcon_Boolean Boolean
+    hi def link SymbolIcon_Array Constant
+    hi def link SymbolIcon_Object Type
+    hi def link SymbolIcon_Key Type
+    hi def link SymbolIcon_Null Type
+    hi def link SymbolIcon_EnumMember Identifier
+    hi def link SymbolIcon_Struct Structure
+    hi def link SymbolIcon_Event Type
+    hi def link SymbolIcon_Operator Identifier
+    hi def link SymbolIcon_TypeParameter Identifier
+    hi def link SymbolIcon_Component Function
+    hi def link SymbolIcon_Fragment Constant
+    hi def link SymbolIcon_TypeAlias Type
+    hi def link SymbolIcon_Parameter Identifier
+    hi def link SymbolIcon_StaticMethod Function
+    hi def link SymbolIcon_Macro Function
 ]])
 
 -- interfaces that need to override
@@ -431,14 +452,14 @@ local function get_win_buf_by(buf_name)
 end
 
 -- init vars
--- @override init_symbol_infos 
+-- @override init_symbol_infos
 local function sorted_init_symbol_infos()
-    for i = 1, #kind_names do
+    for i in pairs(kind_names) do
         symbol_infos[i] = {}
     end
 end
 
--- @override init_symbol_infos 
+-- @override init_symbol_infos
 local function nested_init_symbol_infos()
     symbol_infos = {}
 end
@@ -454,12 +475,12 @@ local function inits(source_buf)
 end
 
 -- parse lsp response to get the symbol_infos
--- @override add_symbol_info 
+-- @override add_symbol_info
 local function sorted_add_symbol_info(kind, t)
     symbol_infos[kind][#symbol_infos[kind] + 1] = t
 end
 
--- @override add_symbol_info 
+-- @override add_symbol_info
 local function nested_add_symbol_info(kind, t)
     symbol_infos[#symbol_infos + 1] = t
 end
@@ -591,16 +612,16 @@ local function get_indent_markers(cur, prev, indent_markers)
 end
 
 -- splicing of each line of symbol outline content
--- @override splice 
+-- @override splice
 local function sorted_splice()
     local cur_sequence = 1
-    for i = 1, #kind_names do
+    for i in pairs(kind_names) do
         cur_sequence = merge_same_kind(i, cur_sequence)
     end
     vim.t.jump_positions = jump_positions
 end
 
--- @override splice 
+-- @override splice
 local function nested_splice()
     local indent_markers = {}
     local prev = {}
@@ -610,11 +631,15 @@ local function nested_splice()
     local detail = 4
     local start_row = 5
     local start_column = 6
+    -- vim.notify(vim.inspect(symbol_infos), vim.log.levels.ERROR)
     for i = 1, #symbol_infos do
         local cur = symbol_infos[i]
         indent_markers = get_indent_markers(cur, prev, indent_markers)
         local indent_splicing = table.concat(indent_markers)
         local cur_kind = cur[kind]
+        -- vim.notify("cur_kind: "..tostring(cur_kind), vim.log.levels.ERROR)
+        -- vim.notify("cur: ", vim.log.levels.ERROR)
+        -- vim.notify(vim.inspect(cur), vim.log.levels.ERROR)
         presentings[i] = table.concat({
             indent_splicing,
             icons[cur_kind],
@@ -678,12 +703,12 @@ local function write(outline_buf)
 end
 
 -- highlight the symbol outline
--- @override get_icon_color_index 
+-- @override get_icon_color_index
 local function sorted_get_icon_color_index(line, kind)
     return presentings_line_kinds[line]
 end
 
--- @override get_icon_color_index 
+-- @override get_icon_color_index
 local function nested_get_icon_color_index(line, kind)
     return symbol_infos[line][kind]
 end
@@ -860,5 +885,3 @@ end, {})
 vim.api.nvim_create_user_command("OpenSymbolOutlineSorted", function()
     activate_sorted_view(0)
 end, {})
-
-
