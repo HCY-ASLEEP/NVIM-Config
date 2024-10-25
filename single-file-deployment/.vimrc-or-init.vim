@@ -949,7 +949,7 @@ let s:dirSeparator = '/'
 let s:treeWinid = -1
 let s:treeBufnr = -1
 let s:treePreWinid = -1
-let s:treeBufname = "Tree explorer for files and dirs"
+let s:treeBufname = "Tree Explorer -> Files & Dirs"
 let s:treeUnamedReg = ""
 let s:treeSearchReg = ""
 
