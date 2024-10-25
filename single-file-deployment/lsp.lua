@@ -7,173 +7,68 @@
 
 local vim = vim
 
-if vim.fn.executable("/root/ccls/Release/ccls") == 1 then
-    local clangd_lsp = vim.api.nvim_create_augroup("ccls", { clear = true })
-    vim.api.nvim_create_autocmd("FileType", {
-        pattern = { 'c', 'cpp', 'objc', 'objcpp', 'cuda' },
-        callback = function()
-            local root_dir = vim.fs.root(0, {'compile_commands.json', '.ccls', '.git'})
-            local client = vim.lsp.start({
-                name = "ccls",
-                cmd = { "/root/ccls/Release/ccls" },
-                root_dir = root_dir,
-                single_file_support = false,
-                offset_encoding = 'utf-32'
-            })
-            -- vim.lsp.buf_attach_client(0, client)
-        end,
-        group = ccls,
-    })
-end
 
--- if vim.fn.executable("clangd") == 1 then
---     local clangd_lsp = vim.api.nvim_create_augroup("clangd_lsp", { clear = true })
---     vim.api.nvim_create_autocmd("FileType", {
---         pattern = { "c", "cpp", "objc", "objcpp", "cuda", "proto" },
---         callback = function()
---             local root_dir = vim.fs.root(0, {
---                 ".clangd",
---                 ".clang-tidy",
---                 ".clang-format",
---                 "compile_commands.json",
---                 "compile_flags.txt",
---                 "configure.ac",
---                 ".git"
---             })
---             local client = vim.lsp.start({
---                 name = "clangd",
---                 cmd = { "clangd" },
---                 root_dir = root_dir,
---                 single_file_support = true,
---                 capabilities = {
---                     textDocument = {
---                         completion = {
---                             editsNearCursor = true,
---                         },
---                     },
---                     offsetEncoding = { "utf-8", "utf-16" },
---                 },
---             })
---             -- vim.lsp.buf_attach_client(0, client)
---         end,
---         group = clangd_lsp,
---     })
--- end
-
-if vim.fn.executable("pyright-langserver") == 1 then
-    local pyright_lsp = vim.api.nvim_create_augroup("pyright_lsp", { clear = true })
-    vim.api.nvim_create_autocmd("FileType", {
-        pattern = { "python" },
-        callback = function()
-            local root_dir = vim.fs.root(0, {
-                "pyproject.toml",
-                "setup.py",
-                "setup.cfg",
-                "requirements.txt",
-                "Pipfile",
-                "pyrightconfig.json",
-                ".git",
-            })
-            local client = vim.lsp.start({
-                name = "pyright",
-                cmd = { "pyright-langserver", "--stdio" },
-                root_dir = root_dir,
-                settings = {
-                    python = {
-                        analysis = {
-                            autoSearchPaths = true,
-                            useLibraryCodeForTypes = true,
-                            diagnosticMode = "workspace",
-                        },
-                    },
+local servers = {
+    ccls = {
+        cmd = { '/root/ccls/Release/ccls' },
+        filetypes = { 'c', 'cpp', 'objc', 'objcpp', 'cuda' },
+        root_dir = vim.fs.root(0, {'compile_commands.json', '.ccls', '.git'}),
+        offset_encoding = 'utf-32',
+        -- ccls does not support sending a null root directory
+        single_file_support = false,
+    },
+    
+--[[
+    clangd = {
+        cmd = { 'clangd' },
+        filetypes = { 'c', 'cpp', 'objc', 'objcpp', 'cuda', 'proto' },
+        root_dir = vim.fs.root(0, {
+            '.clangd',
+            '.clang-tidy',
+            '.clang-format',
+            'compile_commands.json',
+            'compile_flags.txt',
+            'configure.ac', -- AutoTools
+            '.git'
+        })
+        single_file_support = true,
+        capabilities = {
+            textDocument = {
+                completion = {
+                    editsNearCursor = true,
                 },
-            })
-            -- vim.lsp.buf_attach_client(0, client)
-        end,
-        group = pyright_lsp,
-    })
+            },
+          offsetEncoding = { 'utf-8', 'utf-16' },
+        },
+    },
+--]]
+
+    lua_ls = {
+        name = "lua-language-server",
+        cmd = { "lua-language-server" },
+        root_dir = vim.fs.root(0, { ".luarc.json", ".luarc.jsonc", ".luacheckrc", ".stylua.toml", "stylua.toml", "selene.toml", "selene.yml", ".git" }),
+        filetypes = { "lua" },
+    },
+    gopls = {
+        name = "gopls",
+        cmd = { "gopls" },
+        root_dir = vim.fs.root(0, { "go.work", "go.mod", ".git" }),
+        filetypes = { "go", "gomod", "gowork", "gotmpl" },
+    },
+}
+local group = vim.api.nvim_create_augroup("UserLspStart", { clear = true })
+for _, config in pairs(servers) do
+    if vim.fn.executable(config.cmd[1]) ~= 0 then
+        vim.api.nvim_create_autocmd("FileType", {
+            group = group,
+            pattern = config.filetypes,
+            callback = function (ev)
+                vim.lsp.start(config, { bufnr = ev.buf })
+            end,
+        })
+    end
 end
 
-if vim.fn.executable("vim-language-server") == 1 then
-    local vimls_lsp = vim.api.nvim_create_augroup("vimls_lsp", { clear = true })
-    vim.api.nvim_create_autocmd("FileType", {
-        pattern = { "vim" },
-        callback = function()
-            local root_dir = vim.fs.root(0, {
-                ".git",
-            })
-            local client = vim.lsp.start({
-                name = "vimls",
-                cmd = { "vim-language-server", "--stdio" },
-                root_dir = root_dir,
-                init_options = {
-                    isNeovim = true,
-                    iskeyword = "@,48-57,_,192-255,-#",
-                    vimruntime = "",
-                    runtimepath = "",
-                    diagnostic = { enable = true },
-                    indexes = {
-                        runtimepath = true,
-                        gap = 100,
-                        count = 3,
-                        projectRootPatterns = { "runtime", "nvim", ".git", "autoload", "plugin" },
-                    },
-                    suggest = { fromVimruntime = true, fromRuntimepath = true },
-                },
-            })
-            -- vim.lsp.buf_attach_client(0, client)
-        end,
-        group = vimls_lsp,
-    })
-end
-
-if vim.fn.executable("lua-language-server") == 1 then
-    local luals_lsp = vim.api.nvim_create_augroup("luals_lsp", { clear = true })
-    vim.api.nvim_create_autocmd("FileType", {
-        pattern = { "lua" },
-        callback = function()
-            local root_dir = vim.fs.root(0, {
-                ".luarc.json",
-                ".luarc.jsonc",
-                ".luacheckrc",
-                ".stylua.toml",
-                "stylua.toml",
-                "selene.toml",
-                "selene.yml",
-                ".git",
-            })
-            local client = vim.lsp.start({
-                name = "luals",
-                cmd = { "lua-language-server" },
-                root_dir = root_dir,
-                settings = { Lua = { telemetry = { enable = false } } },
-            })
-            -- vim.lsp.buf_attach_client(0, client)
-        end,
-        group = luals_lsp,
-    })
-end
-
-if vim.fn.executable("gopls") == 1 then
-    local golang_lsp = vim.api.nvim_create_augroup("golang_lsp", { clear = true })
-    vim.api.nvim_create_autocmd("FileType", {
-        pattern = { "go", "gomod", "gowork", "gotmpl" },
-        callback = function()
-            local root_dir = vim.fs.root(0, {
-                "go.work",
-                "go.mod",
-                ".git",
-            })
-            local client = vim.lsp.start({
-                name = "gopls",
-                cmd = { "gopls" },
-                root_dir = root_dir,
-            })
-            -- vim.lsp.buf_attach_client(0, client)
-        end,
-        group = golang_lsp,
-    })
-end
 
 vim.api.nvim_command("highlight NormalFloat ctermbg=darkgray")
 
@@ -579,7 +474,6 @@ local function get_indent_markers(cur, prev, indent_markers)
     local middle = markers[2]
     local vert = markers[3]
     local spaces = markers[4]
-    --local indent_splicing = ""
     local prev_indent = prev[indent_num]
     local cur_indent = cur[indent_num]
     local prev_is_end = prev[is_end]
