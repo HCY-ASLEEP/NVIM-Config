@@ -30,7 +30,7 @@ local servers = {
             'compile_flags.txt',
             'configure.ac', -- AutoTools
             '.git'
-        })
+        }),
         single_file_support = true,
         capabilities = {
             textDocument = {
