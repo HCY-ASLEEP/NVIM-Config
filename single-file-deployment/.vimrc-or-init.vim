@@ -258,19 +258,19 @@ nnoremap <silent><S-Tab> :tabnext<CR>
 
 " spetial chars
 set fillchars+=eob:\ 
-set fillchars+=vert:\| 
+set fillchars+=vert:\│
 
 set list
-set listchars=tab:\|\ ,eol:\ 
+set listchars=tab:\┊\ ,eol:\ 
 set listchars+=trail:\ 
-set listchars+=leadmultispace:\|\ \ \ 
-set listchars+=precedes:<
-set listchars+=extends:>
+set listchars+=leadmultispace:\┊\ \ \ 
+set listchars+=precedes:…
+set listchars+=extends:…
 
 " Break line at predefined characters
 set linebreak
 " Character to show before the lines that have been soft-wrapped
-set showbreak=\ \^\ 
+set showbreak=\ \↪\ 
 
 set nowrap
 
