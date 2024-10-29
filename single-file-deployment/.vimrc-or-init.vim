@@ -1041,7 +1041,7 @@ function! s:AddIndents(startLine, endLine, indents)
     silent exec a:startLine . ',' . a:endLine . 's/^/' . a:indents .'/'
 endfunction
 
-function! s:RemoveIndents(startLine, endLine, endCol)
+function! s:DeleteIndents(startLine, endLine, endCol)
     if a:endCol == 0
         return
     endif
@@ -1067,7 +1067,7 @@ function! s:WriteCachedNodes(block, startLine, lineLength, indents)
     let @" = a:block
     silent exec "normal p"
     exec l:startLine . "normal! ^"
-    call s:RemoveIndents(l:startLine, l:endLine, col('.') - 1)
+    call s:DeleteIndents(l:startLine, l:endLine, col('.') - 1)
     call s:AddIndents(l:startLine, l:endLine, a:indents)
 endfunction
 
