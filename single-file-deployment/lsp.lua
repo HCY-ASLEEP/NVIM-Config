@@ -9,6 +9,7 @@ local vim = vim
 
 
 local servers = {
+    --[[
     ccls = {
         cmd = { '/root/ccls/Release/ccls' },
         filetypes = { 'c', 'cpp', 'objc', 'objcpp', 'cuda' },
@@ -17,8 +18,8 @@ local servers = {
         -- ccls does not support sending a null root directory
         single_file_support = false,
     },
+    --]]
     
---[[
     clangd = {
         cmd = { 'clangd' },
         filetypes = { 'c', 'cpp', 'objc', 'objcpp', 'cuda', 'proto' },
@@ -41,7 +42,6 @@ local servers = {
           offsetEncoding = { 'utf-8', 'utf-16' },
         },
     },
---]]
 
     lua_ls = {
         name = "lua-language-server",
@@ -327,7 +327,7 @@ vim.cmd([[
 -- interfaces that need to override
 local init_symbol_infos = function() end
 local add_symbol_info = function(kind, t) end
-local splice = function() end
+local join = function() end
 local get_icon_color_index = function(line, kind) end
 
 -- get window handle by buffer name in the current tabpage
@@ -348,14 +348,14 @@ end
 
 -- init vars
 -- @override init_symbol_infos
-local function sorted_init_symbol_infos()
+local function init_sorted_symbol_infos()
     for i in pairs(kind_names) do
         symbol_infos[i] = {}
     end
 end
 
 -- @override init_symbol_infos
-local function nested_init_symbol_infos()
+local function init_nested_symbol_infos()
     symbol_infos = {}
 end
 
@@ -371,12 +371,12 @@ end
 
 -- parse lsp response to get the symbol_infos
 -- @override add_symbol_info
-local function sorted_add_symbol_info(kind, t)
+local function add_sorted_symbol_info(kind, t)
     symbol_infos[kind][#symbol_infos[kind] + 1] = t
 end
 
 -- @override add_symbol_info
-local function nested_add_symbol_info(kind, t)
+local function add_nested_symbol_info(kind, t)
     symbol_infos[#symbol_infos + 1] = t
 end
 
@@ -506,8 +506,8 @@ local function get_indent_markers(cur, prev, indent_markers)
 end
 
 -- splicing of each line of symbol outline content
--- @override splice
-local function sorted_splice()
+-- @override join
+local function join_sorted()
     local cur_sequence = 1
     for i in pairs(kind_names) do
         cur_sequence = merge_same_kind(i, cur_sequence)
@@ -515,8 +515,8 @@ local function sorted_splice()
     vim.t.jump_positions = jump_positions
 end
 
--- @override splice
-local function nested_splice()
+-- @override join
+local function join_nested()
     local indent_markers = {}
     local prev = {}
     -- symbol_infos indexes
@@ -525,17 +525,13 @@ local function nested_splice()
     local detail = 4
     local start_row = 5
     local start_column = 6
-    -- vim.notify(vim.inspect(symbol_infos), vim.log.levels.ERROR)
     for i = 1, #symbol_infos do
         local cur = symbol_infos[i]
         indent_markers = get_indent_markers(cur, prev, indent_markers)
-        local indent_splicing = table.concat(indent_markers)
+        local indent_join = table.concat(indent_markers)
         local cur_kind = cur[kind]
-        -- vim.notify("cur_kind: "..tostring(cur_kind), vim.log.levels.ERROR)
-        -- vim.notify("cur: ", vim.log.levels.ERROR)
-        -- vim.notify(vim.inspect(cur), vim.log.levels.ERROR)
         presentings[i] = table.concat({
-            indent_splicing,
+            indent_join,
             icons[cur_kind],
             " ",
             cur[name],
@@ -546,7 +542,7 @@ local function nested_splice()
             "] ",
         })
         presentings_item_lens[i] = {
-            string.len(indent_splicing),
+            string.len(indent_join),
             string.len(icons[cur_kind]),
             string.len(cur[name]) + 1,
             string.len(cur[detail]),
@@ -598,12 +594,12 @@ end
 
 -- highlight the symbol outline
 -- @override get_icon_color_index
-local function sorted_get_icon_color_index(line, kind)
+local function get_sorted_icon_color_index(line, kind)
     return presentings_line_kinds[line]
 end
 
 -- @override get_icon_color_index
-local function nested_get_icon_color_index(line, kind)
+local function get_nested_icon_color_index(line, kind)
     return symbol_infos[line][kind]
 end
 
@@ -744,32 +740,41 @@ function SYMBOL_OUTLINE.open_outline(source_win)
             end
             inits(source_buf)
             parse(response, 0)
-            splice()
+            join()
             local outline_win, outline_buf = open_outline_win()
             write(outline_buf)
             highlight(outline_buf)
             locate_open_position_in(outline_win)
             vim.keymap.set("n", "<CR>", jump, { noremap = true, silent = true, buffer = true })
             vim.keymap.set("n", "r", refresh, { noremap = true, silent = true, buffer = true })
+            local group = vim.api.nvim_create_augroup("FocusedSymbolAugroup", { clear = true })
+            vim.api.nvim_create_autocmd("BufWinLeave",{
+                group = group,
+                buffer = 0,
+                callback = function ()
+                    local _, jump_buf = get_win_buf_by(vim.t.jump_buf_name)
+                    vim.api.nvim_buf_clear_namespace(jump_buf, vim.t.focused_symbol_ns, 0, -1)
+                end,
+            })
         end
     )
 end
 
 local function activate_sorted_view(source_win)
     outline_type = "sorted"
-    init_symbol_infos = sorted_init_symbol_infos
-    add_symbol_info = sorted_add_symbol_info
-    splice = sorted_splice
-    get_icon_color_index = sorted_get_icon_color_index
+    init_symbol_infos = init_sorted_symbol_infos
+    add_symbol_info = add_sorted_symbol_info
+    join = join_sorted
+    get_icon_color_index = get_sorted_icon_color_index
     SYMBOL_OUTLINE.open_outline(source_win)
 end
 
 local function activate_nested_view(source_win)
     outline_type = "nested"
-    init_symbol_infos = nested_init_symbol_infos
-    add_symbol_info = nested_add_symbol_info
-    splice = nested_splice
-    get_icon_color_index = nested_get_icon_color_index
+    init_symbol_infos = init_nested_symbol_infos
+    add_symbol_info = add_nested_symbol_info
+    join = join_nested
+    get_icon_color_index = get_nested_icon_color_index
     SYMBOL_OUTLINE.open_outline(source_win)
 end
 
