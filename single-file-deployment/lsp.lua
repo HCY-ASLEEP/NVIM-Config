@@ -33,7 +33,7 @@ local servers = {
         single_file_support = true,
     },
     clangd = {
-        cmd = { '/root/llvm-project/build/bin/clangd' },
+        cmd = { 'clangd' },
         filetypes = { 'c', 'cpp', 'objc', 'objcpp', 'cuda', 'proto' },
         root_dir = vim.fs.root(0, {
             '.clangd',
