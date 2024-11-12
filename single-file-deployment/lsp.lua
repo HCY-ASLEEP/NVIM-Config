@@ -19,9 +19,21 @@ local servers = {
         single_file_support = false,
     },
     --]]
-    
+    jedi = {
+        cmd = { 'jedi-language-server' },
+        filetypes = { 'python' },
+        root_dir = vim.fs.root(0, {
+            'pyproject.toml',
+            'setup.py',
+            'setup.cfg',
+            'requirements.txt',
+            'Pipfile',
+            '.git',
+        }),
+        single_file_support = true,
+    },
     clangd = {
-        cmd = { 'clangd' },
+        cmd = { '/root/llvm-project/build/bin/clangd' },
         filetypes = { 'c', 'cpp', 'objc', 'objcpp', 'cuda', 'proto' },
         root_dir = vim.fs.root(0, {
             '.clangd',
@@ -42,7 +54,6 @@ local servers = {
           offsetEncoding = { 'utf-8', 'utf-16' },
         },
     },
-
     lua_ls = {
         name = "lua-language-server",
         cmd = { "lua-language-server" },
@@ -56,11 +67,12 @@ local servers = {
         filetypes = { "go", "gomod", "gowork", "gotmpl" },
     },
 }
-local group = vim.api.nvim_create_augroup("UserLspStart", { clear = true })
+
+local user_lsp_start_augroup = vim.api.nvim_create_augroup("UserLspStart", { clear = true })
 for _, config in pairs(servers) do
     if vim.fn.executable(config.cmd[1]) ~= 0 then
         vim.api.nvim_create_autocmd("FileType", {
-            group = group,
+            group = user_lsp_start_augroup,
             pattern = config.filetypes,
             callback = function (ev)
                 vim.lsp.start(config, { bufnr = ev.buf })
@@ -70,22 +82,42 @@ for _, config in pairs(servers) do
 end
 
 
-vim.api.nvim_command("highlight NormalFloat ctermbg=darkgray")
+local lsp_buf_local_augroup = vim.api.nvim_create_augroup("LspBufLocal", { clear = true })
+vim.api.nvim_create_autocmd("LspAttach", {
+    group = lsp_buf_local_augroup,
+    callback = function() 
+        vim.api.nvim_buf_set_option(0, "omnifunc", "v:lua.vim.lsp.omnifunc")
+        vim.api.nvim_buf_set_option(0, "updatetime", 300)
+        
+        local opt = { buffer = 0, noremap = true, silent = true }
+        vim.keymap.set("n", "gD", vim.lsp.buf.declaration, opt)
+        vim.keymap.set("n", "gd", vim.lsp.buf.definition, opt)
+        vim.keymap.set("n", "gh", vim.lsp.buf.hover, opt)
+        vim.keymap.set("n", "gi", vim.lsp.buf.implementation, opt)
+        vim.keymap.set("n", "gr", vim.lsp.buf.references, opt)
+        vim.keymap.set("n", "gt", vim.lsp.buf.type_definition, opt)
+        vim.keymap.set("n", "gs", vim.lsp.buf.signature_help, opt)
+        vim.keymap.set("n", "ge", vim.diagnostic.open_float, opt)
+        vim.keymap.set("n", "<space>r", vim.lsp.buf.rename, opt)
+        vim.keymap.set("n", "<space>a", vim.diagnostic.setloclist, opt)
+        vim.keymap.set("n", "<C-up>", vim.diagnostic.goto_prev, opt)
+        vim.keymap.set("n", "<C-down>", vim.diagnostic.goto_next, opt)
+        
+        vim.api.nvim_create_autocmd({ "CursorHold", "CursorHoldI" }, {
+            buffer = 0,
+            callback = function()
+                vim.lsp.buf.document_highlight()
+            end,
+        })
+        vim.api.nvim_create_autocmd({ "CursorMoved", "CursorMovedI" }, {
+            buffer = 0,
+            callback = function()
+                vim.lsp.buf.clear_references()
+            end,
+        })
 
-vim.api.nvim_buf_set_option(0, "omnifunc", "v:lua.vim.lsp.omnifunc")
-
-vim.keymap.set("n", "gD", vim.lsp.buf.declaration, { noremap = true, silent = true })
-vim.keymap.set("n", "gd", vim.lsp.buf.definition, { noremap = true, silent = true })
-vim.keymap.set("n", "gh", vim.lsp.buf.hover, { noremap = true, silent = true })
-vim.keymap.set("n", "gi", vim.lsp.buf.implementation, { noremap = true, silent = true })
-vim.keymap.set("n", "gr", vim.lsp.buf.references, { noremap = true, silent = true })
-vim.keymap.set("n", "gt", vim.lsp.buf.type_definition, { noremap = true, silent = true })
-vim.keymap.set("n", "gs", vim.lsp.buf.signature_help, { noremap = true, silent = true })
-vim.keymap.set("n", "ge", vim.diagnostic.open_float, { noremap = true, silent = true })
-vim.keymap.set("n", "<space>r", vim.lsp.buf.rename, { noremap = true, silent = true })
-vim.keymap.set("n", "<space>a", vim.diagnostic.setloclist, { noremap = true, silent = true })
-vim.keymap.set("n", "<C-up>", vim.diagnostic.goto_prev, { noremap = true, silent = true })
-vim.keymap.set("n", "<C-down>", vim.diagnostic.goto_next, { noremap = true, silent = true })
+    end
+})
 
 vim.lsp.inlay_hint.enable()
 -- Decorate floating windows
@@ -101,7 +133,8 @@ vim.diagnostic.config({
 
 
 vim.cmd("hi! link NormalFloat Normal")
-vim.cmd("hi! link FloatBorder MoreMsg")
+vim.cmd("hi! link FloatBorder Comment")
+vim.cmd("hi! link LspReferenceText WildMenu")
 
 local function CursorHoldLSPHoverWithDelay()
     -- 创建一个新的 augroup
