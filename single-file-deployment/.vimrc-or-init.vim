@@ -1008,9 +1008,9 @@ function! s:ClearAllCache()
 endfunction
 
 function! s:ClearCache(path)
-    call remove(s:nodesCache, a:path)
-    call remove(s:fullPathsCache, a:path)
-    call remove(s:kidCountCache, a:path)
+    silent! call remove(s:nodesCache, a:path)
+    silent! call remove(s:fullPathsCache, a:path)
+    silent! call remove(s:kidCountCache, a:path)
 endfunction
 
 function! s:ChangeKidCountUpward(path, n, depth, operate)
