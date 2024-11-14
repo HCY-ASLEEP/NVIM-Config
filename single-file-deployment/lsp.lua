@@ -18,7 +18,6 @@ local servers = {
         -- ccls does not support sending a null root directory
         single_file_support = false,
     },
-    --]]
     jedi = {
         cmd = { 'jedi-language-server' },
         filetypes = { 'python' },
@@ -32,6 +31,30 @@ local servers = {
         }),
         single_file_support = true,
     },
+    --]]
+    basedpyright = {
+        cmd = { 'basedpyright-langserver', '--stdio' },
+        filetypes = { 'python' },
+        root_dir = vim.fs.root(0, {
+            'pyproject.toml',
+            'setup.py',
+            'setup.cfg',
+            'requirements.txt',
+            'Pipfile',
+            'pyrightconfig.json',
+            '.git',
+        }),
+        single_file_support = true,
+        settings = {
+            basedpyright = {
+                analysis = {
+                    autoSearchPaths = true,
+                    useLibraryCodeForTypes = true,
+                    diagnosticMode = 'openFilesOnly',
+                },
+            },
+        },
+    },   
     clangd = {
         cmd = { 'clangd' },
         filetypes = { 'c', 'cpp', 'objc', 'objcpp', 'cuda', 'proto' },
