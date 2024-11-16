@@ -1210,6 +1210,7 @@ function! s:RefreshDir()
     let l:curLine = line('.')
     if l:curLine == 1
         call s:Upper()
+        return
     endif
     let l:nodeId = s:fullPaths[l:curLine - 2]
     if !isdirectory(l:nodeId)
