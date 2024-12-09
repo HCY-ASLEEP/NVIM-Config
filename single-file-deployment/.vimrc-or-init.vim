@@ -193,15 +193,21 @@ function! s:QuickMovement()
     let l:top = line('w0')
     let l:bottom = line('w$')
     let l:toLefts=""
-    let l:limitSearchScopeCmdStr="/ | LimitSearchScope"
-    for i in range(1,strlen(l:limitSearchScopeCmdStr))
-        let l:toLefts = l:toLefts."\<Left>"
-    endfor
-    call feedkeys(":silent! ".l:top.",".l:bottom."g/".l:limitSearchScopeCmdStr.l:toLefts)
+    let l:suffix="/ | LimitSearchScope"
+    let l:toLefts=repeat("\<Left>",strlen(l:suffix))
+    call feedkeys(":silent! ".l:top.",".l:bottom."g/".l:suffix.l:toLefts)
 endfunction
 
 command! LimitSearchScope call s:LimitSearchScope()
 nnoremap <silent> s :call <SID>QuickMovement()<CR>
+
+
+function! s:SearchList()
+    let l:suffix="/g % | copen"
+    let l:toLefts=repeat("\<Left>",strlen(l:suffix))
+    call feedkeys(":vimgrep /".l:suffix.l:toLefts)
+endfunction
+nnoremap <silent> S :call <SID>SearchList()<CR>
 
 
 " highlight settings -------------------------------------------------------------------------------
@@ -482,7 +488,7 @@ endfunction
 function! s:JumpWhenPressEnter(locateTargetFunctionName)
     let t:redirLocateTarget=getline('.')
     if win_id2tabwin(t:redirPreviewWinid)[1] == 0
-        top new
+        top sp
         let t:redirPreviewWinid = win_getid()
     else
         call win_gotoid(t:redirPreviewWinid)
@@ -494,7 +500,7 @@ function! s:JumpWhenPressJOrK(direction,locateTargetFunctionName)
     exec "normal! ".a:direction
     let t:redirLocateTarget=getline('.')
     if win_id2tabwin(t:redirPreviewWinid)[1] == 0
-        top new
+        top sp
         let t:redirPreviewWinid = win_getid()
         wincmd p
     endif
@@ -541,6 +547,26 @@ function! s:BufferListLocateTarget()
     endtry
 endfunction
 
+function! s:BufferListDeleteBuf()
+    let l:bufNum=split(getline('.'),"\ ")[0]
+    let l:bufChanged = 0
+    try
+        exec "bdelete".l:bufNum
+    catch
+        let l:bufChanged = 1
+        echo ">> Buffer Not Saved!"
+    endtry
+    if l:bufChanged == 0
+        delete _
+        if getline('.')==''
+            vnew
+            call s:QuitRedirWindow()
+            return
+        endif
+        call s:JumpWhenPressJOrK('.', 's:BufferListLocateTarget')
+    endif
+endfunction
+
 " redirect the command output to a buffer
 function! s:BufferListRedir()
     call s:OpenRedirWindow()
@@ -559,6 +585,7 @@ function! s:BufferListJumpMap()
     nnoremap <buffer><silent><CR> :call <SID>JumpWhenPressEnter('s:BufferListLocateTarget')<CR>
     nnoremap <buffer><silent>j :call <SID>JumpWhenPressJOrK('+', 's:BufferListLocateTarget')<CR>
     nnoremap <buffer><silent>k :call <SID>JumpWhenPressJOrK('-', 's:BufferListLocateTarget')<CR>
+    nnoremap <buffer>dd :call <SID>BufferListDeleteBuf()<CR>
 endfunction
 
 nnoremap <silent><Space>l :call <SID>BufferListRedir()<CR>
@@ -746,11 +773,15 @@ function! s:PrepareForQuickfix()
     setlocal bufhidden=wipe nobuflisted noswapfile nocursorline
 endfunction
 
+function! s:QuickfixFocusWord()
+    call matchadd('RedirFocusCurMatch', '\c\%#'.expand('<cword>'))
+endfunction
+
 augroup quickFixPreparation
     autocmd!
     autocmd FileType qf call s:PrepareForQuickfix()
-    autocmd FileType qf nnoremap <buffer> j j<CR>zz<C-w>p
-    autocmd FileType qf nnoremap <buffer> k k<CR>zz<C-w>p
+    autocmd FileType qf nnoremap <buffer> j j<CR>zz:call <SID>QuickfixFocusWord()<CR><C-w>p
+    autocmd FileType qf nnoremap <buffer> k k<CR>zz:call <SID>QuickfixFocusWord()<CR><C-w>p
 augroup END
 
 
@@ -1166,7 +1197,7 @@ function! s:OpenFile()
     endif
     let l:curWinid = win_getid()
     if win_id2tabwin(s:treePreWinid)[1] == 0
-        bot vnew 
+        bot vs
         silent exec "edit ".l:nodeId
         echo l:nodeId
         return
@@ -1247,7 +1278,7 @@ function! s:AfterLeaveTree()
 endfunction
 
 function! s:SetTreeOptions()
-    setlocal buftype=nofile bufhidden=hide nobuflisted noswapfile
+    setlocal buftype=nofile nobuflisted noswapfile
     setlocal tabstop=2 shiftwidth=2 softtabstop=2 
     setlocal list listchars=multispace:\|\ 
     setlocal nonumber norelativenumber
@@ -1314,13 +1345,13 @@ function! s:ToggleTree()
         return
     endif
     if s:treeWinid == -1
-        to vnew
+        to vs
         exec "buffer ".s:treeBufname
         let s:treeWinid = win_getid()
         return
     endif
     call win_gotoid(s:treeWinid)
-    close
+    quit
 endfunction
 
 set splitright
