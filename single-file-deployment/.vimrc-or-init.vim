@@ -557,7 +557,9 @@ function! s:BufferListDeleteBuf()
         echo ">> Buffer Not Saved!"
     endtry
     if l:bufChanged == 0
+        setlocal modifiable
         delete _
+        setlocal nomodifiable
         if getline('.')==''
             vnew
             call s:QuitRedirWindow()
@@ -577,6 +579,7 @@ function! s:BufferListRedir()
     while getline('.') == ""
         exec "normal! dd"
     endwhile
+    setlocal nomodifiable
     call s:BufferListJumpMap()
 endfunction
 
@@ -612,6 +615,7 @@ function! s:FileSearchRedir(cmd)
     call s:OpenRedirWindow()
     exec "edit FuzzyFilenameSearch".tabpagenr()."\ ->\ ".t:fileSubStr
     exec "read ".a:cmd
+    setlocal nomodifiable
     setlocal buftype=nofile bufhidden=wipe nobuflisted noswapfile cursorline filetype=redirWindows
     call s:FileSearchJumpMap()
 endfunction
@@ -709,6 +713,7 @@ function! s:WordSearchRedir(cmd)
     exec "edit RipgrepWordSearch".tabpagenr()."\ ->\ ".t:rgrepSubStr
     exec "read "a:cmd
     setlocal buftype=nofile bufhidden=wipe nobuflisted noswapfile cursorline filetype=redirWindows
+    setlocal nomodifiable
     call s:WordSearchJumpMap()
 endfunction
 
