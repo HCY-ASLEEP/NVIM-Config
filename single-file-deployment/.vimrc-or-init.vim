@@ -574,6 +574,7 @@ function! s:BufferListRedir()
     call s:OpenRedirWindow()
     exec "edit BufferList".tabpagenr()
     setlocal buftype=nofile bufhidden=wipe nobuflisted noswapfile cursorline filetype=redirWindows
+    setlocal modifiable
     silent! put = execute('buffers')
     exec "normal! gg"
     while getline('.') == ""
@@ -614,6 +615,7 @@ endfunction
 function! s:FileSearchRedir(cmd)
     call s:OpenRedirWindow()
     exec "edit FuzzyFilenameSearch".tabpagenr()."\ ->\ ".t:fileSubStr
+    setlocal modifiable
     exec "read ".a:cmd
     setlocal nomodifiable
     setlocal buftype=nofile bufhidden=wipe nobuflisted noswapfile cursorline filetype=redirWindows
@@ -711,6 +713,7 @@ endfunction
 function! s:WordSearchRedir(cmd)
     call s:OpenRedirWindow()
     exec "edit RipgrepWordSearch".tabpagenr()."\ ->\ ".t:rgrepSubStr
+    setlocal modifiable
     exec "read "a:cmd
     setlocal buftype=nofile bufhidden=wipe nobuflisted noswapfile cursorline filetype=redirWindows
     setlocal nomodifiable
