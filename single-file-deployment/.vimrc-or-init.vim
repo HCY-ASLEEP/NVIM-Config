@@ -615,37 +615,30 @@ endfunction
 function! s:FileSearchRedir(cmd)
     call s:OpenRedirWindow()
     exec "edit FuzzyFilenameSearch".tabpagenr()."\ ->\ ".t:fileSubStr
-    setlocal modifiable
-    exec "read ".a:cmd
-    setlocal nomodifiable
     setlocal buftype=nofile bufhidden=wipe nobuflisted noswapfile cursorline filetype=redirWindows
+    setlocal modifiable
+    exec "tc ".t:rootDir
+    exec "read ".a:cmd
+    exec "normal! gg"
+    if getline('.') == ""
+        exec "normal! dd"
+    endif
+    exec "%s/^/".escape(t:rootDir.'/','/')
+    setlocal nomodifiable
     call s:FileSearchJumpMap()
+    echo t:rootDir
 endfunction
 
 " Show Files fuzzily searched with git
 function! s:FileSearchWithGit(substr)
     let t:fileSubStr=a:substr
-    exec "tc ".t:rootDir
     exec "FileSearchRedir !rg --files \| rg --ignore-case ".a:substr
-    exec "normal! gg"
-    if getline('.') == ""
-        exec "normal! dd"
-    endif
-    exec "%s/^/".escape(t:rootDir.'/','/')
-    echo t:rootDir
 endfunction
 
 " Show Files searched fuzzily without git
 function! s:FileSearchWithoutGit(substr)
     let t:fileSubStr=a:substr
-    exec "tc ".t:rootDir
     exec "FileSearchRedir !rg --no-ignore --files \| rg --ignore-case ".a:substr
-    exec "normal! gg"
-    if getline('.') == ""
-        exec "normal! dd"
-    endif
-    exec "%s/^/".escape(t:rootDir.'/','/')
-    echo t:rootDir
 endfunction
 
 " autocmd to jump to file with CR only in FuzzyFilenameSearch buffer
@@ -713,37 +706,31 @@ endfunction
 function! s:WordSearchRedir(cmd)
     call s:OpenRedirWindow()
     exec "edit RipgrepWordSearch".tabpagenr()."\ ->\ ".t:rgrepSubStr
-    setlocal modifiable
-    exec "read "a:cmd
     setlocal buftype=nofile bufhidden=wipe nobuflisted noswapfile cursorline filetype=redirWindows
+    setlocal modifiable
+    exec "tc ".t:rootDir
+    exec "read "a:cmd
+    exec "normal! gg"
+    if getline('.') == ""
+        exec "normal! dd"
+    endif
     setlocal nomodifiable
     call s:WordSearchJumpMap()
+    echo t:rootDir
 endfunction
 
 " Show Words fuzzily searched with git
 function! s:WordSearchWithGit(substr)
     let t:rgrepSubStr=a:substr
     let l:rgArgs="--ignore-case --vimgrep --no-heading"
-    exec "tc ".t:rootDir
     exec "WordSearchRedir !rg ".l:rgArgs." ".a:substr." ".t:rootDir
-    exec "normal! gg"
-    if getline('.') == ""
-        exec "normal! dd"
-    endif
-    echo t:rootDir
 endfunction
 
 " Show Files fuzzily searched without git
 function! s:WordSearchWithoutGit(substr)
     let t:rgrepSubStr=a:substr
     let l:rgArgs="--ignore-case --vimgrep --no-heading --no-ignore"
-    exec "tc ".t:rootDir
     exec "WordSearchRedir !rg ".l:rgArgs." ".a:substr." ".t:rootDir
-    exec "normal! gg"
-    if getline('.') == ""
-        exec "normal! dd"
-    endif
-    echo t:rootDir
 endfunction
 
 " autocmd to jump to file with CR only in RipgrepWordSearch buffer
