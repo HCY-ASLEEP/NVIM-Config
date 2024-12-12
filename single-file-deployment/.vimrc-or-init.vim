@@ -770,13 +770,14 @@ endfunction
 
 function! s:QuickfixFocusWord()
     call matchadd('RedirFocusCurMatch', '\c\%#'.expand('<cword>'))
+    echo
 endfunction
 
 augroup quickFixPreparation
     autocmd!
     autocmd FileType qf call s:PrepareForQuickfix()
-    autocmd FileType qf nnoremap <buffer> j j<CR>zz:call <SID>QuickfixFocusWord()<CR><C-w>p
-    autocmd FileType qf nnoremap <buffer> k k<CR>zz:call <SID>QuickfixFocusWord()<CR><C-w>p
+    autocmd FileType qf nnoremap <silent><buffer> j j<CR>zz:call <SID>QuickfixFocusWord()<CR><C-w>p
+    autocmd FileType qf nnoremap <silent><buffer> k k<CR>zz:call <SID>QuickfixFocusWord()<CR><C-w>p
 augroup END
 
 
