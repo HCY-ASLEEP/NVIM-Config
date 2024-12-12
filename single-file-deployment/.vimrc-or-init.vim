@@ -199,7 +199,7 @@ function! s:QuickMovement()
 endfunction
 
 command! LimitSearchScope call s:LimitSearchScope()
-nnoremap <silent> s :call <SID>QuickMovement()<CR>
+nnoremap <silent> f :call <SID>QuickMovement()<CR>
 
 
 function! s:SearchList()
@@ -207,7 +207,7 @@ function! s:SearchList()
     let l:toLefts=repeat("\<Left>",strlen(l:suffix))
     call feedkeys(":vimgrep /".l:suffix.l:toLefts)
 endfunction
-nnoremap <silent> S :call <SID>SearchList()<CR>
+nnoremap <silent> s :call <SID>SearchList()<CR>
 
 
 " highlight settings -------------------------------------------------------------------------------
@@ -347,55 +347,6 @@ inoremap <expr> <S-TAB> pumvisible() ? "\<C-p>" : "\<S-Tab>"
 " use up and down keys for navigating the autocomplete menu
 inoremap <expr> <Down> pumvisible() ? "\<C-n>" : "\<Down>"
 inoremap <expr> <Up> pumvisible() ? "\<C-p>" : "\<Up>"
-
-
-" +-----------------------------------------------+
-" |                                               |
-" |     FOLD ACCORDING TO "/" SEARCH PATTERN      |
-" |                                               |
-" +-----------------------------------------------+
-
-
-function! s:HasFolds()
-    let l:numLines = line('$')
-    for l:lineNum in range(1, l:numLines)
-        if foldclosed(l:lineNum) != -1
-            return 1
-        endif
-    endfor
-    return 0
-endfunction
-
-function! s:SearchFoldEpxr()
-    if getline(v:lnum) =~ @/
-        return 0
-    elseif getline(v:lnum-1) =~ @/ || getline(v:lnum+1) =~ @/
-        return 1
-    else
-        return 2
-    endif
-endfunction
-
-" Folding according to search result
-function! s:ToggleSearchFolding()
-    if s:HasFolds()==0
-        let b:fde=$foldexpr
-        let b:fdm=&foldmethod
-        let b:fdl=&foldlevel
-        let b:fdc=&foldcolumn
-        setlocal foldexpr=s:SearchFoldEpxr() foldmethod=expr foldlevel=0 foldcolumn=2
-        exec 'normal! zM'
-    else
-        setlocal foldmethod=syntax foldcolumn=0
-        exec 'normal! zR'
-        exec 'setlocal foldexpr='.b:fde
-        exec 'setlocal foldmethod='.b:fdm
-        exec 'setlocal foldlevel='.b:fdl
-        exec 'setlocal foldcolumn='.b:fdc
-    endif
-endfunction
-
-nnoremap <silent><Space>z :call <SID>ToggleSearchFolding()<CR>
 
 
 " +-----------------------------------------------+
