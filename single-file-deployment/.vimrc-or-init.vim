@@ -81,6 +81,8 @@ augroup resCur
   autocmd BufReadPost * call setpos(".", getpos("'\""))
 augroup END
 
+set jumpoptions=stack
+
 set incsearch
 set hlsearch
 
@@ -106,8 +108,6 @@ endif
 
 " visual block short-cut
 nnoremap vv <C-v>
-
-nnoremap W :let @"=expand("<cword>") <Bar> echo 'COPY WORD -->  '.@" <CR>
 
 " paste in command mod
 cnoremap <C-v> <C-r>"
@@ -178,7 +178,7 @@ else
     augroup END
 endif
 " switch windows -----------------------------------------------------------------------------------
-nnoremap <silent><Tab> :wincmd w<CR>
+nnoremap <silent><Space>w :wincmd w<CR>
 
 
 " Search only in displayed scope -------------------------------------------------------------------
