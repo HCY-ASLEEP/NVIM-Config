@@ -112,17 +112,33 @@ vim.api.nvim_create_autocmd("LspAttach", {
         vim.api.nvim_buf_set_option(0, "omnifunc", "v:lua.vim.lsp.omnifunc")
         vim.api.nvim_buf_set_option(0, "updatetime", 300)
         
+        local g_prefix_dict = {}
+        local function g_prefix()
+            vim.api.nvim_echo({{"Waiting for next key after g:"}}, false, {})
+            local key = vim.fn.nr2char(vim.fn.getchar())
+            vim.cmd("redraw")
+            vim.api.nvim_echo({{"Pressed 'g" .. key .. "'"}}, false, {})
+            local func = g_prefix_dict[key]
+            if func ~= nil then
+                func()
+            else
+                vim.api.nvim_feedkeys("g" .. key, "n", false)
+            end
+        end
         local opt = { buffer = 0, noremap = true, silent = true }
-        vim.keymap.set("n", "gD", vim.lsp.buf.declaration, opt)
-        vim.keymap.set("n", "gd", vim.lsp.buf.definition, opt)
-        vim.keymap.set("n", "gh", vim.lsp.buf.hover, opt)
-        vim.keymap.set("n", "gi", vim.lsp.buf.implementation, opt)
-        vim.keymap.set("n", "gr", vim.lsp.buf.references, opt)
-        vim.keymap.set("n", "gt", vim.lsp.buf.type_definition, opt)
-        vim.keymap.set("n", "gs", vim.lsp.buf.signature_help, opt)
-        vim.keymap.set("n", "ge", vim.diagnostic.open_float, opt)
-        vim.keymap.set("n", "<space>r", vim.lsp.buf.rename, opt)
-        vim.keymap.set("n", "<space>a", vim.diagnostic.setloclist, opt)
+        vim.keymap.set("n", "g", g_prefix, opt)
+        
+        g_prefix_dict["D"] = vim.lsp.buf.declaration
+        g_prefix_dict["d"] = vim.lsp.buf.definition
+        g_prefix_dict["h"] = vim.lsp.buf.hover
+        g_prefix_dict["i"] = vim.lsp.buf.implementation
+        g_prefix_dict["r"] = vim.lsp.buf.references
+        g_prefix_dict["t"] = vim.lsp.buf.type_definition
+        g_prefix_dict["s"] = vim.lsp.buf.signature_help
+        g_prefix_dict["e"] = vim.diagnostic.open_float
+        g_prefix_dict["R"] = vim.lsp.buf.rename
+        g_prefix_dict["a"] = vim.diagnostic.setloclist
+
         vim.keymap.set("n", "<C-up>", vim.diagnostic.goto_prev, opt)
         vim.keymap.set("n", "<C-down>", vim.diagnostic.goto_next, opt)
         
