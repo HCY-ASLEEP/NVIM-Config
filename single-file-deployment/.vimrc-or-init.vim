@@ -90,6 +90,23 @@ set hlsearch
 set number
 set relativenumber
 
+
+let s:SpacePrefixDict={}
+nnoremap <Space> :call <SID>SpacePrefix()<CR>
+
+function! s:SpacePrefix()
+    echo "Waiting for next key after <Space>:"
+    let l:key = nr2char(getchar())  " 等待输入一个字符
+    redraw
+    echo "Pressed '<Space>".l:key."'"
+    if has_key(s:SpacePrefixDict, l:key)
+        exec s:SpacePrefixDict[l:key]
+    else
+        exec "normal <Space>".l:key
+    endif
+endfunction
+
+
 if has('nvim') && exists('$TMUX')
     " share system clipboard
     set clipboard+=unnamedplus,unnamed
@@ -178,7 +195,7 @@ else
     augroup END
 endif
 " switch windows -----------------------------------------------------------------------------------
-nnoremap <silent><Space>w :wincmd w<CR>
+let s:SpacePrefixDict['w']='wincmd w'
 
 
 " Search only in displayed scope -------------------------------------------------------------------
@@ -217,13 +234,19 @@ function! s:StressCurMatch()
     call matchadd('FocusCurMatch', l:target)
 endfunction
 
+function! s:ToggleHlsearch()
+    if @/==''
+        let @/=@s 
+    else
+        let @/=""
+        call clearmatches()
+    endif
+endfunction
+
 " centre the screen on the current search result
 nnoremap <silent> n n:call <SID>StressCurMatch()<CR>
 nnoremap <silent> N N:call <SID>StressCurMatch()<CR>
-nnoremap <silent><expr> <Space><Space> @/=='' ?
-    \ ':let @/=@s<CR>' :
-    \ ':let @/=""<CR>
-        \:call clearmatches()<CR>'
+let s:SpacePrefixDict[' ']='call s:ToggleHlsearch()'
 cnoremap <silent><expr> <CR> getcmdtype() =~ '[/?]' ?
     \ '<CR>:let @s=@/<CR>
         \:call <SID>StressCurMatch()<CR>' :
@@ -279,6 +302,7 @@ set linebreak
 set showbreak=\ \↪\ 
 
 set nowrap
+
 
 " +-----------------------------------------------+
 " |                                               |
@@ -458,7 +482,7 @@ function! s:JumpWhenPressJOrK(direction,locateTargetFunctionName)
     call win_execute(t:redirPreviewWinid, "call ".a:locateTargetFunctionName."()")
 endfunction
 
-nnoremap <silent><Space>q :call <SID>QuitRedirWindow()<CR>
+let s:SpacePrefixDict['q']='call s:QuitRedirWindow()'
 
 command! Rpwd call s:ShowRootDir()
 command! -nargs=? Rcd call s:RedirCd(<q-args>)
@@ -543,7 +567,7 @@ function! s:BufferListJumpMap()
     nnoremap <buffer>dd :call <SID>BufferListDeleteBuf()<CR>
 endfunction
 
-nnoremap <silent><Space>l :call <SID>BufferListRedir()<CR>
+let s:SpacePrefixDict['l']='call s:BufferListRedir()'
 
 
 " +-----------------------------------------------+
@@ -1302,7 +1326,7 @@ function! s:ToggleTree()
 endfunction
 
 set splitright
-nnoremap <silent> <Space>e :call <SID>ToggleTree()<CR>
+let s:SpacePrefixDict['e']='call s:ToggleTree()'
 
 
 " +-----------------------------------------------+
