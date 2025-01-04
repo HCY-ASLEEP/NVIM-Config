@@ -26,11 +26,6 @@ set mouse=a
 
 let $LANG = 'en_US'
 
-" tab settings
-set tabstop=4
-set shiftwidth=4
-set softtabstop=4
-
 " let tap become four spaces
 set expandtab
 
@@ -95,7 +90,7 @@ let s:SpacePrefixDict={}
 nnoremap <Space> :call <SID>SpacePrefix()<CR>
 
 function! s:SpacePrefix()
-    echo "Waiting for next key after <Space>:"
+    echo "Waiting for next key after <Space> ... "
     let l:key = nr2char(getchar())  " 等待输入一个字符
     redraw
     echo "Pressed '<Space>".l:key."'"
@@ -130,7 +125,7 @@ nnoremap vv <C-v>
 cnoremap <C-v> <C-r>"
 
 " show current buffer path
-cnoreabbrev fd echo expand("%:p:h")
+cnoreabbrev bp echo expand("%:p:h")
 
 if has('nvim')
     cnoreabbrev vt vs \| term
@@ -290,11 +285,24 @@ set fillchars+=eob:\
 set fillchars+=vert:\│
 
 set list
-set listchars=tab:\┊\ ,eol:\ 
-set listchars+=trail:\ 
-set listchars+=leadmultispace:\┊\ \ \ 
-set listchars+=precedes:…
-set listchars+=extends:…
+function! s:SetListchars(tabLen)
+    setglobal listchars=tab:\┊\ ,eol:\ 
+    setglobal listchars+=trail:\ 
+    setglobal listchars+=precedes:…
+    setglobal listchars+=extends:…
+    exec "setglobal listchars+=leadmultispace:\┊".repeat("\\ ", a:tabLen-1) 
+endfunction
+
+function! s:SetTabLen(n)
+    call s:SetListchars(a:n)
+    " tab settings
+    exec "set tabstop=".a:n
+    exec "set shiftwidth=".a:n
+    exec "set softtabstop=".a:n
+endfunction
+command! -nargs=1 Tl call s:SetTabLen(<args>)
+Tl 4
+
 
 " Break line at predefined characters
 set linebreak
@@ -947,6 +955,7 @@ let s:kidCountCache = {}
 let s:minusKidCountOp = 0
 let s:plusKidCountOp = 1
 let s:topDirDepth = 0
+let s:topDirPath = getcwd()
 let s:dirSeparator = '/'
 let s:treeWinid = -1
 let s:treeBufnr = -1
@@ -1268,7 +1277,10 @@ endfunction
 
 function! s:InitTree(path)
     setlocal modifiable
+    let s:topDirPath = a:path
     let s:topDirDepth = s:GetDirDepth(a:path)
+    let s:treeBufnr = bufnr()
+    let s:treeWinid = win_getid()
     silent exec '%d'
     call s:HighlightTree()
     call setline(1, '..' . s:dirSeparator)
@@ -1303,30 +1315,46 @@ function! s:ToggleNode()
     call s:CloseDir()
 endfunction
 
-function! s:ToggleTree()
+function! s:ToggleTree(path)
     let s:treePreWinid = win_getid()
     if s:treeBufnr == -1
         to vnew
         call s:BeforeEnterTree()
-        call s:InitTree(getcwd())
+        call s:InitTree(a:path)
         call s:MapTree()
         call s:SetTreeOptions()
-        let s:treeBufnr = bufnr()
-        let s:treeWinid = win_getid()
         return
     endif
-    if s:treeWinid == -1
+    if a:path ==# s:topDirPath && s:treeWinid != -1
+        call win_gotoid(s:treeWinid)
+        quit
+        return
+    endif
+    if a:path ==# s:topDirPath
         to vs
         exec "buffer ".s:treeBufname
         let s:treeWinid = win_getid()
         return
     endif
-    call win_gotoid(s:treeWinid)
-    quit
+    if s:treeWinid == win_getid()
+        return
+    endif
+    if s:treeWinid != -1
+        call win_gotoid(s:treeWinid)
+    else
+        to vs
+        exec "buffer ".s:treeBufname
+        let s:treeWinid = win_getid()
+    endif
+    call s:ClearAllCache()
+    call s:InitTree(a:path)
 endfunction
 
+
 set splitright
-let s:SpacePrefixDict['e']='call s:ToggleTree()'
+let s:SpacePrefixDict['e']='call s:ToggleTree(s:topDirPath)'
+command! OpenTreeByCurBuf call s:ToggleTree(expand("%:p:h"))
+command! -nargs=1 OpenTreeByPath call s:ToggleTree(expand(<q-args>))
 
 
 " +-----------------------------------------------+
