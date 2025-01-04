@@ -114,7 +114,7 @@ vim.api.nvim_create_autocmd("LspAttach", {
         
         local g_prefix_dict = {}
         local function g_prefix()
-            vim.api.nvim_echo({{"Waiting for next key after g:"}}, false, {})
+            vim.api.nvim_echo({{"Waiting for next key after g ... "}}, false, {})
             local key = vim.fn.nr2char(vim.fn.getchar())
             vim.cmd("redraw")
             vim.api.nvim_echo({{"Pressed 'g" .. key .. "'"}}, false, {})
