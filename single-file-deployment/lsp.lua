@@ -74,7 +74,7 @@ local servers = {
                     editsNearCursor = true,
                 },
             },
-          offsetEncoding = { 'utf-8', 'utf-16' },
+          offsetEncoding = { 'utf-16' },
         },
     },
     lua_ls = {
@@ -106,9 +106,16 @@ end
 
 
 local lsp_buf_local_augroup = vim.api.nvim_create_augroup("LspBufLocal", { clear = true })
-vim.api.nvim_create_autocmd("LspAttach", {
+vim.api.nvim_create_autocmd({"BufEnter", "LspAttach"}, {
     group = lsp_buf_local_augroup,
     callback = function() 
+        if next(vim.lsp.get_active_clients())==nil then
+            return
+        end
+        if vim.b.lsp_mapped ~= nil then
+            return
+        end
+        vim.b.lsp_mapped = true
         vim.api.nvim_buf_set_option(0, "omnifunc", "v:lua.vim.lsp.omnifunc")
         vim.api.nvim_buf_set_option(0, "updatetime", 300)
         
@@ -135,8 +142,8 @@ vim.api.nvim_create_autocmd("LspAttach", {
         g_prefix_dict["r"] = vim.lsp.buf.references
         g_prefix_dict["t"] = vim.lsp.buf.type_definition
         g_prefix_dict["s"] = vim.lsp.buf.signature_help
-        g_prefix_dict["e"] = vim.diagnostic.open_float
         g_prefix_dict["R"] = vim.lsp.buf.rename
+        g_prefix_dict["e"] = vim.diagnostic.open_float
         g_prefix_dict["a"] = vim.diagnostic.setloclist
 
         vim.keymap.set("n", "<C-up>", vim.diagnostic.goto_prev, opt)
@@ -443,13 +450,14 @@ end
 
 -- parse lsp response to get the symbol_infos
 -- @override add_symbol_info
-local function add_sorted_symbol_info(kind, t)
-    symbol_infos[kind][#symbol_infos[kind] + 1] = t
+local function add_sorted_symbol_info(i)
+    kind = i[2]
+    symbol_infos[kind][#symbol_infos[kind] + 1] = i
 end
 
 -- @override add_symbol_info
-local function add_nested_symbol_info(kind, t)
-    symbol_infos[#symbol_infos + 1] = t
+local function add_nested_symbol_info(i)
+    symbol_infos[#symbol_infos + 1] = i
 end
 
 local function parse(response, indent_num)
@@ -475,7 +483,7 @@ local function parse(response, indent_num)
         if next(response, i) == nil then
             is_end = true
         end
-        add_symbol_info(kind, { indent_num, kind, name, detail, start_row, start_column, is_end })
+        add_symbol_info({ indent_num, kind, name, detail, start_row, start_column, is_end })
         if symbol["children"] ~= nil then
             parse(symbol["children"], indent_num + 1)
         end
