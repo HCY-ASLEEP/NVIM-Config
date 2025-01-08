@@ -147,16 +147,20 @@ inoremap ` ``<Left>
 " {} and () completion when press enter in the middle of them
 " Part of path autocompletion also included in this function
 function! s:InsertCRBrace()
-    call feedkeys("\<BS>",'n')
     let l:frontChar = getline('.')[col('.') - 2]
     if l:frontChar == "{" || l:frontChar == "("
-        call feedkeys("\<CR>\<C-c>\O", 'n')
-    elseif l:frontChar =~ '[/]'
-        call feedkeys("\<C-x>\<C-f>", "n")
-    else
-        call feedkeys("\<CR>", 'n')
+        return "\<CR>\<C-c>\O"
     endif
+    if l:frontChar =~ '[/]'
+        let l:pathCompletionKey = "\<C-x>\<C-f>"
+        if pumvisible()
+            return l:pathCompletionKey
+        endif
+        return l:pathCompletionKey."\<CR>"
+    endif
+    return "\<CR>"
 endfunction
+
 inoremap <expr> <CR> <SID>InsertCRBrace()
 
 
@@ -164,9 +168,9 @@ inoremap <expr> <CR> <SID>InsertCRBrace()
 function! s:ESC_IMAP()
     " If the char in front the cursor is ";"
     if getline('.')[col('.') - 2]== ";"
-        call feedkeys("\<BS>\<BS>\<C-c>", 'n')
+        return "\<BS>\<C-c>"
     else
-        call feedkeys("\<BS>\;", 'n')
+        return ";"
     endif
 endfunction
 inoremap <expr> ; <SID>ESC_IMAP()
@@ -762,6 +766,7 @@ endfunction
 augroup quickFixPreparation
     autocmd!
     autocmd FileType qf call s:PrepareForQuickfix()
+    autocmd FileType qf nnoremap <silent><buffer> <CR> <CR>zz:call <SID>QuickfixFocusWord()<CR>
     autocmd FileType qf nnoremap <silent><buffer> j j<CR>zz:call <SID>QuickfixFocusWord()<CR><C-w>p
     autocmd FileType qf nnoremap <silent><buffer> k k<CR>zz:call <SID>QuickfixFocusWord()<CR><C-w>p
 augroup END
