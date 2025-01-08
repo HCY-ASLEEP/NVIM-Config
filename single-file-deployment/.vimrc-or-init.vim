@@ -144,12 +144,15 @@ inoremap ' ''<Left>
 inoremap " ""<Left>
 inoremap ` ``<Left>
 
-" {} and ()completion when press enter in the middle of them
+" {} and () completion when press enter in the middle of them
+" Part of path autocompletion also included in this function
 function! s:InsertCRBrace()
     call feedkeys("\<BS>",'n')
     let l:frontChar = getline('.')[col('.') - 2]
     if l:frontChar == "{" || l:frontChar == "("
         call feedkeys("\<CR>\<C-c>\O", 'n')
+    elseif l:frontChar =~ '[/]'
+        call feedkeys("\<C-x>\<C-f>", "n")
     else
         call feedkeys("\<CR>", 'n')
     endif
@@ -1353,6 +1356,7 @@ endfunction
 
 set splitright
 let s:SpacePrefixDict['e']='call s:ToggleTree(s:topDirPath)'
+command! OpenTreeByCurCwd call s:ToggleTree(expand(getcwd()))
 command! OpenTreeByCurBuf call s:ToggleTree(expand("%:p:h"))
 command! -nargs=1 OpenTreeByPath call s:ToggleTree(expand(<q-args>))
 
