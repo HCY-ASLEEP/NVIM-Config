@@ -624,6 +624,7 @@ function! s:FileSearchRedir(cmd)
         exec "normal! dd"
     endif
     exec "%s/^/".escape(t:rootDir.'/','/')
+    exec "normal! gg"
     setlocal nomodifiable
     call s:FileSearchJumpMap()
     echo t:rootDir
