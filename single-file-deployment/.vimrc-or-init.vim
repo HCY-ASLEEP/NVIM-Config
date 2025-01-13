@@ -184,18 +184,30 @@ onoremap ;; <C-c>
 " exit windows
 tnoremap ;; <C-\><C-n>
 
+function! s:ActionBeforeTermianlOpen()
+    setlocal nonumber norelativenumber
+    tnoremap <silent><buffer><S-Tab> <C-\><C-n>:tabnext<CR>
+    call feedkeys("i")
+endfunction
+
 if has('nvim')
     " internal terminal settings
     augroup internal_terminal
         autocmd!
-        autocmd TermOpen * setlocal nonumber norelativenumber
+        autocmd TermOpen * call s:ActionBeforeTermianlOpen()
+        autocmd BufEnter * if &buftype == 'terminal' | call feedkeys("i") | endif
     augroup END
 else
     augroup internal_terminal
         autocmd!
-        autocmd TerminalOpen * setlocal nonumber norelativenumber
+        autocmd TerminalOpen * call s:ActionBeforeTermianlOpen()
+        autocmd BufEnter * if &buftype == 'terminal' | call feedkeys("i") | endif
     augroup END
 endif
+
+nnoremap <silent><S-Tab> :tabnext<CR>
+
+
 " switch windows -----------------------------------------------------------------------------------
 let s:SpacePrefixDict['w']='wincmd w'
 
@@ -285,7 +297,6 @@ endfunction
 
 command! RmTrailingSpace call s:RmTrailingSpace()
 
-nnoremap <silent><S-Tab> :tabnext<CR>
 
 " spetial chars
 set fillchars+=eob:\ 
