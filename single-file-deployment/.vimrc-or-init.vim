@@ -187,14 +187,13 @@ tnoremap ;; <C-\><C-n>
 function! s:ActionBeforeTermianlOpen()
     setlocal nonumber norelativenumber
     tnoremap <silent><buffer><S-Tab> <C-\><C-n>:tabnext<CR>
-    call feedkeys("i")
 endfunction
 
 if has('nvim')
     " internal terminal settings
     augroup internal_terminal
         autocmd!
-        autocmd TermOpen * call s:ActionBeforeTermianlOpen()
+        autocmd TermOpen * call s:ActionBeforeTermianlOpen() | call feedkeys("i")
         autocmd BufEnter * if &buftype == 'terminal' | call feedkeys("i") | endif
     augroup END
 else
