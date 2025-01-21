@@ -454,7 +454,7 @@ function! s:RedirCdWithPathString(path)
 endfunction
 
 function! s:RedirCdWithTreeFileExplorer()
-    if bufname() !=# s:treeBufname
+    if bufname() !=# t:treeBufname
         echo ">> Not in tree file explorer window!"
         return
     endif
@@ -971,26 +971,27 @@ command! -register OSCYankRegister call s:OSCYankRegister('<reg>')
 " |                                               |
 " +-----------------------------------------------+
 
-
-let s:topDirPath = getcwd()
-let s:topDirDepth = 0
-let s:treeWinid = -1
-let s:treeBufnr = -1
-let s:treePreWinid = -1
-let s:fullPaths = []
-let s:fullPathsCache = {}
-let s:nodesCache = {}
-let s:kidCountCache = {}
-let s:treeUnamedReg = ""
-let s:treeSearchReg = ""
-
 let s:openedDir = 1
 let s:closedDir = -1
 let s:fileTreeIndent = '  '
 let s:minusKidCountOp = 0
 let s:plusKidCountOp = 1
 let s:dirSeparator = '/'
-let s:treeBufname = "Tree Explorer -> Files & Dirs"
+
+function! s:InitTreeVars4Tab()
+    let t:topDirPath = getcwd()
+    let t:topDirDepth = 0
+    let t:treeWinid = -1
+    let t:treeBufnr = -1
+    let t:treePreWinid = -1
+    let t:fullPaths = []
+    let t:fullPathsCache = {}
+    let t:nodesCache = {}
+    let t:kidCountCache = {}
+    let t:treeUnamedReg = ""
+    let t:treeSearchReg = ""
+    let t:treeBufname = "Tree Explorer -> Files & Dirs ".tabpagenr()
+endfunction
 
 function! s:GetNodesAndFullPaths(path)
     let l:dirNodes = []
@@ -1013,15 +1014,15 @@ function! s:GetNodesAndFullPaths(path)
 endfunction
 
 function! s:GetFullPath(lineNum)
-    return s:fullPaths[a:lineNum - 2]
+    return t:fullPaths[a:lineNum - 2]
 endfunction
 
 function! s:GetFullPathsCache(path)
-    return s:fullPathsCache[a:path]
+    return t:fullPathsCache[a:path]
 endfunction
 
 function! s:IsInFullPathsCache(path)
-    return has_key(s:fullPathsCache, a:path)
+    return has_key(t:fullPathsCache, a:path)
 endfunction
 
 function! s:GetDirDepth(path)
@@ -1033,47 +1034,47 @@ function! s:GetDirDepth(path)
 endfunction
 
 function! s:GetNodesCache(path)
-    return s:nodesCache[a:path]
+    return t:nodesCache[a:path]
 endfunction
 
 function! s:IsInNodesCache(path)
-    return has_key(s:nodesCache, a:path)
+    return has_key(t:nodesCache, a:path)
 endfunction
 
 function! s:ClearAllCache()
-    let s:nodesCache = {}
-    let s:fullPathsCache = {}
-    let s:kidCountCache = {}
+    let t:nodesCache = {}
+    let t:fullPathsCache = {}
+    let t:kidCountCache = {}
 endfunction
 
 function! s:ClearCache(path)
-    silent! call remove(s:nodesCache, a:path)
-    silent! call remove(s:fullPathsCache, a:path)
-    silent! call remove(s:kidCountCache, a:path)
+    silent! call remove(t:nodesCache, a:path)
+    silent! call remove(t:fullPathsCache, a:path)
+    silent! call remove(t:kidCountCache, a:path)
 endfunction
 
 function! s:ChangeKidCountUpward(path, n, depth, operate)
-    if a:depth < s:topDirDepth 
+    if a:depth < t:topDirDepth 
         return 
     endif
-    if !has_key(s:kidCountCache, a:path)
-        let s:kidCountCache[a:path] = 0
+    if !has_key(t:kidCountCache, a:path)
+        let t:kidCountCache[a:path] = 0
     endif
     if a:operate == s:minusKidCountOp
-        let s:kidCountCache[a:path] -= a:n
+        let t:kidCountCache[a:path] -= a:n
     else
-        let s:kidCountCache[a:path] += a:n
+        let t:kidCountCache[a:path] += a:n
     endif
     let l:upperDir = fnamemodify(a:path, ':h')
     call s:ChangeKidCountUpward(l:upperDir, a:n, a:depth - 1, a:operate)
 endfunction
 
 function! s:ZeroKidCount(path)
-    let s:kidCountCache[a:path] = 0
+    let t:kidCountCache[a:path] = 0
 endfunction
 
 function! s:GetKidCount(path)
-    return s:kidCountCache[a:path]
+    return t:kidCountCache[a:path]
 endfunction
 
 function! s:AddIndents(startLine, endLine, indents)
@@ -1114,16 +1115,16 @@ function! s:WriteFullPaths(fullPaths, startLine)
     if empty(a:fullPaths)
         return
     endif
-    call extend(s:fullPaths, a:fullPaths, a:startLine)
+    call extend(t:fullPaths, a:fullPaths, a:startLine)
 endfunction
 
 function! s:DeleteNodes(nodeId, startLine, endLine)
     silent exec a:startLine . "," . a:endLine . "delete"
-    let s:nodesCache[a:nodeId] = @"
+    let t:nodesCache[a:nodeId] = @"
 endfunction
 
 function! s:DeleteFullPaths(nodeId, startLine, endLine)
-    let s:fullPathsCache[a:nodeId] = remove(s:fullPaths, a:startLine, a:endLine)
+    let t:fullPathsCache[a:nodeId] = remove(t:fullPaths, a:startLine, a:endLine)
 endfunction
 
 function! s:IsOpenedDir()
@@ -1204,13 +1205,13 @@ function! s:OpenFile()
         return
     endif
     let l:curWinid = win_getid()
-    if win_id2tabwin(s:treePreWinid)[1] == 0
+    if win_id2tabwin(t:treePreWinid)[1] == 0
         bot vs
         silent exec "edit ".l:nodeId
         echo l:nodeId
         return
     endif
-    call win_gotoid(s:treePreWinid)
+    call win_gotoid(t:treePreWinid)
     if expand(bufname()) ==# l:nodeId
         return
     endif
@@ -1240,7 +1241,7 @@ endfunction
 
 function! s:CdCurDir()
     let l:curLine = line('.')
-    let l:nodeId = s:fullPaths[l:curLine - 2]
+    let l:nodeId = t:fullPaths[l:curLine - 2]
     call s:ClearAllCache()
     call s:InitTree(l:nodeId)
 endfunction
@@ -1251,7 +1252,7 @@ function! s:RefreshDir()
         call s:Upper()
         return
     endif
-    let l:nodeId = s:fullPaths[l:curLine - 2]
+    let l:nodeId = t:fullPaths[l:curLine - 2]
     if !isdirectory(l:nodeId)
         echo ">> Can not refresh a file, but a dir!"
         return
@@ -1276,13 +1277,13 @@ function! s:MapTree()
 endfunction
 
 function! s:BeforeEnterTree()
-    let s:treeSearchReg = @/
-    let s:treeUnamedReg = @"
+    let t:treeSearchReg = @/
+    let t:treeUnamedReg = @"
 endfunction
 
 function! s:AfterLeaveTree()
-    let @/ = s:treeSearchReg
-    let @" = s:treeUnamedReg
+    let @/ = t:treeSearchReg
+    let @" = t:treeUnamedReg
 endfunction
 
 function! s:SetTreeOptions()
@@ -1293,22 +1294,21 @@ function! s:SetTreeOptions()
     setlocal cursorline
     setlocal cursorlineopt=line
     setlocal autoread
-    exec "file ".s:treeBufname
+    exec "file ".t:treeBufname
     augroup switchContext
         autocmd!
         autocmd BufEnter <buffer> call s:BeforeEnterTree()
         autocmd BufLeave <buffer> call s:AfterLeaveTree()
-        autocmd BufHidden <buffer> let s:treeWinid = -1
-        autocmd TabLeave * if s:treeWinid != -1 | call s:ToggleTree() | let s:treeWinid = -1 | endif
+        autocmd BufHidden <buffer> let t:treeWinid = -1
     augroup END
 endfunction
 
 function! s:InitTree(path)
     setlocal modifiable
-    let s:topDirPath = a:path
-    let s:topDirDepth = s:GetDirDepth(a:path)
-    let s:treeBufnr = bufnr()
-    let s:treeWinid = win_getid()
+    let t:topDirPath = a:path
+    let t:topDirDepth = s:GetDirDepth(a:path)
+    let t:treeBufnr = bufnr()
+    let t:treeWinid = win_getid()
     silent exec '%d'
     call s:HighlightTree()
     call setline(1, '..' . s:dirSeparator)
@@ -1317,8 +1317,8 @@ function! s:InitTree(path)
     else
         call setline(2, a:path . s:dirSeparator) 
     endif
-    let s:fullPaths = []
-    call insert(s:fullPaths, a:path)
+    let t:fullPaths = []
+    call insert(t:fullPaths, a:path)
     exec 2
     call s:OpenDir()
     setlocal nomodifiable
@@ -1344,8 +1344,8 @@ function! s:ToggleNode()
 endfunction
 
 function! s:ToggleTree(path)
-    let s:treePreWinid = win_getid()
-    if s:treeBufnr == -1
+    let t:treePreWinid = win_getid()
+    if t:treeBufnr == -1
         to vnew
         call s:BeforeEnterTree()
         call s:InitTree(a:path)
@@ -1353,34 +1353,38 @@ function! s:ToggleTree(path)
         call s:SetTreeOptions()
         return
     endif
-    if a:path ==# s:topDirPath && s:treeWinid != -1
-        call win_gotoid(s:treeWinid)
+    if a:path ==# t:topDirPath && t:treeWinid != -1
+        call win_gotoid(t:treeWinid)
         quit
         return
     endif
-    if a:path ==# s:topDirPath
+    if a:path ==# t:topDirPath
         to vs
-        exec "buffer ".s:treeBufname
-        let s:treeWinid = win_getid()
+        exec "buffer ".t:treeBufname
+        let t:treeWinid = win_getid()
         return
     endif
-    if s:treeWinid == win_getid()
+    if t:treeWinid == win_getid()
         return
     endif
-    if s:treeWinid != -1
-        call win_gotoid(s:treeWinid)
+    if t:treeWinid != -1
+        call win_gotoid(t:treeWinid)
     else
         to vs
-        exec "buffer ".s:treeBufname
-        let s:treeWinid = win_getid()
+        exec "buffer ".t:treeBufname
+        let t:treeWinid = win_getid()
     endif
     call s:ClearAllCache()
     call s:InitTree(a:path)
 endfunction
 
+augroup InitTreeVars4TabGroup
+    autocmd!
+    autocmd TabNew,VimEnter * call <SID>InitTreeVars4Tab()
+augroup END
 
 set splitright
-let s:SpacePrefixDict['e']='call s:ToggleTree(s:topDirPath)'
+let s:SpacePrefixDict['e']='call s:ToggleTree(t:topDirPath)'
 command! OpenTreeByCurCwd call s:ToggleTree(expand(getcwd()))
 command! OpenTreeByCurBuf call s:ToggleTree(expand("%:p:h"))
 command! -nargs=1 OpenTreeByPath call s:ToggleTree(expand(<q-args>))
