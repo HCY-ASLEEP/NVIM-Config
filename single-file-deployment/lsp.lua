@@ -11,7 +11,7 @@ local vim = vim
 local servers = {
     --[[
     ccls = {
-        cmd = { '/root/ccls/Release/ccls' },
+        cmd = { 'ccls' },
         filetypes = { 'c', 'cpp', 'objc', 'objcpp', 'cuda' },
         root_dir = vim.fs.root(0, {'compile_commands.json', '.ccls', '.git'}),
         offset_encoding = 'utf-32',
