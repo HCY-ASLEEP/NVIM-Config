@@ -972,24 +972,25 @@ command! -register OSCYankRegister call s:OSCYankRegister('<reg>')
 " +-----------------------------------------------+
 
 
-let s:fullPaths = []
-let s:fileTreeIndent = '  '
-let s:closedDir = -1
-let s:openedDir = 1
-let s:nodesCache = {}
-let s:fullPathsCache = {}
-let s:kidCountCache = {}
-let s:minusKidCountOp = 0
-let s:plusKidCountOp = 1
-let s:topDirDepth = 0
 let s:topDirPath = getcwd()
-let s:dirSeparator = '/'
+let s:topDirDepth = 0
 let s:treeWinid = -1
 let s:treeBufnr = -1
 let s:treePreWinid = -1
-let s:treeBufname = "Tree Explorer -> Files & Dirs"
+let s:fullPaths = []
+let s:fullPathsCache = {}
+let s:nodesCache = {}
+let s:kidCountCache = {}
 let s:treeUnamedReg = ""
 let s:treeSearchReg = ""
+
+let s:openedDir = 1
+let s:closedDir = -1
+let s:fileTreeIndent = '  '
+let s:minusKidCountOp = 0
+let s:plusKidCountOp = 1
+let s:dirSeparator = '/'
+let s:treeBufname = "Tree Explorer -> Files & Dirs"
 
 function! s:GetNodesAndFullPaths(path)
     let l:dirNodes = []
