@@ -42,6 +42,28 @@ local servers = {
         single_file_support = true,
     },
     --]]
+    vim_ls = {
+        cmd = { 'vim-language-server', '--stdio' },
+        filetypes = { 'vim' },
+        root_dir = function(fname)
+            return vim.fs.dirname(vim.fs.find('.git', { path = fname, upward = true })[1])
+        end,
+        single_file_support = true,
+        init_options = {
+            isNeovim = true,
+            iskeyword = '@,48-57,_,192-255,-#',
+            vimruntime = '',
+            runtimepath = '',
+            diagnostic = { enable = true },
+            indexes = {
+                runtimepath = true,
+                gap = 100,
+                count = 3,
+                projectRootPatterns = { 'runtime', 'nvim', '.git', 'autoload', 'plugin' },
+            },
+            suggest = { fromVimruntime = true, fromRuntimepath = true },
+        },
+    },
     basedpyright = {
         cmd = { 'basedpyright-langserver', '--stdio' },
         filetypes = { 'python' },
@@ -126,18 +148,25 @@ local servers = {
 }
 
 local user_lsp_start_augroup = vim.api.nvim_create_augroup("UserLspStart", { clear = true })
-for _, config in pairs(servers) do
+for server, config in pairs(servers) do
     if vim.fn.executable(config.cmd[1]) ~= 0 then
         vim.api.nvim_create_autocmd("FileType", {
             group = user_lsp_start_augroup,
             pattern = config.filetypes,
             callback = function (ev)
+                vim.b.server = server
                 vim.lsp.start(config, { bufnr = ev.buf })
             end,
         })
     end
 end
 
+local function restart_cur_buf_language_servers()
+    vim.cmd('wa')
+    local opt = { bufnr = 0 }
+    vim.lsp.stop_client(vim.lsp.get_clients(opt))
+    vim.lsp.start(servers[vim.b.server], opt)
+end
 
 local lsp_buf_local_augroup = vim.api.nvim_create_augroup("LspBufLocal", { clear = true })
 vim.api.nvim_create_autocmd({"BufEnter", "LspAttach"}, {
@@ -169,16 +198,18 @@ vim.api.nvim_create_autocmd({"BufEnter", "LspAttach"}, {
         local opt = { buffer = 0, noremap = true, silent = true }
         vim.keymap.set("n", "g", g_prefix, opt)
         
-        g_prefix_dict["a"] = vim.diagnostic.setloclist
-        g_prefix_dict["e"] = function () vim.diagnostic.open_float({ border = 'rounded' }) end
-        g_prefix_dict["h"] = function () vim.lsp.buf.hover({ border = 'rounded' }) end
-        g_prefix_dict["s"] = function () vim.lsp.buf.signature_help({ border = 'rounded' }) end
-        g_prefix_dict["D"] = vim.lsp.buf.declaration
-        g_prefix_dict["d"] = vim.lsp.buf.definition
-        g_prefix_dict["i"] = vim.lsp.buf.implementation
-        g_prefix_dict["r"] = vim.lsp.buf.references
-        g_prefix_dict["t"] = vim.lsp.buf.type_definition
-        g_prefix_dict["R"] = vim.lsp.buf.rename
+        g_prefix_dict["e"] = function () vim.diagnostic.open_float({ border = 'rounded' }) end      -- [e]rrors or warnings
+        g_prefix_dict["h"] = function () vim.lsp.buf.hover({ border = 'rounded' }) end              -- [h]over
+        g_prefix_dict["s"] = function () vim.lsp.buf.signature_help({ border = 'rounded' }) end     -- [s]ignature
+        g_prefix_dict["a"] = vim.diagnostic.setloclist      -- [a]ll errors and warnings
+        g_prefix_dict["D"] = vim.lsp.buf.declaration        -- [D]eclaration                                        
+        g_prefix_dict["d"] = vim.lsp.buf.definition         -- [d]efinition
+        g_prefix_dict["i"] = vim.lsp.buf.implementation     -- [i]mplementation
+        g_prefix_dict["r"] = vim.lsp.buf.references         -- [r]eferences
+        g_prefix_dict["t"] = vim.lsp.buf.type_definition    -- [t]ype_definition
+        g_prefix_dict["R"] = vim.lsp.buf.rename             -- [R]ename
+
+        g_prefix_dict["u"] = restart_cur_buf_language_servers   -- [u]pdate and restart language servers
 
         vim.keymap.set("n", "<C-up>", vim.diagnostic.goto_prev, opt)
         vim.keymap.set("n", "<C-down>", vim.diagnostic.goto_next, opt)
