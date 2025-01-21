@@ -15,9 +15,22 @@ colorscheme retrobox
 " +-----------------------------------------------+
 
 
-syntax on
+let s:SpacePrefixDict={}
+nnoremap <Space> :call <SID>SpacePrefix()<CR>
 
-" hovel settings -----------------------------------------------------------------------------------
+function! s:SpacePrefix()
+    echo "Waiting for next key after <Space> ... "
+    let l:key = nr2char(getchar())  " 等待输入一个字符
+    redraw
+    echo "Pressed '<Space>".l:key."'"
+    if has_key(s:SpacePrefixDict, l:key)
+        exec s:SpacePrefixDict[l:key]
+    else
+        exec "normal <Space>".l:key
+    endif
+endfunction
+
+
 " case insensitive
 set ignorecase
 
@@ -84,22 +97,6 @@ set hlsearch
 " show line number
 set number
 set relativenumber
-
-
-let s:SpacePrefixDict={}
-nnoremap <Space> :call <SID>SpacePrefix()<CR>
-
-function! s:SpacePrefix()
-    echo "Waiting for next key after <Space> ... "
-    let l:key = nr2char(getchar())  " 等待输入一个字符
-    redraw
-    echo "Pressed '<Space>".l:key."'"
-    if has_key(s:SpacePrefixDict, l:key)
-        exec s:SpacePrefixDict[l:key]
-    else
-        exec "normal <Space>".l:key
-    endif
-endfunction
 
 
 if has('nvim') && exists('$TMUX')
