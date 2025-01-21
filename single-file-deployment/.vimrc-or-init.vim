@@ -1,5 +1,16 @@
 " +-----------------------------------------------+
 " |                                               |
+" |         LOAD LANGUAGE SERVER (NEOVIM)         |
+" |                                               |
+" +-----------------------------------------------+
+
+
+" let g:config_path=expand("<sfile>:p:h")
+" exec "source ".g:config_path."/lsp.lua"
+
+
+" +-----------------------------------------------+
+" |                                               |
 " |                  COLORSCHEME                  |
 " |                                               |
 " +-----------------------------------------------+
@@ -1372,14 +1383,3 @@ let s:SpacePrefixDict['e']='call s:ToggleTree(s:topDirPath)'
 command! OpenTreeByCurCwd call s:ToggleTree(expand(getcwd()))
 command! OpenTreeByCurBuf call s:ToggleTree(expand("%:p:h"))
 command! -nargs=1 OpenTreeByPath call s:ToggleTree(expand(<q-args>))
-
-
-" +-----------------------------------------------+
-" |                                               |
-" |         LOAD LANGUAGE SERVER (NEOVIM)         |
-" |                                               |
-" +-----------------------------------------------+
-
-
-" let g:config_path=expand("<sfile>:p:h")
-" exec "source ".g:config_path."/lsp.lua"
