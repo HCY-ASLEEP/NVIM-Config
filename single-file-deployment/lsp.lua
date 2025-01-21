@@ -12,8 +12,18 @@ local servers = {
     --[[
     ccls = {
         cmd = { 'ccls' },
-        filetypes = { 'c', 'cpp', 'objc', 'objcpp', 'cuda' },
-        root_dir = vim.fs.root(0, {'compile_commands.json', '.ccls', '.git'}),
+        filetypes = {
+            'c',
+            'cpp',
+            'objc',
+            'objcpp',
+            'cuda'
+        },
+        root_dir = vim.fs.root(0, {
+            'compile_commands.json',
+            '.ccls',
+            '.git'
+        }),
         offset_encoding = 'utf-32',
         -- ccls does not support sending a null root directory
         single_file_support = false,
@@ -57,7 +67,14 @@ local servers = {
     },   
     clangd = {
         cmd = { 'clangd' },
-        filetypes = { 'c', 'cpp', 'objc', 'objcpp', 'cuda', 'proto' },
+        filetypes = {
+            'c',
+            'cpp',
+            'objc',
+            'objcpp',
+            'cuda',
+            'proto'
+        },
         root_dir = vim.fs.root(0, {
             '.clangd',
             '.clang-tidy',
@@ -78,16 +95,33 @@ local servers = {
         },
     },
     lua_ls = {
-        name = "lua-language-server",
-        cmd = { "lua-language-server" },
-        root_dir = vim.fs.root(0, { ".luarc.json", ".luarc.jsonc", ".luacheckrc", ".stylua.toml", "stylua.toml", "selene.toml", "selene.yml", ".git" }),
-        filetypes = { "lua" },
+        cmd = { 'lua-language-server' },
+        root_dir = vim.fs.root(0, {
+            '.luarc.json',
+            '.luarc.jsonc',
+            '.luacheckrc',
+            '.stylua.toml',
+            'stylua.toml',
+            'selene.toml',
+            'selene.yml',
+            '.git'
+        }),
+        filetypes = { 'lua' },
+        single_file_support = true,
     },
     gopls = {
-        name = "gopls",
-        cmd = { "gopls" },
-        root_dir = vim.fs.root(0, { "go.work", "go.mod", ".git" }),
-        filetypes = { "go", "gomod", "gowork", "gotmpl" },
+        cmd = { 'gopls' },
+        root_dir = vim.fs.root(0, {
+            'go.work',
+            'go.mod',
+            '.git'
+        }),
+        filetypes = {
+            'go',
+            'gomod',
+            'gowork',
+            'gotmpl'
+        },
     },
 }
 
@@ -109,7 +143,7 @@ local lsp_buf_local_augroup = vim.api.nvim_create_augroup("LspBufLocal", { clear
 vim.api.nvim_create_autocmd({"BufEnter", "LspAttach"}, {
     group = lsp_buf_local_augroup,
     callback = function() 
-        if next(vim.lsp.get_active_clients())==nil then
+        if next(vim.lsp.get_clients({ bufnr = 0 }))==nil then
             return
         end
         if vim.b.lsp_mapped ~= nil then
@@ -135,16 +169,16 @@ vim.api.nvim_create_autocmd({"BufEnter", "LspAttach"}, {
         local opt = { buffer = 0, noremap = true, silent = true }
         vim.keymap.set("n", "g", g_prefix, opt)
         
+        g_prefix_dict["a"] = vim.diagnostic.setloclist
+        g_prefix_dict["e"] = function () vim.diagnostic.open_float({ border = 'rounded' }) end
+        g_prefix_dict["h"] = function () vim.lsp.buf.hover({ border = 'rounded' }) end
+        g_prefix_dict["s"] = function () vim.lsp.buf.signature_help({ border = 'rounded' }) end
         g_prefix_dict["D"] = vim.lsp.buf.declaration
         g_prefix_dict["d"] = vim.lsp.buf.definition
-        g_prefix_dict["h"] = vim.lsp.buf.hover
         g_prefix_dict["i"] = vim.lsp.buf.implementation
         g_prefix_dict["r"] = vim.lsp.buf.references
         g_prefix_dict["t"] = vim.lsp.buf.type_definition
-        g_prefix_dict["s"] = vim.lsp.buf.signature_help
         g_prefix_dict["R"] = vim.lsp.buf.rename
-        g_prefix_dict["e"] = vim.diagnostic.open_float
-        g_prefix_dict["a"] = vim.diagnostic.setloclist
 
         vim.keymap.set("n", "<C-up>", vim.diagnostic.goto_prev, opt)
         vim.keymap.set("n", "<C-down>", vim.diagnostic.goto_next, opt)
@@ -166,17 +200,11 @@ vim.api.nvim_create_autocmd({"BufEnter", "LspAttach"}, {
 })
 
 vim.lsp.inlay_hint.enable()
--- Decorate floating windows
-vim.lsp.handlers["textDocument/hover"] = vim.lsp.with(vim.lsp.handlers.hover, { border = "rounded" })
-
-vim.lsp.handlers["textDocument/signatureHelp"] = vim.lsp.with(vim.lsp.handlers.signature_help, { border = "rounded" })
 
 vim.diagnostic.config({
-    float = { border = "rounded" },
     virtual_text = false,
     underline = true,
 })
-
 
 vim.cmd("hi! link NormalFloat Normal")
 vim.cmd("hi! link FloatBorder Comment")
@@ -663,6 +691,8 @@ local function open_outline_win()
     vim.opt_local.swapfile = false
     vim.opt_local.wrap = false
     vim.opt_local.list = false
+    vim.opt_local.number = false
+    vim.opt_local.relativenumber = false
     vim.opt_local.filetype = "SymbolOutline"
     return outline_win, outline_buf
 end
