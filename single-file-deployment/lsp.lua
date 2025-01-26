@@ -513,7 +513,7 @@ end
 
 -- parse lsp response to get the symbol_infos
 ---@interface
-function SYMBOL_OUTLINE:add_symbol_info() end
+function SYMBOL_OUTLINE:add_symbol_info(i) end
 
 function SYMBOL_OUTLINE:parse(response, indent_num)
     for i = 1, #response do
