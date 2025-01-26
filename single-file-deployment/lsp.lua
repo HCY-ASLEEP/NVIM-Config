@@ -230,7 +230,7 @@ vim.api.nvim_create_autocmd({"BufEnter", "LspAttach"}, {
     end
 })
 
-vim.lsp.inlay_hint.enable()
+-- vim.lsp.inlay_hint.enable()
 
 vim.diagnostic.config({
     virtual_text = false,
@@ -260,44 +260,6 @@ local function CursorHoldLSPHoverWithDelay()
     })
 end
 
-
--- +-----------------------------------------------+
--- |                                               |
--- |     SYMBOL OUTLINE NESTED AND SORTED VIEW     |
--- |                                               |
--- +-----------------------------------------------+
-
-
-local SYMBOL_OUTLINE = {}
-
--- parsed raw symbol content
-local symbol_infos = {}
-
--- symbol position under the cursor of the source file
--- at the moment before opening the symbol outline
-local source_open_row = -1
-
--- the final content to be written to the buffer
-local presentings = {}
-
--- the length of each string element in each line of
--- the final content to be written into the buffer
-local presentings_item_lens = {}
-
-local outline_type = ""
-
-local presentings_line_kinds = {}
-
-local jump_positions = {}
-
--- refresh signal
-local is_refresh = false
-
--- store the symbol outline win handle needed to be refreshed
-local refresh_outline_win = -1
-
--- store the symbol outline buf handle needed to be refreshed
-local refresh_outline_buf = -1
 
 -- symbol kind names
 local kind_names = {
@@ -462,14 +424,65 @@ vim.cmd([[
     hi def link SymbolIcon_Macro Function
 ]])
 
--- interfaces that need to override
-local init_symbol_infos = function() end
-local add_symbol_info = function(kind, t) end
-local join = function() end
-local get_icon_color_index = function(line, kind) end
+
+local function inherit(parent, kid)
+    for declaration, implementation in pairs(parent) do
+        if kid[declaration] == nil then
+            kid[declaration] = implementation
+        end
+    end
+    return kid
+end
+
+
+-- +-----------------------------------------------+
+-- |                                               |
+-- |     SYMBOL OUTLINE NESTED AND SORTED VIEW     |
+-- |                                               |
+-- +-----------------------------------------------+
+
+
+SYMBOL_OUTLINE = {}
+
+local SYMBOL_OUTLINE_SORTED = {}
+
+local SYMBOL_OUTLINE_NESTED = {}
+
+function SYMBOL_OUTLINE:new()
+    -- parsed raw symbol content
+    self.symbol_infos = {}
+
+    -- symbol position under the cursor of the source file
+    -- at the moment before opening the symbol outline
+    self.source_open_row = -1
+
+    -- the final content to be written to the buffer
+    self.presentings = {}
+
+    -- the length of each string element in each line of
+    -- the final content to be written into the buffer
+    self.presentings_item_lens = {}
+
+    self.outline_type = ""
+
+    self.presentings_line_kinds = {}
+
+    self.jump_positions = {}
+
+    -- refresh signal
+    self.is_refresh = false
+
+    -- store the symbol outline win handle needed to be refreshed
+    self.refresh_outline_win = -1
+
+    -- store the symbol outline buf handle needed to be refreshed
+    self.refresh_outline_buf = -1
+
+    return self
+end
 
 -- get window handle by buffer name in the current tabpage
-local function get_win_buf_by(buf_name)
+function SYMBOL_OUTLINE:get_win_buf_by(buf_name)
     local buf = vim.fn.bufnr(buf_name)
     if buf == -1 then
         return -1, -1
@@ -485,41 +498,24 @@ local function get_win_buf_by(buf_name)
 end
 
 -- init vars
--- @override init_symbol_infos
-local function init_sorted_symbol_infos()
-    for i in pairs(kind_names) do
-        symbol_infos[i] = {}
-    end
-end
+---@interface
+function SYMBOL_OUTLINE:init_symbol_infos() end
 
--- @override init_symbol_infos
-local function init_nested_symbol_infos()
-    symbol_infos = {}
-end
-
-local function inits(source_buf)
-    init_symbol_infos()
-    presentings = {}
-    presentings_item_lens = {}
-    jump_positions = {}
+function SYMBOL_OUTLINE:inits(source_buf)
+    self:init_symbol_infos()
+    self.presentings = {}
+    self.presentings_item_lens = {}
+    self.jump_positions = {}
     vim.t.jump_buf_name = vim.api.nvim_buf_get_name(source_buf)
     local tabpage = vim.api.nvim_get_current_tabpage()
     vim.t.focused_symbol_ns = vim.api.nvim_create_namespace("FocusedSymbol" .. tabpage)
 end
 
 -- parse lsp response to get the symbol_infos
--- @override add_symbol_info
-local function add_sorted_symbol_info(i)
-    kind = i[2]
-    symbol_infos[kind][#symbol_infos[kind] + 1] = i
-end
+---@interface
+function SYMBOL_OUTLINE:add_symbol_info() end
 
--- @override add_symbol_info
-local function add_nested_symbol_info(i)
-    symbol_infos[#symbol_infos + 1] = i
-end
-
-local function parse(response, indent_num)
+function SYMBOL_OUTLINE:parse(response, indent_num)
     for i = 1, #response do
         local symbol = response[i]
         local kind = symbol["kind"]
@@ -542,14 +538,14 @@ local function parse(response, indent_num)
         if next(response, i) == nil then
             is_end = true
         end
-        add_symbol_info({ indent_num, kind, name, detail, start_row, start_column, is_end })
+        self:add_symbol_info({ indent_num, kind, name, detail, start_row, start_column, is_end })
         if symbol["children"] ~= nil then
-            parse(symbol["children"], indent_num + 1)
+            self:parse(symbol["children"], indent_num + 1)
         end
     end
 end
 
-local function merge_same_kind(kind_index, cur_sequence)
+function SYMBOL_OUTLINE:merge_same_kind(kind_index, cur_sequence)
     local bottem = markers[1]
     local middle = markers[2]
     -- symbol_infos indexes
@@ -558,23 +554,23 @@ local function merge_same_kind(kind_index, cur_sequence)
     local detail = 4
     local start_row = 5
     local start_column = 6
-    if symbol_infos[kind_index][1] == nil then
+    if self.symbol_infos[kind_index][1] == nil then
         return cur_sequence
     end
     local kind_title = " " .. kind_names[kind_index] .. " ::"
-    presentings[cur_sequence] = kind_title
-    presentings_item_lens[cur_sequence] = { 0, string.len(kind_title), 0, 0, 0 }
-    presentings_line_kinds[cur_sequence] = kind_index
-    jump_positions[cur_sequence] = {}
+    self.presentings[cur_sequence] = kind_title
+    self.presentings_item_lens[cur_sequence] = { 0, string.len(kind_title), 0, 0, 0 }
+    self.presentings_line_kinds[cur_sequence] = kind_index
+    self.jump_positions[cur_sequence] = {}
     cur_sequence = cur_sequence + 1
-    for i = 1, #symbol_infos[kind_index] do
-        local cur = symbol_infos[kind_index][i]
+    for i = 1, #self.symbol_infos[kind_index] do
+        local cur = self.symbol_infos[kind_index][i]
         local cur_kind = cur[kind]
         local indent = middle
-        if symbol_infos[kind_index][i + 1] == nil then
+        if self.symbol_infos[kind_index][i + 1] == nil then
             indent = bottem
         end
-        presentings[cur_sequence] = table.concat({
+        self.presentings[cur_sequence] = table.concat({
             indent,
             icons[cur_kind],
             " ",
@@ -585,26 +581,26 @@ local function merge_same_kind(kind_index, cur_sequence)
             kind_names[cur_kind],
             "] ",
         })
-        presentings_item_lens[cur_sequence] = {
+        self.presentings_item_lens[cur_sequence] = {
             string.len(indent),
             string.len(icons[cur_kind]),
             string.len(cur[name]) + 1,
             string.len(cur[detail]),
             string.len(kind_names[cur_kind]) + 4,
         }
-        presentings_line_kinds[cur_sequence] = kind_index
-        jump_positions[cur_sequence] = { cur[start_row], cur[start_column] }
+        self.presentings_line_kinds[cur_sequence] = kind_index
+        self.jump_positions[cur_sequence] = { cur[start_row], cur[start_column] }
         cur_sequence = cur_sequence + 1
     end
-    presentings[cur_sequence] = ""
-    presentings_item_lens[cur_sequence] = { 0, 0, 0, 0, 0 }
-    presentings_line_kinds[cur_sequence] = kind_index
-    jump_positions[cur_sequence] = {}
+    self.presentings[cur_sequence] = ""
+    self.presentings_item_lens[cur_sequence] = { 0, 0, 0, 0, 0 }
+    self.presentings_line_kinds[cur_sequence] = kind_index
+    self.jump_positions[cur_sequence] = {}
     cur_sequence = cur_sequence + 1
     return cur_sequence
 end
 
-local function get_indent_markers(cur, prev, indent_markers)
+function SYMBOL_OUTLINE:get_indent_markers(cur, prev, indent_markers)
     -- symbol_infos indexes
     local indent_num = 1
     local is_end = 7
@@ -645,68 +641,23 @@ local function get_indent_markers(cur, prev, indent_markers)
 end
 
 -- splicing of each line of symbol outline content
--- @override join
-local function join_sorted()
-    local cur_sequence = 1
-    for i in pairs(kind_names) do
-        cur_sequence = merge_same_kind(i, cur_sequence)
-    end
-    vim.t.jump_positions = jump_positions
-end
-
--- @override join
-local function join_nested()
-    local indent_markers = {}
-    local prev = {}
-    -- symbol_infos indexes
-    local kind = 2
-    local name = 3
-    local detail = 4
-    local start_row = 5
-    local start_column = 6
-    for i = 1, #symbol_infos do
-        local cur = symbol_infos[i]
-        indent_markers = get_indent_markers(cur, prev, indent_markers)
-        local indent_join = table.concat(indent_markers)
-        local cur_kind = cur[kind]
-        presentings[i] = table.concat({
-            indent_join,
-            icons[cur_kind],
-            " ",
-            cur[name],
-            "  ",
-            cur[detail],
-            "  [",
-            kind_names[cur_kind],
-            "] ",
-        })
-        presentings_item_lens[i] = {
-            string.len(indent_join),
-            string.len(icons[cur_kind]),
-            string.len(cur[name]) + 1,
-            string.len(cur[detail]),
-            string.len(kind_names[cur_kind]) + 4,
-        }
-        jump_positions[i] = { cur[start_row], cur[start_column] }
-        prev = cur
-    end
-    vim.t.jump_positions = jump_positions
-end
+---@interface
+function SYMBOL_OUTLINE:join() end
 
 -- open symbol outline win
-local function open_outline_win()
+function SYMBOL_OUTLINE:open_outline_win()
     local outline_tabpage = -1
     local outline_name = ""
     local outline_win, outline_buf = -1, -1
-    if is_refresh then
-        is_refresh = false
-        vim.api.nvim_set_current_win(refresh_outline_win)
-        outline_win = refresh_outline_win
-        outline_buf = refresh_outline_buf
+    if self.is_refresh then
+        self.is_refresh = false
+        vim.api.nvim_set_current_win(self.refresh_outline_win)
+        outline_win = self.refresh_outline_win
+        outline_buf = self.refresh_outline_buf
     else
         outline_tabpage = vim.api.nvim_get_current_tabpage()
         outline_name = "SymbolOutline" .. outline_tabpage
-        outline_win, outline_buf = get_win_buf_by(outline_name)
+        outline_win, outline_buf = self:get_win_buf_by(outline_name)
         if outline_win == -1 then
             vim.cmd("bot 45vs")
             vim.cmd.edit(outline_name)
@@ -729,37 +680,30 @@ local function open_outline_win()
 end
 
 -- write buffer
-local function write(outline_buf)
-    vim.api.nvim_buf_set_lines(outline_buf, 0, -1, false, presentings)
+function SYMBOL_OUTLINE:write(outline_buf)
+    vim.api.nvim_buf_set_lines(outline_buf, 0, -1, false, self.presentings)
 end
 
 -- highlight the symbol outline
--- @override get_icon_color_index
-local function get_sorted_icon_color_index(line, kind)
-    return presentings_line_kinds[line]
-end
+---@interface
+function SYMBOL_OUTLINE:get_icon_color_index(line, kind) end
 
--- @override get_icon_color_index
-local function get_nested_icon_color_index(line, kind)
-    return symbol_infos[line][kind]
-end
-
-local function highlight(outline_buf)
+function SYMBOL_OUTLINE:highlight(outline_buf)
     -- presentings_line_lens indexes
     local indent_num = 1
     local kind = 2
     local name = 3
     local detail = 4
     local kind_name = 5
-    for line = 1, #presentings_item_lens do
-        local len = presentings_item_lens[line]
+    for line = 1, #self.presentings_item_lens do
+        local len = self.presentings_item_lens[line]
         -- indent
         local indent_num_len = len[indent_num]
         vim.api.nvim_buf_add_highlight(outline_buf, -1, "SymbolIndent", line - 1, 0, indent_num_len)
         -- kind
         local hl_start_col = len[indent_num]
         local hl_end_col = len[kind] + hl_start_col
-        local icon_color = icon_colors[get_icon_color_index(line, kind)]
+        local icon_color = icon_colors[self:get_icon_color_index(line, kind)]
         vim.api.nvim_buf_add_highlight(outline_buf, -1, icon_color, line - 1, hl_start_col, hl_end_col)
         -- name
         hl_start_col = hl_end_col + 1
@@ -777,12 +721,12 @@ local function highlight(outline_buf)
 end
 
 -- depend on open_position
-local function locate_open_position_in(outline_win)
+function SYMBOL_OUTLINE:locate_open_position_in(outline_win)
     --jump_positions = vim.t.jump_positions
     local open_position_in_outline = -1
     for i = 1, #vim.t.jump_positions do
         local jump_row = vim.t.jump_positions[i][1]
-        if jump_row == source_open_row - 1 then
+        if jump_row == self.source_open_row - 1 then
             open_position_in_outline = i
             break
         end
@@ -794,7 +738,7 @@ local function locate_open_position_in(outline_win)
 end
 
 -- jump to the symbol in the source file
-local function jump()
+function SYMBOL_OUTLINE:jump()
     local jump_buf_name = vim.t.jump_buf_name
     local cur_symbol_row = vim.api.nvim_win_get_cursor(0)[1]
     local jump_position = vim.t.jump_positions[cur_symbol_row]
@@ -803,7 +747,7 @@ local function jump()
     end
     local jump_row = tonumber(jump_position[1])
     local jump_col = tonumber(jump_position[2])
-    local jump_win, jump_buf = get_win_buf_by(jump_buf_name)
+    local jump_win, jump_buf = self:get_win_buf_by(jump_buf_name)
     if jump_win == -1 then
         local outline_win = vim.api.nvim_get_current_win()
         vim.cmd("to vsplit")
@@ -822,21 +766,21 @@ local function jump()
 end
 
 -- refresh symbol outline
-local function refresh()
-    local jump_win, _ = get_win_buf_by(vim.t.jump_buf_name)
+function SYMBOL_OUTLINE:refresh()
+    local jump_win, _ = self:get_win_buf_by(vim.t.jump_buf_name)
     if jump_win == -1 then
         print(">> Corresponding Source File Win Not Exists!")
         return
     end
-    refresh_outline_win = vim.api.nvim_get_current_win()
-    refresh_outline_buf = vim.api.nvim_get_current_buf()
-    is_refresh = true
+    self.refresh_outline_win = vim.api.nvim_get_current_win()
+    self.refresh_outline_buf = vim.api.nvim_get_current_buf()
+    self.is_refresh = true
     vim.api.nvim_win_call(jump_win, function()
-        SYMBOL_OUTLINE.open_outline(jump_win)
+        self:open_outline(jump_win)
     end)
 end
 
-local function return_immediately()
+function SYMBOL_OUTLINE:return_immediately()
     if next(vim.lsp.get_clients({bufnr = 0})) == nil then
         return true
     end
@@ -846,30 +790,30 @@ local function return_immediately()
     if vim.fn.bufnr(vim.t.jump_buf_name) ~= vim.api.nvim_get_current_buf() then
         return false
     end
-    if is_refresh then
+    if self.is_refresh then
         return false
     end
     local outline_tabpage = vim.api.nvim_get_current_tabpage()
-    local outline_win, _ = get_win_buf_by("SymbolOutline" .. outline_tabpage)
+    local outline_win, _ = self:get_win_buf_by("SymbolOutline" .. outline_tabpage)
     if outline_win == -1 then
         return false
     end
-    if vim.t.outline_type ~= outline_type then
+    if vim.t.outline_type ~= self.outline_type then
         return false
     end
     vim.api.nvim_set_current_win(outline_win)
-    locate_open_position_in(outline_win)
+    self:locate_open_position_in(outline_win)
     return true
 end
 
 -- open symbol outline
-function SYMBOL_OUTLINE.open_outline(source_win)
+function SYMBOL_OUTLINE:open_outline(source_win)
     local source_buf = vim.api.nvim_win_get_buf(source_win)
-    source_open_row = vim.api.nvim_win_get_cursor(source_win)[1]
-    if return_immediately() then
+    self.source_open_row = vim.api.nvim_win_get_cursor(source_win)[1]
+    if self:return_immediately() then
         return
     end
-    vim.t.outline_type = outline_type
+    vim.t.outline_type = self.outline_type
     vim.lsp.buf_request(
         source_buf,
         "textDocument/documentSymbol",
@@ -879,21 +823,21 @@ function SYMBOL_OUTLINE.open_outline(source_win)
                 print(">> No Symbols But LSP Is Working!")
                 return
             end
-            inits(source_buf)
-            parse(response, 0)
-            join()
-            local outline_win, outline_buf = open_outline_win()
-            write(outline_buf)
-            highlight(outline_buf)
-            locate_open_position_in(outline_win)
-            vim.keymap.set("n", "<CR>", jump, { noremap = true, silent = true, buffer = true })
-            vim.keymap.set("n", "r", refresh, { noremap = true, silent = true, buffer = true })
+            self:inits(source_buf)
+            self:parse(response, 0)
+            self:join()
+            local outline_win, outline_buf = self:open_outline_win()
+            self:write(outline_buf)
+            self:highlight(outline_buf)
+            self:locate_open_position_in(outline_win)
+            vim.keymap.set("n", "<CR>", function () self:jump() end, { noremap = true, silent = true, buffer = true })
+            vim.keymap.set("n", "r", function () self:refresh() end, { noremap = true, silent = true, buffer = true })
             local group = vim.api.nvim_create_augroup("FocusedSymbolAugroup", { clear = true })
             vim.api.nvim_create_autocmd("BufWinLeave",{
                 group = group,
                 buffer = 0,
                 callback = function ()
-                    local _, jump_buf = get_win_buf_by(vim.t.jump_buf_name)
+                    local _, jump_buf = self:get_win_buf_by(vim.t.jump_buf_name)
                     vim.api.nvim_buf_clear_namespace(jump_buf, vim.t.focused_symbol_ns, 0, -1)
                 end,
             })
@@ -901,27 +845,109 @@ function SYMBOL_OUTLINE.open_outline(source_win)
     )
 end
 
-local function activate_sorted_view(source_win)
-    outline_type = "sorted"
-    init_symbol_infos = init_sorted_symbol_infos
-    add_symbol_info = add_sorted_symbol_info
-    join = join_sorted
-    get_icon_color_index = get_sorted_icon_color_index
-    SYMBOL_OUTLINE.open_outline(source_win)
+
+
+
+function SYMBOL_OUTLINE_NESTED:new()
+    self = inherit(SYMBOL_OUTLINE:new(), self)
+    self.outline_type = "nested"
+    return self
 end
 
-local function activate_nested_view(source_win)
-    outline_type = "nested"
-    init_symbol_infos = init_nested_symbol_infos
-    add_symbol_info = add_nested_symbol_info
-    join = join_nested
-    get_icon_color_index = get_nested_icon_color_index
-    SYMBOL_OUTLINE.open_outline(source_win)
+---@override init_symbol_infos
+function SYMBOL_OUTLINE_NESTED:init_symbol_infos()
+    self.outline_type = "sorted"
+    self.symbol_infos = {}
+end
+
+---@override add_symbol_info
+function SYMBOL_OUTLINE_NESTED:add_symbol_info(i)
+    self.symbol_infos[#self.symbol_infos + 1] = i
+end
+
+---@override join
+function SYMBOL_OUTLINE_NESTED:join()
+    local indent_markers = {}
+    local prev = {}
+    -- symbol_infos indexes
+    local kind = 2
+    local name = 3
+    local detail = 4
+    local start_row = 5
+    local start_column = 6
+    for i = 1, #self.symbol_infos do
+        local cur = self.symbol_infos[i]
+        indent_markers = self:get_indent_markers(cur, prev, indent_markers)
+        local indent_join = table.concat(indent_markers)
+        local cur_kind = cur[kind]
+        self.presentings[i] = table.concat({
+            indent_join,
+            icons[cur_kind],
+            " ",
+            cur[name],
+            "  ",
+            cur[detail],
+            "  [",
+            kind_names[cur_kind],
+            "] ",
+        })
+        self.presentings_item_lens[i] = {
+            string.len(indent_join),
+            string.len(icons[cur_kind]),
+            string.len(cur[name]) + 1,
+            string.len(cur[detail]),
+            string.len(kind_names[cur_kind]) + 4,
+        }
+        self.jump_positions[i] = { cur[start_row], cur[start_column] }
+        prev = cur
+    end
+    vim.t.jump_positions = self.jump_positions
+end
+
+---@override get_icon_color_index
+function SYMBOL_OUTLINE_NESTED:get_icon_color_index(line, kind)
+    return self.symbol_infos[line][kind]
 end
 
 vim.api.nvim_create_user_command("OpenSymbolOutlineNested", function()
-    activate_nested_view(0)
+    SYMBOL_OUTLINE_NESTED:new():open_outline(0)
 end, {})
+
+
+
+
+function SYMBOL_OUTLINE_SORTED:new()
+    self = inherit(SYMBOL_OUTLINE:new(), self)
+    return self
+end
+
+---@override init_symbol_infos
+function SYMBOL_OUTLINE_SORTED:init_symbol_infos()
+    for i in pairs(kind_names) do
+        self.symbol_infos[i] = {}
+    end
+end
+
+---@override add_symbol_info
+function SYMBOL_OUTLINE_SORTED:add_symbol_info(i)
+    local kind = i[2]
+    self.symbol_infos[kind][#self.symbol_infos[kind] + 1] = i
+end
+
+---@override join
+function SYMBOL_OUTLINE_SORTED:join()
+    local cur_sequence = 1
+    for i in pairs(kind_names) do
+        cur_sequence = self:merge_same_kind(i, cur_sequence)
+    end
+    vim.t.jump_positions = self.jump_positions
+end
+
+---@override get_icon_color_index
+function SYMBOL_OUTLINE_SORTED:get_icon_color_index(line, kind)
+    return self.presentings_line_kinds[line]
+end
+
 vim.api.nvim_create_user_command("OpenSymbolOutlineSorted", function()
-    activate_sorted_view(0)
+    SYMBOL_OUTLINE_SORTED:new():open_outline(0)
 end, {})
