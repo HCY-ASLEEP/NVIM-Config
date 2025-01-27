@@ -261,43 +261,43 @@ local function CursorHoldLSPHoverWithDelay()
 end
 
 
--- symbol kind names
 local kind_names = {
-    [1]  = "File",
-    [2]  = "Module",
-    [3]  = "Namespace",
-    [4]  = "Package",
-    [5]  = "Class",
-    [6]  = "Method",
-    [7]  = "Property",
-    [8]  = "Field",
-    [9]  = "Constructor",
-    [10] = "Enum",
-    [11] = "Interface",
-    [12] = "Function",
-    [13] = "Variable",
-    [14] = "Constant",
-    [15] = "String",
-    [16] = "Number",
-    [17] = "Boolean",
-    [18] = "Array",
-    [19] = "Object",
-    [20] = "Key",
-    [21] = "Null",
-    [22] = "EnumMember",
-    [23] = "Struct",
-    [24] = "Event",
-    [25] = "Operator",
-    [26] = "TypeParameter",
-    [27] = "Component",
-    [28] = "Fragment",
+  [1] = "Fl",      -- File
+  [2] = "Mod",     -- Module
+  [3] = "Ns",      -- Namespace
+  [4] = "Pkg",     -- Package
+  [5] = "Cls",     -- Class 
+  [6] = "Mth",     -- Method
+  [7] = "Prop",    -- Property
+  [8] = "Fld",     -- Field
+  [9] = "Ctor",    -- Constructor
+  [10] = "Enum",   -- Enum
+  [11] = "If",     -- Interface
+  [12] = "Fn",     -- Function
+  [13] = "Var",    -- Variable
+  [14] = "Const",  -- Constant
+  [15] = "Str",    -- String
+  [16] = "Num",    -- Number
+  [17] = "Bool",   -- Boolean
+  [18] = "Arr",    -- Array
+  [19] = "Obj",    -- Object
+  [20] = "Key",    -- Key
+  [21] = "Null",   -- Null
+  [22] = "EnumM",  -- EnumMember
+  [23] = "St",     -- Struct
+  [24] = "Evt",    -- Event
+  [25] = "Op",     -- Operator
+  [26] = "TP",     -- TypeParameter
+  [27] = "Comp",   -- Component
+  [28] = "Frag",   -- Fragment
 
-    -- ccls
-    [252] = "TypeAlias",
-    [253] = "Parameter",
-    [254] = "StaticMethod",
-    [255] = "Macro"
+  -- ccls spetial
+  [252] = "TA",    -- TypeAlias
+  [253] = "Param", -- Parameter
+  [254] = "SM",    -- StaticMethod
+  [255] = "Mac"    -- Macro
 }
+
 
 -- icon highlight groups corresponding to the name of the symbol kind
 local icon_colors = {
@@ -776,7 +776,7 @@ function SYMBOL_OUTLINE:refresh()
     self.refresh_outline_buf = vim.api.nvim_get_current_buf()
     self.is_refresh = true
     vim.api.nvim_win_call(jump_win, function()
-        self:open_outline(jump_win)
+        self:open(jump_win)
     end)
 end
 
@@ -807,7 +807,7 @@ function SYMBOL_OUTLINE:return_immediately()
 end
 
 -- open symbol outline
-function SYMBOL_OUTLINE:open_outline(source_win)
+function SYMBOL_OUTLINE:open(source_win)
     local source_buf = vim.api.nvim_win_get_buf(source_win)
     self.source_open_row = vim.api.nvim_win_get_cursor(source_win)[1]
     if self:return_immediately() then
@@ -910,7 +910,7 @@ function SYMBOL_OUTLINE_NESTED:get_icon_color_index(line, kind)
 end
 
 vim.api.nvim_create_user_command("OpenSymbolOutlineNested", function()
-    SYMBOL_OUTLINE_NESTED:new():open_outline(0)
+    SYMBOL_OUTLINE_NESTED:new():open(0)
 end, {})
 
 
@@ -949,5 +949,170 @@ function SYMBOL_OUTLINE_SORTED:get_icon_color_index(line, kind)
 end
 
 vim.api.nvim_create_user_command("OpenSymbolOutlineSorted", function()
-    SYMBOL_OUTLINE_SORTED:new():open_outline(0)
+    SYMBOL_OUTLINE_SORTED:new():open(0)
 end, {})
+
+
+
+
+LSP_CONTEXT = {}
+
+function LSP_CONTEXT:new()
+    self.mutex = true
+    self.parents = {}
+    self.ancetor = -1
+    for i = 1, vim.api.nvim_buf_line_count(0) do
+        self.parents[i] = {}
+    end
+    return self
+end
+
+function LSP_CONTEXT:parse(response, parent)
+    for i = 1, #response do
+        local symbol = response[i]
+        local start_row = symbol["range"]["start"]["line"] + 1
+        local p = self.parents[start_row]
+        if next(p) == nil then
+            if parent == self.ancetor then
+                p.parent = start_row
+            else
+                p.parent = parent
+            end
+            p.start_row = start_row
+            p.kind = symbol["kind"]
+            p.name = symbol["name"]
+        end
+        local children = symbol["children"]
+        if children ~= nil then
+            self:parse(children, start_row)
+        end
+    end
+end
+
+function LSP_CONTEXT:fill()
+    local iter = {}
+    for i = 1, #self.parents do
+        if next(self.parents[i]) ~= nil then
+            iter = self.parents[i]
+        else
+            self.parents[i] = iter
+        end
+    end
+end
+
+function LSP_CONTEXT:query(line)
+    local p = self.parents[line]
+    if next(p) == nil then
+        return {}
+    end
+    if line ~= p.start_row then
+        line = p.parent
+    end
+    local result = {}
+    while true do
+        p = self.parents[line]
+        table.insert(result, p)
+        if p.parent == line then
+            return result
+        end
+        line = p.parent
+    end
+end
+
+function LSP_CONTEXT:format(raw)
+    local t = ""
+    if next(raw) == nil then
+        return t
+    end
+    for i = #raw, 1, -1 do
+        local node = raw[i]
+        local k = node.kind
+        t = t .. "%#" .. icon_colors[k] .. "#" .. kind_names[k] .. ' ' .. "%#CursorLine#" .. node.name .. ' > '
+    end
+    return t
+end
+
+function LSP_CONTEXT:display()
+    if self.parents == nil then
+        return
+    end
+    if next(self.parents) == nil then
+        return
+    end
+    if self.mutex == true then
+        return
+    end
+    if next(vim.lsp.get_clients({ bufnr = 0 }))==nil then
+        return
+    end
+    local result = self:query(vim.fn.line('.'))
+    vim.wo.winbar = self:format(result)
+end
+
+function LSP_CONTEXT:close()
+    vim.wo.winbar = ""
+end
+
+function LSP_CONTEXT:update()
+    self.mutex = true
+    vim.lsp.buf_request(
+        0,
+        "textDocument/documentSymbol",
+        { textDocument = vim.lsp.util.make_text_document_params() },
+        function(_, response)
+            if response == nil then
+                return
+	        end
+            if response[1] == nil then
+                return
+            end
+            self:parse(response, self.ancetor)
+            self:fill()
+            self.mutex = false
+            self:display()
+        end
+    )
+end
+
+function LSP_CONTEXT:async(fn)
+    local timer = vim.loop.new_timer()
+    local async_fn = vim.schedule_wrap(function()
+        fn()
+        timer:stop()
+    end)
+    timer:start(0, 0, async_fn)
+end
+
+vim.cmd([[hi! link WinBar CursorLine
+    hi! link WinBarNC CursorLine]])
+
+local lsp_context_augroup = vim.api.nvim_create_augroup("LspContext", { clear = true })
+vim.api.nvim_create_autocmd({"LspAttach"}, {
+    group = lsp_context_augroup,
+    callback = function ()
+        local async_update = function ()
+            if next(vim.lsp.get_clients({ bufnr = 0 }))==nil then
+                return
+            end
+            LSP_CONTEXT:async(function() LSP_CONTEXT:new():update() end)
+        end
+        
+        async_update()
+        
+        vim.api.nvim_create_autocmd({"BufEnter", "TextChanged", "InsertLeave"}, {
+            buffer = 0,
+            group = lsp_context_augroup,
+            callback = async_update})
+        vim.api.nvim_create_autocmd({"CursorMoved"}, {
+            buffer = 0,
+            group = lsp_context_augroup,
+            callback = function ()
+                if vim.wo.winbar == "" then
+                    async_update()
+                    return
+                end
+                LSP_CONTEXT:async(function() LSP_CONTEXT:display() end)
+            end
+        })
+    end
+})
