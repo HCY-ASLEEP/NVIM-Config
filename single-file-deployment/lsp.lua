@@ -1005,10 +1005,11 @@ function LSP_CONTEXT:query(line)
     if next(p) == nil then
         return {}
     end
+    local result = {}
     if line ~= p.start_row then
         line = p.parent
+        table.insert(result, p)
     end
-    local result = {}
     while true do
         p = self.parents[line]
         table.insert(result, p)
