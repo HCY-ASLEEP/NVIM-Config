@@ -442,13 +442,13 @@ end
 -- +-----------------------------------------------+
 
 
-SYMBOL_OUTLINE = {}
+SymbolOutline = {}
 
-local SYMBOL_OUTLINE_SORTED = {}
+local SymbolOutlineSorted = {}
 
-local SYMBOL_OUTLINE_NESTED = {}
+local SymbolOutlineNested = {}
 
-function SYMBOL_OUTLINE:new()
+function SymbolOutline:new()
     -- parsed raw symbol content
     self.symbol_infos = {}
 
@@ -482,7 +482,7 @@ function SYMBOL_OUTLINE:new()
 end
 
 -- get window handle by buffer name in the current tabpage
-function SYMBOL_OUTLINE:get_win_buf_by(buf_name)
+function SymbolOutline:get_win_buf_by(buf_name)
     local buf = vim.fn.bufnr(buf_name)
     if buf == -1 then
         return -1, -1
@@ -499,9 +499,9 @@ end
 
 -- init vars
 ---@interface
-function SYMBOL_OUTLINE:init_symbol_infos() end
+function SymbolOutline:init_symbol_infos() end
 
-function SYMBOL_OUTLINE:inits(source_buf)
+function SymbolOutline:inits(source_buf)
     self:init_symbol_infos()
     self.presentings = {}
     self.presentings_item_lens = {}
@@ -513,9 +513,9 @@ end
 
 -- parse lsp response to get the symbol_infos
 ---@interface
-function SYMBOL_OUTLINE:add_symbol_info(i) end
+function SymbolOutline:add_symbol_info(i) end
 
-function SYMBOL_OUTLINE:parse(response, indent_num)
+function SymbolOutline:parse(response, indent_num)
     for i = 1, #response do
         local symbol = response[i]
         local kind = symbol["kind"]
@@ -545,7 +545,7 @@ function SYMBOL_OUTLINE:parse(response, indent_num)
     end
 end
 
-function SYMBOL_OUTLINE:merge_same_kind(kind_index, cur_sequence)
+function SymbolOutline:merge_same_kind(kind_index, cur_sequence)
     local bottem = markers[1]
     local middle = markers[2]
     -- symbol_infos indexes
@@ -600,7 +600,7 @@ function SYMBOL_OUTLINE:merge_same_kind(kind_index, cur_sequence)
     return cur_sequence
 end
 
-function SYMBOL_OUTLINE:get_indent_markers(cur, prev, indent_markers)
+function SymbolOutline:get_indent_markers(cur, prev, indent_markers)
     -- symbol_infos indexes
     local indent_num = 1
     local is_end = 7
@@ -642,10 +642,10 @@ end
 
 -- splicing of each line of symbol outline content
 ---@interface
-function SYMBOL_OUTLINE:join() end
+function SymbolOutline:join() end
 
 -- open symbol outline win
-function SYMBOL_OUTLINE:open_outline_win()
+function SymbolOutline:open_outline_win()
     local outline_tabpage = -1
     local outline_name = ""
     local outline_win, outline_buf = -1, -1
@@ -680,15 +680,15 @@ function SYMBOL_OUTLINE:open_outline_win()
 end
 
 -- write buffer
-function SYMBOL_OUTLINE:write(outline_buf)
+function SymbolOutline:write(outline_buf)
     vim.api.nvim_buf_set_lines(outline_buf, 0, -1, false, self.presentings)
 end
 
 -- highlight the symbol outline
 ---@interface
-function SYMBOL_OUTLINE:get_icon_color_index(line, kind) end
+function SymbolOutline:get_icon_color_index(line, kind) end
 
-function SYMBOL_OUTLINE:highlight(outline_buf)
+function SymbolOutline:highlight(outline_buf)
     -- presentings_line_lens indexes
     local indent_num = 1
     local kind = 2
@@ -721,7 +721,7 @@ function SYMBOL_OUTLINE:highlight(outline_buf)
 end
 
 -- depend on open_position
-function SYMBOL_OUTLINE:locate_open_position_in(outline_win)
+function SymbolOutline:locate_open_position_in(outline_win)
     --jump_positions = vim.t.jump_positions
     local open_position_in_outline = -1
     for i = 1, #vim.t.jump_positions do
@@ -738,7 +738,7 @@ function SYMBOL_OUTLINE:locate_open_position_in(outline_win)
 end
 
 -- jump to the symbol in the source file
-function SYMBOL_OUTLINE:jump()
+function SymbolOutline:jump()
     local jump_buf_name = vim.t.jump_buf_name
     local cur_symbol_row = vim.api.nvim_win_get_cursor(0)[1]
     local jump_position = vim.t.jump_positions[cur_symbol_row]
@@ -766,7 +766,7 @@ function SYMBOL_OUTLINE:jump()
 end
 
 -- refresh symbol outline
-function SYMBOL_OUTLINE:refresh()
+function SymbolOutline:refresh()
     local jump_win, _ = self:get_win_buf_by(vim.t.jump_buf_name)
     if jump_win == -1 then
         print(">> Corresponding Source File Win Not Exists!")
@@ -780,7 +780,7 @@ function SYMBOL_OUTLINE:refresh()
     end)
 end
 
-function SYMBOL_OUTLINE:return_immediately()
+function SymbolOutline:return_immediately()
     if next(vim.lsp.get_clients({bufnr = 0})) == nil then
         return true
     end
@@ -807,7 +807,7 @@ function SYMBOL_OUTLINE:return_immediately()
 end
 
 -- open symbol outline
-function SYMBOL_OUTLINE:open(source_win)
+function SymbolOutline:open(source_win)
     local source_buf = vim.api.nvim_win_get_buf(source_win)
     self.source_open_row = vim.api.nvim_win_get_cursor(source_win)[1]
     if self:return_immediately() then
@@ -848,25 +848,25 @@ end
 
 
 
-function SYMBOL_OUTLINE_NESTED:new()
-    self = inherit(SYMBOL_OUTLINE:new(), self)
+function SymbolOutlineNested:new()
+    self = inherit(SymbolOutline:new(), self)
     self.outline_type = "nested"
     return self
 end
 
 ---@override init_symbol_infos
-function SYMBOL_OUTLINE_NESTED:init_symbol_infos()
+function SymbolOutlineNested:init_symbol_infos()
     self.outline_type = "sorted"
     self.symbol_infos = {}
 end
 
 ---@override add_symbol_info
-function SYMBOL_OUTLINE_NESTED:add_symbol_info(i)
+function SymbolOutlineNested:add_symbol_info(i)
     self.symbol_infos[#self.symbol_infos + 1] = i
 end
 
 ---@override join
-function SYMBOL_OUTLINE_NESTED:join()
+function SymbolOutlineNested:join()
     local indent_markers = {}
     local prev = {}
     -- symbol_infos indexes
@@ -905,37 +905,37 @@ function SYMBOL_OUTLINE_NESTED:join()
 end
 
 ---@override get_icon_color_index
-function SYMBOL_OUTLINE_NESTED:get_icon_color_index(line, kind)
+function SymbolOutlineNested:get_icon_color_index(line, kind)
     return self.symbol_infos[line][kind]
 end
 
 vim.api.nvim_create_user_command("OpenSymbolOutlineNested", function()
-    SYMBOL_OUTLINE_NESTED:new():open(0)
+    SymbolOutlineNested:new():open(0)
 end, {})
 
 
 
 
-function SYMBOL_OUTLINE_SORTED:new()
-    self = inherit(SYMBOL_OUTLINE:new(), self)
+function SymbolOutlineSorted:new()
+    self = inherit(SymbolOutline:new(), self)
     return self
 end
 
 ---@override init_symbol_infos
-function SYMBOL_OUTLINE_SORTED:init_symbol_infos()
+function SymbolOutlineSorted:init_symbol_infos()
     for i in pairs(kind_names) do
         self.symbol_infos[i] = {}
     end
 end
 
 ---@override add_symbol_info
-function SYMBOL_OUTLINE_SORTED:add_symbol_info(i)
+function SymbolOutlineSorted:add_symbol_info(i)
     local kind = i[2]
     self.symbol_infos[kind][#self.symbol_infos[kind] + 1] = i
 end
 
 ---@override join
-function SYMBOL_OUTLINE_SORTED:join()
+function SymbolOutlineSorted:join()
     local cur_sequence = 1
     for i in pairs(kind_names) do
         cur_sequence = self:merge_same_kind(i, cur_sequence)
@@ -944,176 +944,189 @@ function SYMBOL_OUTLINE_SORTED:join()
 end
 
 ---@override get_icon_color_index
-function SYMBOL_OUTLINE_SORTED:get_icon_color_index(line, kind)
+function SymbolOutlineSorted:get_icon_color_index(line, kind)
     return self.presentings_line_kinds[line]
 end
 
 vim.api.nvim_create_user_command("OpenSymbolOutlineSorted", function()
-    SYMBOL_OUTLINE_SORTED:new():open(0)
+    SymbolOutlineSorted:new():open(0)
 end, {})
 
 
 
 
-LSP_CONTEXT = {}
+LspContext = {}
 
-function LSP_CONTEXT:new()
-    self.mutex = true
-    self.parents = {}
-    self.ancetor = -1
+function LspContext:new()
+    self.is_locked = true
+    self.symbol_links = {}
+    self.ancestor = -1
     for i = 1, vim.api.nvim_buf_line_count(0) do
-        self.parents[i] = {}
+        self.symbol_links[i] = {}
     end
     return self
 end
 
-function LSP_CONTEXT:parse(response, parent)
-    for i = 1, #response do
-        local symbol = response[i]
-        local start_row = symbol["range"]["start"]["line"] + 1
-        local p = self.parents[start_row]
-        if next(p) == nil then
-            if parent == self.ancetor then
-                p.parent = start_row
+function LspContext:parse(symbols, parent_line)
+    for i = 1, #symbols do
+        local symbol = symbols[i]
+        local start_line = symbol.range.start.line + 1
+        local cur_node = self.symbol_links[start_line]
+        
+        if next(cur_node) == nil then
+            if parent_line == self.ancestor then
+                cur_node.parent = start_line
             else
-                p.parent = parent
+                cur_node.parent = parent_line
             end
-            p.start_row = start_row
-            p.kind = symbol["kind"]
-            p.name = symbol["name"]
+            cur_node.start_line = start_line
+            cur_node.kind = symbol.kind
+            cur_node.name = symbol.name
         end
-        local children = symbol["children"]
+        
+        local children = symbol.children
         if children ~= nil then
-            self:parse(children, start_row)
+            self:parse(children, start_line)
         end
     end
 end
 
-function LSP_CONTEXT:fill()
-    local iter = {}
-    for i = 1, #self.parents do
-        if next(self.parents[i]) ~= nil then
-            iter = self.parents[i]
+function LspContext:fill()
+    local cur_node = {}
+    for i = 1, #self.symbol_links do
+        if next(self.symbol_links[i]) ~= nil then
+            cur_node = self.symbol_links[i]
         else
-            self.parents[i] = iter
+            self.symbol_links[i] = cur_node
         end
     end
 end
 
-function LSP_CONTEXT:query(line)
-    local p = self.parents[line]
-    if next(p) == nil then
+function LspContext:query(line)
+    local cur_node = self.symbol_links[line]
+    if next(cur_node) == nil then
         return {}
     end
-    local result = {}
-    if line ~= p.start_row then
-        line = p.parent
-        table.insert(result, p)
+    
+    local symbols_chain = {}
+    if line ~= cur_node.start_line then
+        line = cur_node.start_line
     end
+    
     while true do
-        p = self.parents[line]
-        table.insert(result, p)
-        if p.parent == line then
-            return result
+        cur_node = self.symbol_links[line]
+        table.insert(symbols_chain, cur_node)
+        if cur_node.parent == line then
+            return symbols_chain
         end
-        line = p.parent
+        line = cur_node.parent
     end
 end
 
-function LSP_CONTEXT:format(raw)
-    local t = ""
-    if next(raw) == nil then
-        return t
+function LspContext:format(symbols_chain)
+    local formatted_text = ""
+    if next(symbols_chain) == nil then
+        return formatted_text
     end
-    for i = #raw, 1, -1 do
-        local node = raw[i]
-        local k = node.kind
-        t = t .. "%#" .. icon_colors[k] .. "#" .. kind_names[k] .. ' ' .. "%#CursorLine#" .. node.name .. ' > '
+    
+    for i = #symbols_chain, 1, -1 do
+        local node = symbols_chain[i]
+        local kind = node.kind
+        formatted_text = formatted_text ..
+            "%#" .. icon_colors[kind] .. "#" ..
+            kind_names[kind] .. ' ' ..
+            "%#CursorLine#" .. node.name .. ' > '
     end
-    return t
+    return formatted_text
 end
 
-function LSP_CONTEXT:display()
-    if self.parents == nil then
+function LspContext:display()
+    if self.symbol_links == nil or
+       next(self.symbol_links) == nil or
+       self.is_locked or
+       next(vim.lsp.get_clients({ bufnr = 0 })) == nil then
         return
     end
-    if next(self.parents) == nil then
-        return
-    end
-    if self.mutex == true then
-        return
-    end
-    if next(vim.lsp.get_clients({ bufnr = 0 }))==nil then
-        return
-    end
-    local result = self:query(vim.fn.line('.'))
-    vim.wo.winbar = self:format(result)
+    
+    local symbols_chain = self:query(vim.fn.line('.'))
+    vim.wo.winbar = self:format(symbols_chain)
 end
 
-function LSP_CONTEXT:close()
+function LspContext:close()
     vim.wo.winbar = ""
 end
 
-function LSP_CONTEXT:update()
-    self.mutex = true
+function LspContext:update()
+    self.is_locked = true
     vim.lsp.buf_request(
         0,
         "textDocument/documentSymbol",
         { textDocument = vim.lsp.util.make_text_document_params() },
         function(_, response)
-            if response == nil then
-                return
-	        end
-            if response[1] == nil then
+            if response == nil or response[1] == nil then
                 return
             end
-            self:parse(response, self.ancetor)
+            self:parse(response, self.ancestor)
             self:fill()
-            self.mutex = false
+            self.is_locked = false
             self:display()
         end
     )
 end
 
-function LSP_CONTEXT:async(fn)
+function LspContext:schedule(task)
     local timer = vim.loop.new_timer()
-    local async_fn = vim.schedule_wrap(function()
-        fn()
+    local scheduled_task = vim.schedule_wrap(function()
+        task()
         timer:stop()
     end)
-    timer:start(0, 0, async_fn)
+    timer:start(0, 0, scheduled_task)
 end
 
-vim.cmd([[hi! link WinBar CursorLine
-    hi! link WinBarNC CursorLine]])
+-- 设置高亮组
+vim.cmd([[
+    hi! link WinBar CursorLine
+    hi! link WinBarNC CursorLine
+]])
 
-local lsp_context_augroup = vim.api.nvim_create_augroup("LspContext", { clear = true })
+-- 创建自动命令组
+local lsp_context_group = vim.api.nvim_create_augroup("LspContext", { clear = true })
+
 vim.api.nvim_create_autocmd({"LspAttach"}, {
-    group = lsp_context_augroup,
-    callback = function ()
-        local async_update = function ()
-            if next(vim.lsp.get_clients({ bufnr = 0 }))==nil then
+    group = lsp_context_group,
+    callback = function()
+        local function update()
+            if next(vim.lsp.get_clients({ bufnr = 0 })) == nil then
                 return
             end
-            LSP_CONTEXT:async(function() LSP_CONTEXT:new():update() end)
+            LspContext:schedule(function() 
+                LspContext:new():update() 
+            end)
         end
         
-        async_update()
+        update()
         
-        vim.api.nvim_create_autocmd({"BufEnter", "TextChanged", "InsertLeave"}, {
+        vim.api.nvim_create_autocmd(
+            {"BufEnter", "TextChanged", "InsertLeave"}, {
             buffer = 0,
-            group = lsp_context_augroup,
-            callback = async_update})
+            group = lsp_context_group,
+            callback = update
+        })
+        
         vim.api.nvim_create_autocmd({"CursorMoved"}, {
             buffer = 0,
-            group = lsp_context_augroup,
-            callback = function ()
+            group = lsp_context_group,
+            callback = function()
                 if vim.wo.winbar == "" then
-                    async_update()
+                    update()
                     return
                 end
-                LSP_CONTEXT:async(function() LSP_CONTEXT:display() end)
+                LspContext:schedule(function() 
+                    LspContext:display() 
+                end)
             end
         })
     end
 })
+
+return LspContext
