@@ -722,20 +722,32 @@ end
 
 -- depend on open_position
 function SymbolOutline:locate_open_position_in(outline_win)
-    --jump_positions = vim.t.jump_positions
-    local open_position_in_outline = -1
-    for i = 1, #vim.t.jump_positions do
-        local jump_row = vim.t.jump_positions[i][1]
-        if jump_row == self.source_open_row - 1 then
-            open_position_in_outline = i
+    local jump_positions = vim.t.jump_positions
+    local left, right = 1, #jump_positions
+    local result = -1  -- 用于存储符合条件的索引
+    local target = self.source_open_row - 1
+
+    while left <= right do
+        local mid = math.floor((left + right) / 2)
+        local jump_row = jump_positions[mid][1]
+
+        if jump_row == target then
+            result = mid  -- 找到精确匹配的索引
             break
+        elseif jump_row < target then
+            result = mid  -- 记录当前满足条件的最大索引
+            left = mid + 1
+        else
+            right = mid - 1
         end
     end
-    if open_position_in_outline ~= -1 then
-        vim.api.nvim_win_set_cursor(outline_win, { open_position_in_outline, 0 })
+
+    if result ~= -1 then
+        vim.api.nvim_win_set_cursor(outline_win, { result, 0 })
         vim.cmd.normal("zz")
     end
 end
+
 
 -- jump to the symbol in the source file
 function SymbolOutline:jump()
