@@ -955,7 +955,7 @@ end, {})
 
 
 
-LspContext = {}
+local LspContext = {}
 
 function LspContext:new()
     self.is_locked = true
@@ -1064,6 +1064,7 @@ function LspContext:update()
         { textDocument = vim.lsp.util.make_text_document_params() },
         function(_, response)
             if response == nil or response[1] == nil then
+                self:close()
                 return
             end
             self:parse(response, self.ancestor)
