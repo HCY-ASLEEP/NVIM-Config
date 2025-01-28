@@ -1047,7 +1047,7 @@ function LspContext:format(symbols_chain)
         formatted_text = formatted_text ..
             "%#" .. icon_colors[kind] .. "#" ..
             kind_names[kind] .. ' ' ..
-            "%#CursorLine#" .. node.name .. ' > '
+            "%#CursorLine#" .. node.name .. '  '
     end
     return formatted_text
 end
