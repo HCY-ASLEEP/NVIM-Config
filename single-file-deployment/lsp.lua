@@ -86,7 +86,7 @@ local servers = {
                 },
             },
         },
-    },   
+    },
     clangd = {
         cmd = { 'clangd' },
         filetypes = {
@@ -171,7 +171,7 @@ end
 local lsp_buf_local_augroup = vim.api.nvim_create_augroup("LspBufLocal", { clear = true })
 vim.api.nvim_create_autocmd({"BufEnter", "LspAttach"}, {
     group = lsp_buf_local_augroup,
-    callback = function() 
+    callback = function()
         if next(vim.lsp.get_clients({ bufnr = 0 }))==nil then
             return
         end
@@ -181,7 +181,7 @@ vim.api.nvim_create_autocmd({"BufEnter", "LspAttach"}, {
         vim.b.lsp_mapped = true
         vim.api.nvim_buf_set_option(0, "omnifunc", "v:lua.vim.lsp.omnifunc")
         vim.api.nvim_buf_set_option(0, "updatetime", 300)
-        
+
         local g_prefix_dict = {}
         local function g_prefix()
             vim.api.nvim_echo({{"Waiting for next key after g ... "}}, false, {})
@@ -197,12 +197,12 @@ vim.api.nvim_create_autocmd({"BufEnter", "LspAttach"}, {
         end
         local opt = { buffer = 0, noremap = true, silent = true }
         vim.keymap.set("n", "g", g_prefix, opt)
-        
+
         g_prefix_dict["e"] = function () vim.diagnostic.open_float({ border = 'rounded' }) end      -- [e]rrors or warnings
         g_prefix_dict["h"] = function () vim.lsp.buf.hover({ border = 'rounded' }) end              -- [h]over
         g_prefix_dict["s"] = function () vim.lsp.buf.signature_help({ border = 'rounded' }) end     -- [s]ignature
         g_prefix_dict["a"] = vim.diagnostic.setloclist      -- [a]ll errors and warnings
-        g_prefix_dict["D"] = vim.lsp.buf.declaration        -- [D]eclaration                                        
+        g_prefix_dict["D"] = vim.lsp.buf.declaration        -- [D]eclaration
         g_prefix_dict["d"] = vim.lsp.buf.definition         -- [d]efinition
         g_prefix_dict["i"] = vim.lsp.buf.implementation     -- [i]mplementation
         g_prefix_dict["r"] = vim.lsp.buf.references         -- [r]eferences
@@ -213,7 +213,7 @@ vim.api.nvim_create_autocmd({"BufEnter", "LspAttach"}, {
 
         vim.keymap.set("n", "<C-up>", vim.diagnostic.goto_prev, opt)
         vim.keymap.set("n", "<C-down>", vim.diagnostic.goto_next, opt)
-        
+
         vim.api.nvim_create_autocmd({ "CursorHold", "CursorHoldI" }, {
             buffer = 0,
             callback = function()
@@ -266,7 +266,7 @@ local kind_names = {
   [2] = "Mod",     -- Module
   [3] = "Ns",      -- Namespace
   [4] = "Pkg",     -- Package
-  [5] = "Cls",     -- Class 
+  [5] = "Cls",     -- Class
   [6] = "Mth",     -- Method
   [7] = "Prop",    -- Property
   [8] = "Fld",     -- Field
@@ -972,7 +972,7 @@ function LspContext:parse(symbols, parent_line)
         local symbol = symbols[i]
         local start_line = symbol.range.start.line + 1
         local cur_node = self.symbol_links[start_line]
-        
+
         if next(cur_node) == nil then
             if parent_line == self.ancestor then
                 cur_node.parent = start_line
@@ -983,7 +983,7 @@ function LspContext:parse(symbols, parent_line)
             cur_node.kind = symbol.kind
             cur_node.name = symbol.name
         end
-        
+
         local children = symbol.children
         if children ~= nil then
             self:parse(children, start_line)
@@ -1007,12 +1007,12 @@ function LspContext:query(line)
     if next(cur_node) == nil then
         return {}
     end
-    
+
     local symbols_chain = {}
     if line ~= cur_node.start_line then
         line = cur_node.start_line
     end
-    
+
     while true do
         cur_node = self.symbol_links[line]
         table.insert(symbols_chain, cur_node)
@@ -1028,7 +1028,7 @@ function LspContext:format(symbols_chain)
     if next(symbols_chain) == nil then
         return formatted_text
     end
-    
+
     for i = #symbols_chain, 1, -1 do
         local node = symbols_chain[i]
         local kind = node.kind
@@ -1047,7 +1047,7 @@ function LspContext:display()
        next(vim.lsp.get_clients({ bufnr = 0 })) == nil then
         return
     end
-    
+
     local symbols_chain = self:query(vim.fn.line('.'))
     vim.wo.winbar = self:format(symbols_chain)
 end
@@ -1100,20 +1100,20 @@ vim.api.nvim_create_autocmd({"LspAttach"}, {
             if next(vim.lsp.get_clients({ bufnr = 0 })) == nil then
                 return
             end
-            LspContext:schedule(function() 
-                LspContext:new():update() 
+            LspContext:schedule(function()
+                LspContext:new():update()
             end)
         end
-        
+
         update()
-        
+
         vim.api.nvim_create_autocmd(
             {"BufEnter", "TextChanged", "InsertLeave"}, {
             buffer = 0,
             group = lsp_context_group,
             callback = update
         })
-        
+
         vim.api.nvim_create_autocmd({"CursorMoved"}, {
             buffer = 0,
             group = lsp_context_group,
@@ -1122,8 +1122,8 @@ vim.api.nvim_create_autocmd({"LspAttach"}, {
                     update()
                     return
                 end
-                LspContext:schedule(function() 
-                    LspContext:display() 
+                LspContext:schedule(function()
+                    LspContext:display()
                 end)
             end
         })
