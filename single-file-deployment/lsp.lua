@@ -1105,10 +1105,10 @@ vim.cmd([[
 -- 创建自动命令组
 local lsp_context_group = vim.api.nvim_create_augroup("LspContext", { clear = true })
 
-vim.api.nvim_create_autocmd({"LspAttach"}, {
+vim.api.nvim_create_autocmd({"BufEnter", "LspAttach"}, {
     group = lsp_context_group,
     callback = function()
-        local function update()
+        local function update_symbols()
             if next(vim.lsp.get_clients({ bufnr = 0 })) == nil then
                 return
             end
@@ -1117,13 +1117,13 @@ vim.api.nvim_create_autocmd({"LspAttach"}, {
             end)
         end
 
-        update()
+        update_symbols()
 
         vim.api.nvim_create_autocmd(
             {"BufEnter", "TextChanged", "InsertLeave"}, {
             buffer = 0,
             group = lsp_context_group,
-            callback = update
+            callback = update_symbols
         })
 
         vim.api.nvim_create_autocmd({"CursorMoved"}, {
@@ -1131,7 +1131,7 @@ vim.api.nvim_create_autocmd({"LspAttach"}, {
             group = lsp_context_group,
             callback = function()
                 if vim.wo.winbar == "" then
-                    update()
+                    update_symbols()
                     return
                 end
                 LspContext:schedule(function()
