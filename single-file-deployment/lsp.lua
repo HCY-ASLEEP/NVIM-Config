@@ -1016,7 +1016,7 @@ end
 
 function LspContext:query(line)
     local cur_node = self.symbol_links[line]
-    if next(cur_node) == nil then
+    if cur_node == nil or next(cur_node) == nil then
         return {}
     end
 
@@ -1061,6 +1061,9 @@ function LspContext:display()
     end
 
     local symbols_chain = self:query(vim.fn.line('.'))
+    if next(symbols_chain) == nil then
+        return
+    end
     vim.wo.winbar = self:format(symbols_chain)
 end
 
