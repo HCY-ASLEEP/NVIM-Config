@@ -966,6 +966,12 @@ end, {})
 
 
 
+-- +-----------------------------------------------+
+-- |                                               |
+-- |                  LSP CONTEXT                  |
+-- |                                               |
+-- +-----------------------------------------------+
+
 
 local LspContext = {}
 
@@ -1079,7 +1085,6 @@ function LspContext:update()
         { textDocument = vim.lsp.util.make_text_document_params() },
         function(_, response)
             if response == nil or response[1] == nil then
-                self:close()
                 return
             end
             self:parse(response, self.ancestor)
@@ -1113,6 +1118,7 @@ vim.api.nvim_create_autocmd({"BufEnter", "LspAttach"}, {
     callback = function()
         local function update_symbols()
             if next(vim.lsp.get_clients({ bufnr = 0 })) == nil then
+                LspContext:close()
                 return
             end
             LspContext:schedule(function()
