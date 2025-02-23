@@ -1,0 +1,6 @@
+{
+    "semanticTokens.enable": true,
+    "inlayHint.display": true,
+    "suggest.noselect": true,
+    "codeLens.enable": true
+}
