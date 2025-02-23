@@ -380,22 +380,29 @@ function! s:AutoComplete()
     endif
 endfunction
 
-if has('nvim')
-    augroup initAutoComplete
-        autocmd!
-        autocmd BufEnter,LspAttach * call s:AutoComplete()
-    augroup END
-else
-    augroup initAutoComplete
-        autocmd!
-        autocmd BufEnter * call s:AutoComplete()
-    augroup END
-endif
+function! s:EnableAutoComplete()
+    if exists('g:coc_enabled') && g:coc_enabled == 1
+        return
+    endif
+    if has('nvim')
+        augroup initAutoComplete
+            autocmd!
+            autocmd BufEnter,LspAttach * call s:AutoComplete()
+        augroup END
+    else
+        augroup initAutoComplete
+            autocmd!
+            autocmd BufEnter * call s:AutoComplete()
+        augroup END
+    endif
 
-augroup openFilePathCompletion
-    autocmd!
-    autocmd InsertCharPre * silent! call s:OpenFilePathCompletion()
-augroup END
+    augroup openFilePathCompletion
+        autocmd!
+        autocmd InsertCharPre * silent! call s:OpenFilePathCompletion()
+    augroup END
+endfunction
+
+autocmd VimEnter * call s:EnableAutoComplete()
 
 " use tab for navigating the autocomplete menu
 inoremap <expr> <Tab> pumvisible() ? "\<C-n>" : "\<Tab>"
