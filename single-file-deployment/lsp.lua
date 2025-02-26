@@ -7,6 +7,21 @@
 
 local vim = vim
 
+local function restart_exception_server(code, signal, client_id)
+    if signal == 0 then
+        return
+    end
+    local function delay()
+        if next(vim.lsp.get_clients(opt)) ~= nil then
+            vim.defer_fn(delay, 100)
+            return
+        end
+        vim.lsp.stop_client(vim.lsp.get_clients(opt))
+        vim.lsp.start(vim.b.lsp_config_of_server_needed_to_be_restarted, opt)
+        vim.lsp.semantic_tokens.force_refresh(0)
+    end
+    vim.defer_fn(delay, 100)
+end
 
 local servers = {
     --[[
@@ -154,7 +169,8 @@ for server, config in pairs(servers) do
             group = user_lsp_start_augroup,
             pattern = config.filetypes,
             callback = function (ev)
-                vim.b.server = server
+                config.on_exit = restart_exception_server
+                vim.b.lsp_config_of_server_needed_to_be_restarted = config
                 vim.lsp.start(config, { bufnr = ev.buf })
             end,
         })
@@ -165,7 +181,7 @@ local function restart_cur_buf_language_servers()
     vim.cmd('wa')
     local opt = { bufnr = 0 }
     vim.lsp.stop_client(vim.lsp.get_clients(opt))
-    vim.lsp.start(servers[vim.b.server], opt)
+    vim.lsp.start(vim.b.lsp_config_of_server_needed_to_be_restarted, opt)
 end
 
 local lsp_buf_local_augroup = vim.api.nvim_create_augroup("LspBufLocal", { clear = true })
