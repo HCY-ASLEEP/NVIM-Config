@@ -348,9 +348,21 @@ set completeopt=menuone,noselect
 " hide commplete info under the statusline
 set shortmess+=c
 
+" Completion Timeout Handler
+function! s:CT(timer)
+    if !pumvisible() 
+        call feedkeys("\<C-x>\<C-n>", "n") 
+    endif
+endfunction
+
 function! s:OpenLSPCompletion()
     if v:char =~ '[A-Za-z_.]' && !pumvisible()
+        if &omnifunc == ''
+            call feedkeys("\<C-x>\<C-n>", "n")
+            return
+        endif
         call feedkeys("\<C-x>\<C-o>", "n")
+        call timer_start(100, "s:CT")
     endif
 endfunction
 
