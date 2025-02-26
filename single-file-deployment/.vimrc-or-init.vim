@@ -356,7 +356,7 @@ function! s:CT(timer)
 endfunction
 
 function! s:OpenLSPCompletion()
-    if v:char =~ '[A-Za-z_.]' && !pumvisible()
+    if v:char =~ '[A-Za-z_.:>]' && !pumvisible()
         if &omnifunc == ''
             call feedkeys("\<C-x>\<C-n>", "n")
             return
