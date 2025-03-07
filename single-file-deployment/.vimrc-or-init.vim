@@ -592,7 +592,7 @@ endfunction
 " redirect the command output to a buffer
 function! s:BufferListRedir()
     call s:OpenRedirWindow()
-    exec "edit BufferList".tabpagenr()
+    exec "edit BufferList".win_getid()
     setlocal buftype=nofile bufhidden=wipe nobuflisted noswapfile cursorline filetype=redirWindows
     setlocal modifiable
     silent! put = execute('buffers')
@@ -634,7 +634,7 @@ endfunction
 " redirect the command output to a buffer
 function! s:FileSearchRedir(cmd)
     call s:OpenRedirWindow()
-    exec "edit FuzzyFilenameSearch".tabpagenr()."\ ->\ ".t:fileSubStr
+    exec "edit FuzzyFilenameSearch".win_getid()."\ ->\ ".t:fileSubStr
     setlocal buftype=nofile bufhidden=wipe nobuflisted noswapfile cursorline filetype=redirWindows
     setlocal modifiable
     exec "tc ".t:rootDir
@@ -726,7 +726,7 @@ endfunction
 " redirect the command output to a buffer
 function! s:WordSearchRedir(cmd)
     call s:OpenRedirWindow()
-    exec "edit RipgrepWordSearch".tabpagenr()."\ ->\ ".t:rgrepSubStr
+    exec "edit RipgrepWordSearch".win_getid()."\ ->\ ".t:rgrepSubStr
     setlocal buftype=nofile bufhidden=wipe nobuflisted noswapfile cursorline filetype=redirWindows
     setlocal modifiable
     exec "tc ".t:rootDir
@@ -1002,7 +1002,16 @@ function! s:InitTreeVars4Tab()
     let t:kidCountCache = {}
     let t:treeUnamedReg = ""
     let t:treeSearchReg = ""
-    let t:treeBufname = "Tree Explorer -> Files & Dirs ".tabpagenr()
+    let t:treeBufname = "Tree Explorer -> Files & Dirs "
+endfunction
+
+function! s:TreeBufLoaded(bufnr)
+    for l:bufnr in tabpagebuflist()
+        if a:bufnr == l:bufnr
+            return 1
+        endif
+    endfor
+    return 0
 endfunction
 
 function! s:GetNodesAndFullPaths(path)
@@ -1306,6 +1315,8 @@ function! s:SetTreeOptions()
     setlocal cursorline
     setlocal cursorlineopt=line
     setlocal autoread
+    let l:winid = win_getid()
+    let t:treeBufname = t:treeBufname.l:winid
     exec "file ".t:treeBufname
     augroup switchContext
         autocmd!
@@ -1365,8 +1376,9 @@ function! s:ToggleTree(path)
         call s:SetTreeOptions()
         return
     endif
-    if a:path ==# t:topDirPath && t:treeWinid != -1
+    if a:path ==# t:topDirPath && s:TreeBufLoaded(t:treeBufnr)
         call win_gotoid(t:treeWinid)
+        let t:treeWinid = -1
         quit
         return
     endif
@@ -1379,7 +1391,7 @@ function! s:ToggleTree(path)
     if t:treeWinid == win_getid()
         return
     endif
-    if t:treeWinid != -1
+    if s:TreeBufLoaded(t:treeBufnr)
         call win_gotoid(t:treeWinid)
     else
         to vs
