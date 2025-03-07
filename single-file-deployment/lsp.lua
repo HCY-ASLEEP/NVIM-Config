@@ -450,6 +450,14 @@ local function inherit(parent, kid)
     return kid
 end
 
+local lsp_extension_tabpage_tag_augroup = vim.api.nvim_create_augroup("LspExtensionTabpageTag", { clear = true })
+vim.api.nvim_create_autocmd({ "TabNew" , "VimEnter" }, {
+    group = lsp_extension_tabpage_tag_augroup,
+    callback = function ()
+        vim.t.lsp_extension_tabpage_tag =vim.fn.win_getid()
+    end
+})
+
 
 -- +-----------------------------------------------+
 -- |                                               |
@@ -523,8 +531,7 @@ function SymbolOutline:inits(source_buf)
     self.presentings_item_lens = {}
     self.jump_positions = {}
     vim.t.jump_buf_name = vim.api.nvim_buf_get_name(source_buf)
-    local tabpage = vim.api.nvim_get_current_tabpage()
-    vim.t.focused_symbol_ns = vim.api.nvim_create_namespace("FocusedSymbol" .. tabpage)
+    vim.t.focused_symbol_ns = vim.api.nvim_create_namespace("FocusedSymbol" .. vim.t.lsp_extension_tabpage_tag)
 end
 
 -- parse lsp response to get the symbol_infos
@@ -672,7 +679,7 @@ function SymbolOutline:open_outline_win()
         outline_buf = self.refresh_outline_buf
     else
         outline_tabpage = vim.api.nvim_get_current_tabpage()
-        outline_name = "SymbolOutline" .. outline_tabpage
+        outline_name = "SymbolOutline" .. vim.t.lsp_extension_tabpage_tag
         outline_win, outline_buf = self:get_win_buf_by(outline_name)
         if outline_win == -1 then
             vim.cmd("bot 45vs")
@@ -822,7 +829,7 @@ function SymbolOutline:return_immediately()
         return false
     end
     local outline_tabpage = vim.api.nvim_get_current_tabpage()
-    local outline_win, _ = self:get_win_buf_by("SymbolOutline" .. outline_tabpage)
+    local outline_win, _ = self:get_win_buf_by("SymbolOutline" .. vim.t.lsp_extension_tabpage_tag)
     if outline_win == -1 then
         return false
     end
