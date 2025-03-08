@@ -744,32 +744,8 @@ function SymbolOutline:highlight(outline_buf)
 end
 
 -- depend on open_position
-function SymbolOutline:locate_open_position_in(outline_win)
-    local jump_positions = vim.t.jump_positions
-    local left, right = 1, #jump_positions
-    local result = -1  -- 用于存储符合条件的索引
-    local target = self.source_open_row - 1
-
-    while left <= right do
-        local mid = math.floor((left + right) / 2)
-        local jump_row = jump_positions[mid][1]
-
-        if jump_row == target then
-            result = mid  -- 找到精确匹配的索引
-            break
-        elseif jump_row < target then
-            result = mid  -- 记录当前满足条件的最大索引
-            left = mid + 1
-        else
-            right = mid - 1
-        end
-    end
-
-    if result ~= -1 then
-        vim.api.nvim_win_set_cursor(outline_win, { result, 0 })
-        vim.cmd.normal("zz")
-    end
-end
+---@interface
+function SymbolOutline:locate_open_position_in(outline_win) end
 
 
 -- jump to the symbol in the source file
@@ -939,6 +915,34 @@ function SymbolOutlineNested:join()
     vim.t.jump_positions = self.jump_positions
 end
 
+---@override locate_open_position_in
+function SymbolOutlineNested:locate_open_position_in(outline_win)
+    local jump_positions = vim.t.jump_positions
+    local left, right = 1, #jump_positions
+    local result = -1  -- 用于存储符合条件的索引
+    local target = self.source_open_row - 1
+
+    while left <= right do
+        local mid = math.floor((left + right) / 2)
+        local jump_row = jump_positions[mid][1]
+
+        if jump_row == target then
+            result = mid  -- 找到精确匹配的索引
+            break
+        elseif jump_row < target then
+            result = mid  -- 记录当前满足条件的最大索引
+            left = mid + 1
+        else
+            right = mid - 1
+        end
+    end
+
+    if result ~= -1 then
+        vim.api.nvim_win_set_cursor(outline_win, { result, 0 })
+        vim.cmd.normal("zz")
+    end
+end
+
 ---@override get_icon_color_index
 function SymbolOutlineNested:get_icon_color_index(line, kind)
     return self.symbol_infos[line][kind]
@@ -976,6 +980,31 @@ function SymbolOutlineSorted:join()
         cur_sequence = self:merge_same_kind(i, cur_sequence)
     end
     vim.t.jump_positions = self.jump_positions
+end
+
+---@override locate_open_position_in
+function SymbolOutlineSorted:locate_open_position_in(outline_win)
+    local jump_positions = vim.t.jump_positions
+    local result = -1
+    local target = self.source_open_row - 1
+    local pre_jump_row = 0
+    for i = 1, #jump_positions do
+        local jump_row = jump_positions[i][1]
+        if jump_row ~= nil then
+            if jump_row == target then
+                result = i
+                break
+            end
+            if pre_jump_row < jump_row and jump_row < target then 
+                result = i
+                pre_jump_row = jump_row
+            end
+        end
+    end
+    if result ~= -1 then
+        vim.api.nvim_win_set_cursor(outline_win, { result, 0 })
+        vim.cmd.normal("zz")
+    end
 end
 
 ---@override get_icon_color_index
