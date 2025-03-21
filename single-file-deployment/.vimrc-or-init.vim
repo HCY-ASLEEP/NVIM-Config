@@ -362,7 +362,7 @@ function! s:OpenLSPCompletion()
             return
         endif
         call feedkeys("\<C-x>\<C-o>", "n")
-        call timer_start(100, "s:CT")
+        call timer_start(500, "s:CT")
     endif
 endfunction
 
