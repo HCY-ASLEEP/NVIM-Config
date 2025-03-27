@@ -411,7 +411,7 @@ augroup END
 
 " use tab for navigating the autocomplete menu
 inoremap <expr> <Tab> pumvisible() ? "\<C-n>" : "\<Tab>"
-inoremap <expr> <S-TAB> pumvisible() ? "\<C-p>" : "\<S-Tab>"
+" inoremap <expr> <S-TAB> pumvisible() ? "\<C-p>" : "\<S-Tab>"
 
 " use up and down keys for navigating the autocomplete menu
 inoremap <expr> <Down> pumvisible() ? "\<C-n>" : "\<Down>"
