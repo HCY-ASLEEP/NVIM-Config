@@ -1218,26 +1218,36 @@ function! s:CloseDir()
     setlocal nomodifiable
 endfunction
 
-function! s:OpenFile()
+function! s:OpenFile(previewQuickly)
     let l:curLine = line('.')
     let l:nodeId = s:GetFullPath(l:curLine)
+    if l:curLine == 1
+        return
+    endif
+    if isdirectory(expand(l:nodeId))
+        return
+    endif
     if !filereadable(expand(l:nodeId))
         echo ">> File not exists!"
         return
     endif
     let l:curWinid = win_getid()
+    let l:GoBack2TreeExplorer = {-> a:previewQuickly == 1 ? "call win_gotoid(l:curWinid)" : ""}
     if win_id2tabwin(t:treePreWinid)[1] == 0
         bot vs
         silent exec "edit ".l:nodeId
         echo l:nodeId
+        exec l:GoBack2TreeExplorer()
         return
     endif
     call win_gotoid(t:treePreWinid)
     if expand(bufname()) ==# l:nodeId
+        exec l:GoBack2TreeExplorer()
         return
     endif
     silent exec "edit ".l:nodeId
     echo l:nodeId
+    exec l:GoBack2TreeExplorer()
 endfunction
 
 function! s:Upper()
@@ -1295,6 +1305,8 @@ function! s:MapTree()
     nnoremap <buffer><silent> <CR> :call <SID>ToggleNode()<CR>
     nnoremap <buffer><silent> r :call <SID>RefreshDir()<CR>
     nnoremap <buffer><silent> c :call <SID>CdCurDir()<CR>
+    nnoremap <buffer> <S-Up> <Up>:call <SID>OpenFile(1)<CR>
+    nnoremap <buffer> <S-Down> <Down>:call <SID>OpenFile(1)<CR>
 endfunction
 
 function! s:BeforeEnterTree()
@@ -1356,7 +1368,7 @@ function! s:ToggleNode()
     endif
     let l:lineContent = getline(l:curLine)
     if l:lineContent[-1:] != s:dirSeparator
-        call s:OpenFile()
+        call s:OpenFile(0)
         return
     endif
     if s:IsOpenedDir() == s:closedDir
