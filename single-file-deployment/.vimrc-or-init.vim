@@ -807,7 +807,7 @@ augroup quickFixPreparation
     autocmd FileType qf nnoremap <silent><buffer> <CR> <CR>zz:call <SID>QuickfixFocusWord()<CR>
     autocmd FileType qf nnoremap <silent><C-j> :call win_gotoid(t:redirWinid)<CR>j<CR>zz:call <SID>QuickfixFocusWord()<CR>
     autocmd FileType qf nnoremap <silent><C-k> :call win_gotoid(t:redirWinid)<CR>k<CR>zz:call <SID>QuickfixFocusWord()<CR>
-    call s:UnmapRedirPreview()
+    autocmd FileType qf call s:UnmapRedirPreview()
 augroup END
 
 
