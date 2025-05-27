@@ -459,7 +459,7 @@ function! s:RedirCdWithPathString(path)
         let t:rootDir=expand("%:p:h")
         exec "tc ".t:rootDir
     else
-        let t:rootDir=a:path
+        let t:rootDir=expand(a:path)
         exec "tc ".t:rootDir
     endif
     echo getcwd()
