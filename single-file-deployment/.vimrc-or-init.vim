@@ -534,7 +534,7 @@ endfunction
 let s:SpacePrefixDict['q']='call s:QuitRedirWindow()'
 
 command! Rpwd call s:ShowRootDir()
-command! -nargs=? Rcd call s:RedirCd(<q-args>)
+command! -nargs=? -complete=dir Rcd call s:RedirCd(<q-args>)
 
 augroup redirWhenTabNew
     autocmd!
