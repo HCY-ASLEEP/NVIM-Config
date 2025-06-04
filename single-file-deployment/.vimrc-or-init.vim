@@ -1133,8 +1133,7 @@ endfunction
 function! s:WriteCachedNodes(block, startLine, lineLength, indents)
     let l:startLine = a:startLine + 1
     let l:endLine = a:startLine + a:lineLength
-    let @" = a:block
-    silent exec "normal p"
+    put = a:block
     exec l:startLine . "normal! ^"
     call s:DeleteIndents(l:startLine, l:endLine, col('.') - 1)
     call s:AddIndents(l:startLine, l:endLine, a:indents)
