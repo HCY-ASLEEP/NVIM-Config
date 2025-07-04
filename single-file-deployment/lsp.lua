@@ -102,6 +102,31 @@ local servers = {
             },
         },
     },
+    --[[
+    pylsp = {
+        cmd = { 'pylsp' },
+        filetypes = { 'python' },
+        root_dir = vim.fs.root(0, {
+            'pyproject.toml',
+            'setup.py',
+            'setup.cfg',
+            'requirements.txt',
+            'Pipfile',            
+            '.git',
+        }),
+        single_file_support = true,
+        settings = {
+            pylsp = {
+                plugins = {
+                    pycodestyle = {
+                        ignore = {'W391'},
+                        maxLineLength = 100
+                    }
+                }
+            }              
+        },
+    },
+    --]]
     clangd = {
         cmd = { 'clangd' },
         filetypes = {
@@ -1040,8 +1065,16 @@ end
 function LspContext:parse(symbols, parent_line)
     for i = 1, #symbols do
         local symbol = symbols[i]
-        local start_line = symbol.range.start.line + 1
+        local symbol_range = symbol.range
+        if symbol_range == nil then
+            symbol_range = symbol.location.range
+        end
+        local start_line = symbol_range.start.line + 1
         local cur_node = self.symbol_links[start_line]
+
+        if cur_node == nil then
+            return false
+        end
 
         if next(cur_node) == nil then
             if parent_line == self.ancestor then
@@ -1059,6 +1092,7 @@ function LspContext:parse(symbols, parent_line)
             self:parse(children, start_line)
         end
     end
+    return true
 end
 
 function LspContext:fill()
@@ -1120,6 +1154,7 @@ function LspContext:display()
 
     local symbols_chain = self:query(vim.fn.line('.'))
     if next(symbols_chain) == nil then
+        vim.wo.winbar = " "
         return
     end
     vim.wo.winbar = self:format(symbols_chain)
@@ -1139,7 +1174,9 @@ function LspContext:update()
             if response == nil or response[1] == nil then
                 return
             end
-            self:parse(response, self.ancestor)
+            if self:parse(response, self.ancestor) == false then
+                return
+            end
             self:fill()
             self.is_locked = false
             self:display()
@@ -1150,8 +1187,8 @@ end
 function LspContext:schedule(task)
     local timer = vim.loop.new_timer()
     local scheduled_task = vim.schedule_wrap(function()
-        task()
         timer:stop()
+        task()
     end)
     timer:start(0, 0, scheduled_task)
 end
@@ -1168,36 +1205,30 @@ local lsp_context_group = vim.api.nvim_create_augroup("LspContext", { clear = tr
 vim.api.nvim_create_autocmd({"BufEnter", "LspAttach"}, {
     group = lsp_context_group,
     callback = function()
-        local function update_symbols()
-            if next(vim.lsp.get_clients({ bufnr = 0 })) == nil then
-                LspContext:close()
-                return
-            end
+        if next(vim.lsp.get_clients({ bufnr = 0 })) == nil then
+            LspContext:close()
+            return
+        end
+        
+        local function schedule_update()
             LspContext:schedule(function()
                 LspContext:new():update()
             end)
         end
-
-        update_symbols()
-
-        vim.api.nvim_create_autocmd(
-            {"BufEnter", "TextChanged", "InsertLeave"}, {
+        
+        schedule_update()
+        
+        vim.api.nvim_create_autocmd({"TextChanged", "TextChangedT", "InsertLeave"}, {
             buffer = 0,
             group = lsp_context_group,
-            callback = update_symbols
+            callback = schedule_update
         })
 
         vim.api.nvim_create_autocmd({"CursorMoved"}, {
             buffer = 0,
             group = lsp_context_group,
             callback = function()
-                if vim.wo.winbar == "" then
-                    update_symbols()
-                    return
-                end
-                LspContext:schedule(function()
-                    LspContext:display()
-                end)
+                LspContext:display()
             end
         })
     end
