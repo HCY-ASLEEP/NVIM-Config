@@ -1217,7 +1217,12 @@ vim.api.nvim_create_autocmd({"BufEnter", "LspAttach"}, {
         end
         
         schedule_update()
-        
+
+        if vim.b.lsp_context_autocmd_registered == true then
+            return
+        end
+        vim.b.lsp_context_autocmd_registered = true
+
         vim.api.nvim_create_autocmd({"TextChanged", "TextChangedT", "InsertLeave"}, {
             buffer = 0,
             group = lsp_context_group,
