@@ -252,8 +252,8 @@ vim.api.nvim_create_autocmd({"BufEnter", "LspAttach"}, {
 
         g_prefix_dict["u"] = restart_cur_buf_language_servers   -- [u]pdate and restart language servers
 
-        vim.keymap.set("n", "<C-up>", vim.diagnostic.goto_prev, opt)
-        vim.keymap.set("n", "<C-down>", vim.diagnostic.goto_next, opt)
+        vim.keymap.set("n", "<C-j>", function() vim.diagnostic.jump{count = 1, float = false} end, opt)
+        vim.keymap.set("n", "<C-k>", function() vim.diagnostic.jump{count = -1, float = false} end, opt)
 
         vim.api.nvim_create_autocmd({ "CursorHold", "CursorHoldI" }, {
             buffer = 0,
