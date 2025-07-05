@@ -130,7 +130,7 @@ endif
 nnoremap vv <C-v>
 
 " paste in command mod
-cnoremap <C-v> <C-r>"
+cnoremap <C-p> <C-r>"
 
 " show current buffer path
 cnoreabbrev bp echo expand("%:p:h")
@@ -523,11 +523,18 @@ function! s:JumpWhenPressJOrK(direction,locateTargetFunctionName)
     call win_execute(t:redirWinid, "exec 'normal! '.a:direction | call s:JumpWhenPressEnter(a:locateTargetFunctionName)")
 endfunction
 
+function! s:MapRedirPreview(locateTargetFunctionName)
+    exec "nnoremap <buffer><silent><CR> :call <SID>JumpWhenPressEnter('".a:locateTargetFunctionName."')<CR>"
+    exec "nnoremap <silent><C-Down> :call <SID>JumpWhenPressJOrK('+', '".a:locateTargetFunctionName."')<CR>"
+    exec "nnoremap <silent><C-Up> :call <SID>JumpWhenPressJOrK('-', '".a:locateTargetFunctionName."')<CR>"   
+    call s:UnmapRedirPreview()
+endfunction
+
 function! s:UnmapRedirPreview()
     augroup unmapRedirPreview
         autocmd!
-        autocmd BufUnload <buffer> unmap <C-j>
-        autocmd BufUnload <buffer> unmap <C-k>
+        autocmd BufUnload <buffer> unmap <C-Down>
+        autocmd BufUnload <buffer> unmap <C-Up>
     augroup END
 endfunction
 
@@ -605,16 +612,8 @@ function! s:BufferListRedir()
         exec "normal! dd"
     endwhile
     setlocal nomodifiable
-    call s:BufferListJumpMap()
-endfunction
-
-" autocmd to jump to buffer with CR only in BufferList buffer
-function! s:BufferListJumpMap()
-    nnoremap <buffer><silent><CR> :call <SID>JumpWhenPressEnter('s:BufferListLocateTarget')<CR>
-    nnoremap <silent><C-j> :call <SID>JumpWhenPressJOrK('+', 's:BufferListLocateTarget')<CR>
-    nnoremap <silent><C-k> :call <SID>JumpWhenPressJOrK('-', 's:BufferListLocateTarget')<CR>
+    call s:MapRedirPreview('s:BufferListLocateTarget')
     nnoremap <buffer>dd :call <SID>BufferListDeleteBuf()<CR>
-    call s:UnmapRedirPreview()
 endfunction
 
 let s:SpacePrefixDict['l']='call s:BufferListRedir()'
@@ -651,7 +650,7 @@ function! s:FileSearchRedir(cmd)
     exec "%s/^/".escape(t:rootDir.'/','/')
     exec "normal! gg"
     setlocal nomodifiable
-    call s:FileSearchJumpMap()
+    call s:MapRedirPreview('s:FileSearchLocateTarget')
     echo t:rootDir
 endfunction
 
@@ -665,14 +664,6 @@ endfunction
 function! s:FileSearchWithoutGit(substr)
     let t:fileSubStr=a:substr
     exec "FileSearchRedir !rg --no-ignore --files \| rg --ignore-case ".a:substr
-endfunction
-
-" autocmd to jump to file with CR only in FuzzyFilenameSearch buffer
-function! s:FileSearchJumpMap()
-    nnoremap <buffer><silent><CR> :call <SID>JumpWhenPressEnter('s:FileSearchLocateTarget')<CR>
-    nnoremap <silent><C-j> :call <SID>JumpWhenPressJOrK('+', 's:FileSearchLocateTarget')<CR>
-    nnoremap <silent><C-k> :call <SID>JumpWhenPressJOrK('-', 's:FileSearchLocateTarget')<CR>
-    call s:UnmapRedirPreview()
 endfunction
 
 command! -nargs=1 -complete=command FileSearchRedir silent! call s:FileSearchRedir(<q-args>)
@@ -742,7 +733,7 @@ function! s:WordSearchRedir(cmd)
         exec "normal! dd"
     endif
     setlocal nomodifiable
-    call s:WordSearchJumpMap()
+    call s:MapRedirPreview('s:WordSearchLocateTarget')
     echo t:rootDir
 endfunction
 
@@ -758,14 +749,6 @@ function! s:WordSearchWithoutGit(substr)
     let t:rgrepSubStr=a:substr
     let l:rgArgs="--ignore-case --vimgrep --no-heading --no-ignore"
     exec "WordSearchRedir !rg ".l:rgArgs." ".a:substr." ".t:rootDir
-endfunction
-
-" autocmd to jump to file with CR only in RipgrepWordSearch buffer
-function! s:WordSearchJumpMap()
-    nnoremap <buffer><silent><CR> :call <SID>JumpWhenPressEnter('s:WordSearchLocateTarget')<CR>
-    nnoremap <silent><C-j> :call <SID>JumpWhenPressJOrK('+', 's:WordSearchLocateTarget')<CR>
-    nnoremap <silent><C-k> :call <SID>JumpWhenPressJOrK('-', 's:WordSearchLocateTarget')<CR>
-    call s:UnmapRedirPreview()
 endfunction
 
 command! -nargs=1 -complete=command WordSearchRedir silent! call s:WordSearchRedir(<q-args>)
@@ -805,8 +788,8 @@ augroup quickFixPreparation
     autocmd!
     autocmd FileType qf call s:PrepareForQuickfix()
     autocmd FileType qf nnoremap <silent><buffer> <CR> <CR>zz:call <SID>QuickfixFocusWord()<CR>
-    autocmd FileType qf nnoremap <silent><C-j> :call win_gotoid(t:redirWinid)<CR>j<CR>zz:call <SID>QuickfixFocusWord()<CR>
-    autocmd FileType qf nnoremap <silent><C-k> :call win_gotoid(t:redirWinid)<CR>k<CR>zz:call <SID>QuickfixFocusWord()<CR>
+    autocmd FileType qf nnoremap <silent><C-Down> :call win_gotoid(t:redirWinid)<CR>j<CR>zz:call <SID>QuickfixFocusWord()<CR>
+    autocmd FileType qf nnoremap <silent><C-Up> :call win_gotoid(t:redirWinid)<CR>k<CR>zz:call <SID>QuickfixFocusWord()<CR>
     autocmd FileType qf call s:UnmapRedirPreview()
 augroup END
 
