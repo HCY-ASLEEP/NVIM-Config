@@ -41,6 +41,11 @@ function! s:SpacePrefix()
     endif
 endfunction
 
+if has('win32') || has('win64') || has('win32unix')
+    let &shellcmdflag = '-c'
+    set shellxquote=(
+    set shellslash
+endif
 
 " case insensitive
 set ignorecase
@@ -647,7 +652,8 @@ function! s:FileSearchRedir(cmd)
     if getline('.') == ""
         exec "normal! dd"
     endif
-    exec "%s/^/".escape(t:rootDir.'/','/')
+    echo s:fileSeparator
+    exec "%s/^/".escape(t:rootDir.'/','/\\')
     exec "normal! gg"
     setlocal nomodifiable
     call s:MapRedirPreview('s:FileSearchLocateTarget')
