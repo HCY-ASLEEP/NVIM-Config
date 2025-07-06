@@ -6,6 +6,7 @@
 
 
 colorscheme retrobox
+syntax on
 
 
 " +-----------------------------------------------+
@@ -41,10 +42,12 @@ function! s:SpacePrefix()
     endif
 endfunction
 
-if has('win32') || has('win64') || has('win32unix')
+let s:rgPathSeparator = '/'
+if !empty($MSYSTEM)
     let &shellcmdflag = '-c'
     set shellxquote=(
     set shellslash
+    let s:rgPathSeparator = '//'
 endif
 
 " case insensitive
@@ -454,6 +457,9 @@ augroup END
 " |                                               |
 " +-----------------------------------------------+
 
+function! s:ConvertWindowsToUnix(rootDir)
+  return substitute(a:rootDir, '\\', '/', 'g')
+endfunction
 
 function! s:RedirCdWithPathString(path)
     if !isdirectory(expand(a:path))
@@ -461,10 +467,10 @@ function! s:RedirCdWithPathString(path)
         return
     endif
     if a:path=="."
-        let t:rootDir=expand("%:p:h")
+        let t:rootDir=s:ConvertWindowsToUnix(expand("%:p:h"))
         exec "tc ".t:rootDir
     else
-        let t:rootDir=expand(a:path)
+        let t:rootDir=s:ConvertWindowsToUnix(expand(a:path))
         exec "tc ".t:rootDir
     endif
     echo getcwd()
@@ -475,7 +481,7 @@ function! s:RedirCdWithTreeFileExplorer()
         echo ">> Not in tree file explorer window!"
         return
     endif
-    let t:rootDir=expand(s:GetFullPath(line('.')))
+    let t:rootDir=s:ConvertWindowsToUnix(expand(s:GetFullPath(line('.'))))
     exec 'tc '.t:rootDir
     echo t:rootDir
 endfunction
@@ -550,7 +556,7 @@ command! -nargs=? -complete=dir Rcd call s:RedirCd(<q-args>)
 
 augroup redirWhenTabNew
     autocmd!
-    autocmd VimEnter,TabNew * let t:rootDir=getcwd() | let t:redirWinid=0
+    autocmd VimEnter,TabNew * let t:rootDir=s:ConvertWindowsToUnix(getcwd()) | let t:redirWinid=0
 augroup END
 
 augroup redirBufWinLeave
@@ -652,8 +658,7 @@ function! s:FileSearchRedir(cmd)
     if getline('.') == ""
         exec "normal! dd"
     endif
-    echo s:fileSeparator
-    exec "%s/^/".escape(t:rootDir.'/','/\\')
+    exec "%s/^/".escape(t:rootDir.'/','/')
     exec "normal! gg"
     setlocal nomodifiable
     call s:MapRedirPreview('s:FileSearchLocateTarget')
@@ -663,13 +668,13 @@ endfunction
 " Show Files fuzzily searched with git
 function! s:FileSearchWithGit(substr)
     let t:fileSubStr=a:substr
-    exec "FileSearchRedir !rg --files \| rg --ignore-case ".a:substr
+    exec "FileSearchRedir !rg --files --path-separator ".s:rgPathSeparator." \| rg --ignore-case ".a:substr
 endfunction
 
 " Show Files searched fuzzily without git
 function! s:FileSearchWithoutGit(substr)
     let t:fileSubStr=a:substr
-    exec "FileSearchRedir !rg --no-ignore --files \| rg --ignore-case ".a:substr
+    exec "FileSearchRedir !rg --no-ignore --files --path-separator ".s:rgPathSeparator." \| rg --ignore-case ".a:substr
 endfunction
 
 command! -nargs=1 -complete=command FileSearchRedir silent! call s:FileSearchRedir(<q-args>)
@@ -697,9 +702,7 @@ endfunction
 function! s:LegalLocationsInWindows()
     let l:location = split(t:redirLocateTarget, ":")
     " return path, row, column
-    let l:path = substitute(l:location[0].":".l:location[1], '\\\\', '/', 'g')
-    let l:path = substitute(l:path, '\\', '/', 'g')
-    return [l:path, l:location[2], l:location[3]]
+    return [l:location[0].':'.l:location[1], l:location[2], l:location[3]]
 endfunction
 
 if has('win32') || has('win64') || has('win32unix')
@@ -708,14 +711,14 @@ else
     let s:LegalLocations=function('s:LegalLocationsInUnix')
 endif
 
-" Global Fuzzy Match words -------------------------------------------------------------------------
+" Global Fuzzy Match Words -------------------------------------------------------------------------
 function! s:WordSearchLocateTarget()
     try
         let l:location=s:LegalLocations()
         let l:path=l:location[0]
         let l:row=l:location[1]
         let l:column=l:location[2]
-        if expand("%:p")!=#l:path
+        if s:ConvertWindowsToUnix(expand("%:p"))!=#l:path
             exec "edit ".l:path
         endif
         cal cursor(l:row, l:column)
@@ -734,6 +737,7 @@ function! s:WordSearchRedir(cmd)
     setlocal modifiable
     exec "tc ".t:rootDir
     exec "read "a:cmd
+    exec "%s/\\r//g"
     exec "normal! gg"
     if getline('.') == ""
         exec "normal! dd"
@@ -746,14 +750,14 @@ endfunction
 " Show Words fuzzily searched with git
 function! s:WordSearchWithGit(substr)
     let t:rgrepSubStr=a:substr
-    let l:rgArgs="--ignore-case --vimgrep --no-heading"
+    let l:rgArgs="--ignore-case --vimgrep --no-heading --path-separator ".s:rgPathSeparator
     exec "WordSearchRedir !rg ".l:rgArgs." ".a:substr." ".t:rootDir
 endfunction
 
 " Show Files fuzzily searched without git
 function! s:WordSearchWithoutGit(substr)
     let t:rgrepSubStr=a:substr
-    let l:rgArgs="--ignore-case --vimgrep --no-heading --no-ignore"
+    let l:rgArgs="--ignore-case --vimgrep --no-heading -no-ignore --path-separator ".s:rgPathSeparator
     exec "WordSearchRedir !rg ".l:rgArgs." ".a:substr." ".t:rootDir
 endfunction
 
@@ -1316,7 +1320,7 @@ function! s:AfterLeaveTree()
 endfunction
 
 function! s:SetTreeOptions()
-    setlocal buftype=nofile nobuflisted noswapfile
+    setlocal buftype=nofile nobuflisted noswapfile bufhidden=hide
     setlocal tabstop=2 shiftwidth=2 softtabstop=2 
     setlocal list listchars=multispace:\|\ 
     setlocal nonumber norelativenumber
