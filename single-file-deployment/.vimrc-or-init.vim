@@ -693,23 +693,15 @@ command! -nargs=1 -complete=command Fs call s:FileSearchWithoutGit(<q-args>)
 " +-----------------------------------------------+
 
 
-function! s:LegalLocationsInUnix()
+function! s:LegalLocations()
     let l:location = split(t:redirLocateTarget, ":")
-    " return path, row, column
-    return [l:location[0], l:location[1], l:location[2]]
+    if has('win32') || has('win64') || has('win32unix')
+        " return path, row, column
+        return [l:location[0].':'.l:location[1], l:location[2], l:location[3]]
+    else
+        return [l:location[0], l:location[1], l:location[2]]
+    endif
 endfunction
-
-function! s:LegalLocationsInWindows()
-    let l:location = split(t:redirLocateTarget, ":")
-    " return path, row, column
-    return [l:location[0].':'.l:location[1], l:location[2], l:location[3]]
-endfunction
-
-if has('win32') || has('win64') || has('win32unix')
-    let s:LegalLocations=function('s:LegalLocationsInWindows')
-else
-    let s:LegalLocations=function('s:LegalLocationsInUnix')
-endif
 
 " Global Fuzzy Match Words -------------------------------------------------------------------------
 function! s:WordSearchLocateTarget()
