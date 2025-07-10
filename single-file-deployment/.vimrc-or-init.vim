@@ -6,8 +6,9 @@
 
 
 colorscheme retrobox
-syntax on
-
+if !has('nvim')
+    syntax on
+endif
 
 " +-----------------------------------------------+
 " |                                               |
